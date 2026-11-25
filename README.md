@@ -1,20 +1,32 @@
-# eMTA Label Scanner — Upgrade v2
+# Configuração eMTA 192.168.0.1 — Claro Telecom
 
-Scanner responsivo de etiquetas eMTA para uso em campo.
+Ferramenta web em arquivo único (`index.html`) voltada para técnicos de campo da **Claro**, facilitando a leitura de etiquetas de **eMTA / Gateways**, cópia rápida de credenciais e acesso ao painel `http://192.168.0.1`.
 
-## Melhorias
-- Interface escura com acabamento mais moderno e adaptada a celular.
-- Captura por câmera e seleção de imagem.
-- OCR com duas passagens (imagem original e contraste/limiarização), selecionando o resultado com mais texto.
-- Campos de modelo, fabricante, input, fabricação, serial, CM MAC, eMTA MAC, IP, SSID e usuário quando encontrados.
-- Resumo final formatado e botão copiar.
-- Campos de senha de administrador e Wi-Fi ficam visíveis na tela e no resumo; devem ser preenchidos manualmente após conferir a etiqueta.
+## Funcionalidades
 
-## Uso
-1. Abra `index.html` em navegador com permissão de câmera (em alguns navegadores, câmera exige HTTPS ou localhost).
-2. Fotografe a etiqueta ou selecione imagem.
-3. Clique em **Reconhecer etiqueta (OCR)**.
-4. Confira e corrija os dados detectados e preencha os campos de senha manualmente.
-5. Copie o resumo final.
+1. **4 Campos de Cópia Rápida no Topo (1-Tap Copy)**
+   - **1. Usuário 192.168.0.1**: preenchido automaticamente a partir da leitura/edição e copiado ao tocar no campo.
+   - **2. Senha 192.168.0.1**: preenchido automaticamente e copiado ao tocar no campo.
+   - **3. Usuário Wi-Fi (2.4 GHz ou 5 GHz)**: alternância rápida entre bandas `2.4 GHz` e `5 GHz` para SSIDs iniciados em `CLARO_` ou `NET_`, com cópia ao tocar.
+   - **4. Senha Wi-Fi**: preenchido automaticamente e copiado ao tocar no campo.
 
-O OCR é executado no navegador usando Tesseract.js carregado via CDN; a biblioteca exige internet para carregar. O projeto não persiste os dados capturados.
+2. **Captura pela Câmera e Leitura OCR da Etiqueta**
+   - Botão **Abrir Câmera** com mira de enquadramento e captura de foto (`Tirar Foto e Ler`), além de opção **Foto / Arquivo** para galeria/arquivos.
+   - Extrai e formata na parte inferior da página:
+     - **Modelo**
+     - **Fabricante**
+     - **Input** (alimentação elétrica)
+     - **Fabr.**
+     - **S/N**
+     - **CM MAC**
+     - **eMTA MAC**
+     - **Usuário e Senha do IP `192.168.0.1`**
+     - **SSIDs Wi-Fi 2.4 GHz e 5 GHz (`CLARO_` / `NET_`)** e **Senha Wi-Fi**
+   - Inclui área expansível de texto bruto do OCR para conferência ou reprocessamento manual.
+
+3. **Rodapé de Revisão Estático**
+   - Exibe: `Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37`.
+   - A versão, data e hora no rodapé **não** mudam a cada visualização; são atualizadas apenas quando uma revisão do código é editada.
+
+## Observação de Uso no Navegador (Câmera)
+Para que o navegador permita acesso direto à câmera (`getUserMedia`), abra o `index.html` via **HTTPS** (por exemplo, GitHub Pages) ou **localhost**. Caso abra via `file://` em algum navegador restritivo, utilize o botão **Foto / Arquivo**.
