@@ -1,421 +1,1200 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Config EMTA - 192.168.0.1</title>
-<style>
-:root{--red:#d71920;--bg:#f4f5f7;--card:#fff;--txt:#1d2330;--mut:#667085;--bd:#dfe3ea;--ok:#12a150;--warn:#b54708}
-@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1b2029;--txt:#eef1f6;--mut:#9aa4b5;--bd:#2c3442;--warn:#f79009}}
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.4}
-.top{background:var(--card);border-bottom:3px solid var(--red);padding:10px 12px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-@media (min-width:760px){.top{position:sticky;top:0;z-index:10}}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-h1{margin:0;font-size:1.1rem}
-h1 small{color:var(--red);font-weight:600;margin-left:4px}
-.go{font-size:.85rem;color:var(--red);text-decoration:none;font-weight:600}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media (min-width:760px){.fields{grid-template-columns:repeat(4,1fr)}}
-.fld span{display:block;font-size:.72rem;color:var(--mut);margin-bottom:2px;font-weight:600}
-.fld input{width:100%;padding:10px;font-size:1rem;font-family:ui-monospace,Menlo,Consolas,monospace;border:2px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer}
-.fld input:focus{outline:none;border-color:var(--red)}
-.copied{border-color:var(--ok)!important;background:rgba(18,161,80,.14)!important}
-.band{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.78rem;color:var(--mut);flex-wrap:wrap}
-.band button{border:1px solid var(--bd);background:var(--bg);color:var(--txt);padding:5px 12px;border-radius:999px;font-size:.8rem;cursor:pointer}
-.band button.on{background:var(--red);border-color:var(--red);color:#fff}
-main{max-width:900px;margin:0 auto;padding:12px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
-.card h2{margin:0 0 10px;font-size:1rem}
-.btns{display:flex;gap:8px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 18px;border-radius:10px;border:0;font-size:1rem;font-weight:700;cursor:pointer;background:var(--red);color:#fff;flex:1 1 220px;text-align:center}
-.btn.sec{background:var(--bg);color:var(--txt);border:1px solid var(--bd);font-weight:600;flex:1 1 140px}
-.btn[aria-disabled=true]{opacity:.5;pointer-events:none}
-.tips{font-size:.8rem;color:var(--mut);margin:10px 0 0}
-#prevWrap{margin-top:12px}
-#prev{max-width:100%;max-height:260px;border-radius:8px;border:1px solid var(--bd);display:block}
-.prog{height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin-top:10px}
-.prog i{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
-#status{margin:8px 0 0;font-size:.88rem}
-#status.err{color:var(--red)}#status.ok{color:var(--ok)}#status.warn{color:var(--warn)}
-details{margin-top:10px;font-size:.82rem}
-details pre{white-space:pre-wrap;background:var(--bg);padding:8px;border-radius:8px;border:1px solid var(--bd);max-height:200px;overflow:auto}
-.grp{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--red);font-weight:700;margin:14px 0 6px}
-.grp:first-of-type{margin-top:0}
-.row{margin-bottom:8px}
-.row label{display:block;font-size:.74rem;color:var(--mut);font-weight:600;margin-bottom:2px}
-.in{display:flex;gap:6px}
-.in input{flex:1;min-width:0;padding:9px;font-size:.98rem;font-family:ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--txt)}
-.in input:focus{outline:2px solid var(--red);outline-offset:-1px}
-.cp{width:44px;border:1px solid var(--bd);background:var(--bg);color:var(--txt);border-radius:8px;font-size:1.1rem;cursor:pointer}
-.act{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-footer{text-align:center;color:var(--mut);font-size:.8rem;padding:14px 12px 24px}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;z-index:99}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Configuração eMTA 192.168.0.1 - Claro Telecom</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0b0f17;
+      --bg-card: #131b2b;
+      --bg-input: #0d1320;
+      --border-color: #26334d;
+      --accent-red: #e11d48;
+      --accent-red-hover: #be123c;
+      --accent-blue: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 14px;
+      flex: 1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-claro {
+      background: var(--accent-red);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .gateway-link {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .gateway-link:active {
+      background: rgba(56, 189, 248, 0.24);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hint-copy {
+      font-size: 0.74rem;
+      color: var(--accent-blue);
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .quick-field {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 9px 11px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 64px;
+    }
+
+    .quick-field:hover {
+      border-color: var(--accent-blue);
+    }
+
+    .quick-field:active {
+      transform: scale(0.985);
+      background: #142036;
+    }
+
+    .quick-field.copied {
+      border-color: var(--accent-green);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .quick-label {
+      font-size: 0.69rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-secondary);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .copy-tag {
+      font-size: 0.66rem;
+      color: var(--accent-green);
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .quick-field.copied .copy-tag {
+      opacity: 1;
+    }
+
+    .quick-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      padding: 0;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .quick-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 0.8rem;
+    }
+
+    .wifi-band-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .band-btn {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .band-btn.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .camera-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s ease, transform 0.08s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.985);
+    }
+
+    .btn-primary {
+      background: var(--accent-red);
+      color: #ffffff;
+      flex: 1 1 200px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-red-hover);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-success {
+      background: #15803d;
+      color: #ffffff;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .camera-box {
+      margin-top: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .camera-box.active {
+      display: flex;
+    }
+
+    .video-frame {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #000;
+      aspect-ratio: 4 / 3;
+    }
+
+    video, canvas.preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .reticle {
+      position: absolute;
+      inset: 14%;
+      border: 2px dashed rgba(56, 189, 248, 0.85);
+      border-radius: 10px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32);
+    }
+
+    .reticle-caption {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(11, 15, 23, 0.85);
+      color: #e2e8f0;
+      font-size: 0.72rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .status-bar {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      flex-shrink: 0;
+    }
+
+    .status-dot.busy {
+      background: var(--accent-amber);
+      animation: pulse 1s infinite;
+    }
+
+    .status-dot.ok {
+      background: var(--accent-green);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .formatted-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 500px) {
+      .formatted-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .info-row {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    .info-row:active {
+      border-color: var(--accent-blue);
+    }
+
+    .info-key {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .info-val {
+      font-size: 0.86rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    .raw-ocr-box {
+      margin-top: 10px;
+    }
+
+    .raw-ocr-box summary {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    textarea.raw-text {
+      width: 100%;
+      margin-top: 6px;
+      min-height: 92px;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.76rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      resize: vertical;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 54px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid var(--accent-green);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 999;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    footer {
+      text-align: center;
+      padding: 12px 14px 16px;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-color);
+      background: #090d14;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <div class="brand-title">
+        <span class="badge-claro">Claro</span>
+        <span>eMTA 192.168.0.1</span>
+      </div>
+      <a class="gateway-link" href="http://192.168.0.1" target="_blank" rel="noopener noreferrer">
+        Abrir 192.168.0.1 ↗
+      </a>
+    </header>
 
-<header class="top">
-  <div class="bar">
-    <h1>Config EMTA <small>192.168.0.1</small></h1>
-    <a class="go" href="http://192.168.0.1" target="_blank" rel="noopener">Abrir 192.168.0.1 ↗</a>
+    <!-- TOPO: 4 CAMPOS COM COPIA AUTOMATICA AO CLICAR -->
+    <section class="card" aria-label="Acesso rápido e cópia">
+      <div class="card-header">
+        <div class="card-title">⚡ Cópia Rápida (Toque para Copiar)</div>
+        <span class="hint-copy">Toque no campo = Copiado</span>
+      </div>
+
+      <div class="wifi-band-row" role="group" aria-label="Banda Wi-Fi para o campo usuário Wi-Fi">
+        <button type="button" class="band-btn active" id="btnBand24" onclick="selectWifiBand('2.4')">
+          Wi-Fi 2.4 GHz (CLARO_/NET_)
+        </button>
+        <button type="button" class="band-btn" id="btnBand5" onclick="selectWifiBand('5')">
+          Wi-Fi 5 GHz (CLARO_/NET_)
+        </button>
+      </div>
+
+      <div class="quick-grid">
+        <!-- 1. Usuario IP 192.168.0.1 -->
+        <div class="quick-field" id="boxIpUser" onclick="copyField('ipUser', this)">
+          <div class="quick-label">
+            <span>1. Usuário 192.168.0.1</span>
+            <span class="copy-tag">COPIADO!</span>
+          </div>
+          <input
+            type="text"
+            id="ipUser"
+            class="quick-input"
+            placeholder="Usuário admin..."
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            oninput="syncFromQuick('ipUser')"
+          />
+        </div>
+
+        <!-- 2. Senha IP 192.168.0.1 -->
+        <div class="quick-field" id="boxIpPass" onclick="copyField('ipPass', this)">
+          <div class="quick-label">
+            <span>2. Senha 192.168.0.1</span>
+            <span class="copy-tag">COPIADO!</span>
+          </div>
+          <input
+            type="text"
+            id="ipPass"
+            class="quick-input"
+            placeholder="Senha admin..."
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            oninput="syncFromQuick('ipPass')"
+          />
+        </div>
+
+        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_ ou NET_) -->
+        <div class="quick-field" id="boxWifiSsid" onclick="copyField('wifiSsid', this)">
+          <div class="quick-label">
+            <span id="labelWifiBand">3. Usuário Wi-Fi (2.4 GHz)</span>
+            <span class="copy-tag">COPIADO!</span>
+          </div>
+          <input
+            type="text"
+            id="wifiSsid"
+            class="quick-input"
+            placeholder="CLARO_... ou NET_..."
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            oninput="syncFromQuick('wifiSsid')"
+          />
+        </div>
+
+        <!-- 4. Senha da rede Wi-Fi -->
+        <div class="quick-field" id="boxWifiPass" onclick="copyField('wifiPass', this)">
+          <div class="quick-label">
+            <span>4. Senha Wi-Fi</span>
+            <span class="copy-tag">COPIADO!</span>
+          </div>
+          <input
+            type="text"
+            id="wifiPass"
+            class="quick-input"
+            placeholder="Senha Wi-Fi..."
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            oninput="syncFromQuick('wifiPass')"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- CAMERA E CAPTURA DE ETIQUETA EMTA -->
+    <section class="card" aria-label="Captura de etiqueta por câmera">
+      <div class="card-header">
+        <div class="card-title">📷 Etiqueta do eMTA (Câmera / OCR)</div>
+      </div>
+
+      <div class="camera-actions">
+        <button type="button" class="btn btn-primary" id="btnOpenCam" onclick="openCamera()">
+          📷 Abrir Câmera
+        </button>
+        <button type="button" class="btn btn-success" id="btnCapture" onclick="captureAndRead()" disabled>
+          📸 Tirar Foto e Ler
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="triggerFileFallback()">
+          🖼️ Foto / Arquivo
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnStopCam" onclick="stopCamera()" disabled>
+          ⏹️ Parar
+        </button>
+      </div>
+
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        capture="environment"
+        style="display:none"
+        onchange="handleFileUpload(event)"
+      />
+
+      <div class="camera-box" id="cameraBox">
+        <div class="video-frame" id="videoFrame">
+          <video id="videoEl" autoplay playsinline muted></video>
+          <div class="reticle"></div>
+          <div class="reticle-caption">Alinhe a etiqueta do eMTA dentro do quadro</div>
+        </div>
+        <canvas id="photoCanvas" class="preview-img" style="display:none;"></canvas>
+        <button type="button" class="btn btn-secondary" id="btnRetake" onclick="backToLiveVideo()" style="display:none;">
+          🔄 Tirar Outra Foto
+        </button>
+      </div>
+
+      <div class="status-bar" id="statusBar">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Pronto. Toque em "Abrir Câmera" para fotografar a etiqueta do eMTA.</span>
+      </div>
+    </section>
+
+    <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA ETIQUETA -->
+    <section class="card" aria-label="Informações formatadas da etiqueta">
+      <div class="card-header">
+        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA</div>
+        <button type="button" class="btn btn-secondary" style="padding:5px 10px;font-size:0.75rem;" onclick="clearAllFields()">
+          Limpar
+        </button>
+      </div>
+
+      <div class="formatted-grid" id="formattedGrid">
+        <div class="info-row" onclick="copyTextValue('parsedModel')">
+          <span class="info-key">Modelo</span>
+          <span class="info-val" id="parsedModel">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedManufacturer')">
+          <span class="info-key">Fabricante</span>
+          <span class="info-val" id="parsedManufacturer">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedInput')">
+          <span class="info-key">Input (Alimentação)</span>
+          <span class="info-val" id="parsedInput">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedFabr')">
+          <span class="info-key">Fabr. / Data / Lote</span>
+          <span class="info-val" id="parsedFabr">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedSn')">
+          <span class="info-key">S/N (Serial Number)</span>
+          <span class="info-val" id="parsedSn">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedCmMac')">
+          <span class="info-key">CM MAC</span>
+          <span class="info-val" id="parsedCmMac">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedEmtaMac')">
+          <span class="info-key">eMTA MAC</span>
+          <span class="info-val" id="parsedEmtaMac">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedIpLogin')">
+          <span class="info-key">Usuário 192.168.0.1</span>
+          <span class="info-val" id="parsedIpLogin">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedIpPass')">
+          <span class="info-key">Senha 192.168.0.1</span>
+          <span class="info-val" id="parsedIpPass">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedSsid24')">
+          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_/NET_)</span>
+          <span class="info-val" id="parsedSsid24">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedSsid5')">
+          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_/NET_)</span>
+          <span class="info-val" id="parsedSsid5">—</span>
+        </div>
+
+        <div class="info-row" onclick="copyTextValue('parsedWifiPass')">
+          <span class="info-key">Senha Wi-Fi</span>
+          <span class="info-val" id="parsedWifiPass">—</span>
+        </div>
+      </div>
+
+      <details class="raw-ocr-box">
+        <summary>Ver / editar texto bruto lido pela câmera (OCR)</summary>
+        <textarea
+          id="rawOcrText"
+          class="raw-text"
+          placeholder="O texto reconhecido da etiqueta aparecerá aqui. Você pode colar ou editar manualmente e clicar em Reprocessar."
+        ></textarea>
+        <div style="margin-top:8px;display:flex;justify-content:flex-end;">
+          <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.78rem;" onclick="reparseFromTextarea()">
+            🔍 Reprocessar Texto
+          </button>
+        </div>
+      </details>
+    </section>
   </div>
-  <div class="fields">
-    <div class="fld"><span>1 · Usuário IP 192.168.0.1</span><input id="f1" readonly placeholder="toque p/ copiar" aria-label="Usuário do IP 192.168.0.1"></div>
-    <div class="fld"><span>2 · Senha IP 192.168.0.1</span><input id="f2" readonly placeholder="toque p/ copiar" aria-label="Senha do IP 192.168.0.1"></div>
-    <div class="fld"><span>3 · Usuário Wi-Fi (SSID)</span><input id="f3" readonly placeholder="toque p/ copiar" aria-label="Usuário da rede Wi-Fi"></div>
-    <div class="fld"><span>4 · Senha Wi-Fi</span><input id="f4" readonly placeholder="toque p/ copiar" aria-label="Senha da rede Wi-Fi"></div>
-  </div>
-  <div class="band">
-    <span>Wi-Fi dos campos 3 e 4:</span>
-    <button type="button" data-band="24" class="on">2.4 GHz</button>
-    <button type="button" data-band="5">5 GHz</button>
-    <span>· toque no campo para copiar</span>
-  </div>
-</header>
 
-<main>
-  <section class="card">
-    <h2>Etiqueta do EMTA</h2>
-    <div class="btns">
-      <label class="btn" id="camBtn" for="cam">📷 Tirar foto da etiqueta</label>
-      <label class="btn sec" id="galBtn" for="gal">🖼️ Galeria</label>
-    </div>
-    <input id="cam" type="file" accept="image/*" capture="environment" hidden>
-    <input id="gal" type="file" accept="image/*" hidden>
-    <p class="tips">Dica: etiqueta bem iluminada, sem reflexo, centralizada e ocupando a maior parte da foto.</p>
-    <div id="prevWrap" hidden><img id="prev" alt="Foto da etiqueta"></div>
-    <div class="prog" id="progWrap" hidden><i id="prog"></i></div>
-    <p id="status" role="status"></p>
-    <details id="rawBox" hidden><summary>Texto bruto lido pelo OCR</summary><pre id="raw"></pre></details>
-  </section>
+  <div class="toast" id="toast">Copiado para a área de transferência!</div>
 
-  <section class="card">
-    <h2>Informações extraídas</h2>
-    <div id="grid"></div>
-    <div class="act">
-      <button type="button" class="btn" id="copyAll">Copiar tudo</button>
-      <button type="button" class="btn sec" id="clear">Limpar</button>
-    </div>
-    <p class="tips">O OCR pode errar (0/O, 1/I, 5/S, 8/B). Confira e corrija os campos acima direto aqui — o topo da página acompanha.</p>
-  </section>
-</main>
+  <!-- RODAPE FIXO: ATUALIZADO SOMENTE QUANDO EDITAR A REVISAO -->
+  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37</footer>
 
-<div id="toast"></div>
-
-<!-- ATENÇÃO: atualizar versão, data e hora SOMENTE ao revisar/editar este arquivo. Texto fixo (não é gerado a cada visualização). -->
-<footer>Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script>
-//<parser>
-const BRANDS={TECHNICOLOR:'Technicolor',ARRIS:'Arris',ASKEY:'Askey',SAGEMCOM:'Sagemcom',COMPAL:'Compal',HITRON:'Hitron',UBEE:'Ubee',CISCO:'Cisco',MOTOROLA:'Motorola',NETGEAR:'Netgear',ZYXEL:'Zyxel',HUAWEI:'Huawei',INTELBRAS:'Intelbras',COMMSCOPE:'CommScope',SERCOMM:'Sercomm',HUMAX:'Humax',CASTLENET:'Castlenet',VANTIVA:'Vantiva',CHANGHONG:'Changhong',FIBERHOME:'FiberHome',NOKIA:'Nokia'};
-const MODEL_RE=/\b(?:TC\d{4}[A-Z]{0,2}|CGM\d{4}[A-Z\-]*|CGA\d{4}[A-Z]*|DPC\d{4}[A-Z]?|TG\d{3,4}[A-Z]{0,3}|CODA-?\d{3,4}[A-Z]?|CM\d{4}[A-Z]?|SBG\d{3,4}[A-Z]?|EPC\d{4}[A-Z]?|DCM\d{3}|CH\d{4}[A-Z]?|DG\d{4}[A-Z]?|CG\d{4}[A-Z]?)\b/i;
-const MAC_RE_G=/\b(?:[0-9A-F]{2}[:\-.]){5}[0-9A-F]{2}\b|\b[0-9A-F]{12}\b/gi;
-
-function after(line,m){return line.slice(m.index+m[0].length).replace(/^[\s:：=.#\-–]+/,'').trim();}
-function labelValue(lines,re,needDigit){
-  for(let i=0;i<lines.length;i++){
-    const m=lines[i].match(re); if(!m) continue;
-    let v=after(lines[i],m);
-    if(!v&&lines[i+1]) v=lines[i+1];
-    if(v&&(!needDigit||/\d/.test(v))) return v;
-  }
-  return '';
-}
-function firstToken(v,min){
-  const t=v.split(/\s+/).filter(Boolean); if(!t.length) return '';
-  let r=t[0]; if(r.length<min&&t[1]) r+=t[1]; return r;
-}
-function fmtMac(h){return h.match(/.{2}/g).join(':');}
-function macFrom(str){
-  const u=str.toUpperCase();
-  const m=u.match(/\b(?:[0-9A-F]{2}[:\-.]){5}[0-9A-F]{2}\b|\b[0-9A-F]{12}\b/);
-  if(m) return fmtMac(m[0].replace(/[^0-9A-F]/g,''));
-  const c=u.slice(0,28).replace(/[OQ]/g,'0').replace(/[IL]/g,'1').replace(/[^0-9A-F]/g,'');
-  return c.length>=12?fmtMac(c.slice(0,12)):'';
-}
-function bandHint(L){
-  const f5=/\b5\s?G(?:\s?HZ)?\b/i.test(L);
-  const f24=/\b2[.,]\s?4\s?G?(?:\s?HZ)?\b|\b2G\b/i.test(L);
-  return f5&&!f24?'5':(f24&&!f5?'24':null);
-}
-function findSsids(s){
-  const r=/\b(CLAR[O0]|NET)\s*[_\-‗]\s*([A-Za-z0-9]{3,}(?:_[A-Za-z0-9]+)*)/gi;
-  const out=[]; let m;
-  while((m=r.exec(s))){ out.push(m[1].toUpperCase().replace('0','O')+'_'+m[2]); }
-  return out;
-}
-function ssidBand(s){
-  const suf=s.split('_').slice(1).join('_');
-  if(/^5G/i.test(suf)||/(?:^|_)5G(?:HZ)?$/i.test(suf)) return '5';
-  if(/^2G/i.test(suf)||/(?:^|_)2G$/i.test(suf)) return '24';
-  return null;
-}
-function labelRe(){return /\b(?:USU.?RIO|USER\s*NAME|USERNAME|USER|LOGIN)\b|\b(?:SENHA|PASSWORD|PASSWD|PASS|PWD|CHAVE|KEY)\b/gi;}
-function segs(L){
-  const re=labelRe(), ms=[]; let m;
-  while((m=re.exec(L))) ms.push({i:m.index,e:m.index+m[0].length,t:/^(?:USU|USER|LOGIN)/i.test(m[0])?'u':'p'});
-  return ms.map((x,k)=>({t:x.t,v:L.slice(x.e,k+1<ms.length?ms[k+1].i:L.length)}));
-}
-const cleanV=v=>v.replace(/^[\s:：=.#\-–\/]+/,'').trim();
-
-function parseLabel(raw){
-  const out={};
-  const lines=raw.replace(/\r/g,'').split('\n').map(l=>l.trim()).filter(l=>l.length>1);
-  const up=raw.toUpperCase();
-
-  // Fabricante
-  for(const k in BRANDS){ if(up.includes(k)){ out.fabricante=BRANDS[k]; break; } }
-  if(!out.fabricante){
-    const v=labelValue(lines,/\b(?:FABRICANTE|MANUFACTURER)\b/i);
-    if(v) out.fabricante=v.split(/\s{2,}/)[0];
-  }
-
-  // Modelo
-  const mv=labelValue(lines,/\b(?:MODELO|MODEL|MOD)\b\.?/i);
-  if(mv){
-    const t=firstToken(mv,3).replace(/[^A-Za-z0-9\-_\/.]/g,'');
-    if(t&&/\d/.test(t)) out.modelo=t.toUpperCase();
-  }
-  if(!out.modelo){ const m=raw.match(MODEL_RE); if(m) out.modelo=m[0].toUpperCase(); }
-
-  // Input
-  const iv=labelValue(lines,/\b(?:INPUT|ENTRADA|ALIMENTA[CÇ][AÃ]O)\b/i,true);
-  if(iv) out.input=iv.slice(0,40);
-  else{
-    const m=raw.match(/\b\d{1,2}(?:[.,]\d+)?\s*V\s*[^\dA-Za-z]{0,4}\s*\d(?:[.,]\d+)?\s*A\b/i);
-    if(m) out.input=m[0].replace(/\s+/g,' ');
-  }
-
-  // Fabr (data de fabricação)
-  const fv=labelValue(lines,/\b(?:FABR|FABRICA[CÇ][AÃ]O|MFG(?:\s*DATE)?|MANUFACTURED|DATA\s*DE\s*FAB\w*|FAB)\b\.?/i,true);
-  if(fv){
-    const d=fv.match(/\d{1,2}[\/\-.]\d{2,4}(?:[\/\-.]\d{2,4})?|\d{4}[\/\-.]\d{1,2}/);
-    out.fabr=d?d[0]:firstToken(fv,2);
-  }
-
-  // S/N
-  const sv=labelValue(lines,/\b(?:S\s*\/\s*N|S\.\s?N\.?|SN|SERIAL(?:\s*(?:NUMBER|NO\.?|N[ºO°]))?|N[ºO°]\.?\s*(?:DE\s*)?S[EÉ]RIE)\s*[:：#=]?/i);
-  if(sv){
-    const t=firstToken(sv,6).replace(/[^A-Za-z0-9\-]/g,'');
-    if(t.length>=5) out.sn=t.toUpperCase();
-  }
-
-  // MACs
-  const cmL=/\bCM[\s\-]*MAC\b|\bMAC[\s\-]*CM\b|\bCM\s*[:：]/i;
-  const emL=/\b(?:E-?MTA|MTA)[\s\-]*MAC\b|\bMAC[\s\-]*(?:E-?MTA|MTA)\b|\b(?:E-?MTA|MTA)\s*[:：]/i;
-  const macLine=re=>{
-    for(let i=0;i<lines.length;i++){
-      const m=lines[i].match(re); if(!m) continue;
-      let v=macFrom(after(lines[i],m));
-      if(!v&&lines[i+1]) v=macFrom(lines[i+1]);
-      if(v) return v;
-    }
-    return '';
-  };
-  out.cmMac=macLine(cmL); out.emtaMac=macLine(emL);
-  const all=[...new Set((raw.toUpperCase().match(MAC_RE_G)||[]).map(x=>fmtMac(x.replace(/[^0-9A-F]/g,''))))];
-  const rest=all.filter(x=>x!==out.cmMac&&x!==out.emtaMac);
-  if(!out.cmMac&&rest.length) out.cmMac=rest.shift();
-  if(!out.emtaMac&&rest.length) out.emtaMac=rest.shift();
-
-  // Acesso 192.168.0.1 + Wi-Fi
-  let section=null,lastBand=null;
-  for(let i=0;i<lines.length;i++){
-    const L=lines[i], hint=bandHint(L), ss=findSsids(L);
-    if(ss.length){
-      ss.forEach(s=>{
-        let b=ssidBand(s)||hint||lastBand||(out.ssid24?'5':'24');
-        if(b==='24'&&out.ssid24&&!out.ssid5) b='5';
-        if(b==='5'&&out.ssid5&&!out.ssid24) b='24';
-        if(b==='24'&&!out.ssid24) out.ssid24=s;
-        else if(b==='5'&&!out.ssid5) out.ssid5=s;
-        lastBand=b;
-      });
-      section='wifi';
-    } else if(/WI-?\s?FI|WLAN|WPA|SSID/i.test(L)||hint){
-      section='wifi'; if(hint) lastBand=hint;
-    } else if(/192\.168|GATEWAY|ACESSO|GERENCI|\bADMIN\b/i.test(L)){
-      section='ip';
-    }
-    const sg=segs(L);
-    sg.forEach((s,k)=>{
-      const last=k===sg.length-1;
-      let v=cleanV(s.v);
-      if(s.t==='p') v=v.replace(/^(?:(?:WI-?\s?FI|WLAN|WPA\d?(?:-?PSK)?|2[.,]4\s?G(?:HZ)?|5\s?G(?:HZ)?|ADMIN(?=\s*[:：=]))(?:\s*[:：=]\s*|\s+))+/i,'');
-      if(!v&&last&&lines[i+1]&&!labelRe().test(lines[i+1])&&!findSsids(lines[i+1]).length) v=cleanV(lines[i+1]);
-      const tok=(v.split(/\s+/)[0]||'').replace(/[\/|,;]+$/,'');
-      if(!tok||findSsids(tok).length) return;
-      if(s.t==='u'){ section='ip'; if(!out.ipUser) out.ipUser=tok; }
-      else if(section==='wifi'){
-        const b=hint||lastBand||(out.pass24?'5':'24');
-        if(!out['pass'+b]) out['pass'+b]=tok;
-      } else if(!out.ipPass) out.ipPass=tok;
+  <script>
+    // Metadados da revisão (atualizar manualmente apenas quando houver edição de revisão)
+    const APP_REVISION = Object.freeze({
+      author: "Fernando Sato",
+      version: "1.1",
+      updatedAt: "24/11/2026 20:37"
     });
-  }
-  // Uma senha só para as duas bandas
-  if(out.ssid24&&out.ssid5){
-    if(out.pass24&&!out.pass5){out.pass5=out.pass24;out._shared=true;}
-    else if(out.pass5&&!out.pass24){out.pass24=out.pass5;out._shared=true;}
-  }
-  return out;
-}
-//</parser>
 
-// ---------- Interface ----------
-const $=id=>document.getElementById(id);
-const GROUPS=[
-  ['Equipamento',[['fabricante','Fabricante'],['modelo','Modelo'],['input','Input'],['fabr','Fabr.'],['sn','S/N'],['cmMac','CM MAC'],['emtaMac','EMTA MAC']]],
-  ['Acesso ao IP 192.168.0.1',[['ipUser','Usuário'],['ipPass','Senha']]],
-  ['Wi-Fi',[['ssid24','SSID 2.4 GHz'],['pass24','Senha 2.4 GHz'],['ssid5','SSID 5 GHz'],['pass5','Senha 5 GHz']]]
-];
-const KEYS=GROUPS.flatMap(g=>g[1]);
-const data={}; KEYS.forEach(([k])=>data[k]='');
-let band='24';
+    (function renderStaticFooter() {
+      const el = document.getElementById("appFooter");
+      if (el) {
+        el.textContent = `Criado por: ${APP_REVISION.author} - Versão ${APP_REVISION.version} - ${APP_REVISION.updatedAt}`;
+      }
+    })();
 
-const grid=$('grid');
-GROUPS.forEach(([title,items])=>{
-  const h=document.createElement('div'); h.className='grp'; h.textContent=title; grid.appendChild(h);
-  items.forEach(([k,label])=>{
-    const d=document.createElement('div'); d.className='row';
-    d.innerHTML='<label>'+label+'</label><div class="in"><input data-key="'+k+'" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="cp" title="Copiar" aria-label="Copiar '+label+'">⧉</button></div>';
-    grid.appendChild(d);
-  });
-});
+    let selectedWifiBand = "2.4";
+    let mediaStream = null;
+    let tesseractWorker = null;
 
-function render(except){
-  grid.querySelectorAll('input').forEach(i=>{ if(i!==except) i.value=data[i.dataset.key]||''; });
-  $('f1').value=data.ipUser;
-  $('f2').value=data.ipPass;
-  $('f3').value=band==='24'?data.ssid24:data.ssid5;
-  $('f4').value=band==='24'?data.pass24:data.pass5;
-}
-grid.addEventListener('input',e=>{
-  const el=e.target; if(!el.dataset||!el.dataset.key) return;
-  data[el.dataset.key]=el.value; render(el);
-});
-grid.addEventListener('click',e=>{
-  const b=e.target.closest('.cp'); if(!b) return;
-  const inp=b.parentElement.querySelector('input'); copy(inp.value,inp);
-});
-['f1','f2','f3','f4'].forEach(id=>{ const el=$(id); el.addEventListener('click',()=>copy(el.value,el)); });
-document.querySelectorAll('.band button').forEach(b=>b.addEventListener('click',()=>{
-  band=b.dataset.band;
-  document.querySelectorAll('.band button').forEach(x=>x.classList.toggle('on',x===b));
-  render();
-}));
+    const extractedData = {
+      model: "",
+      manufacturer: "",
+      inputPower: "",
+      fabr: "",
+      sn: "",
+      cmMac: "",
+      emtaMac: "",
+      ipUser: "",
+      ipPass: "",
+      ssid24: "",
+      ssid5: "",
+      wifiPass: ""
+    };
 
-let toastT;
-function toast(msg){
-  const t=$('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1400);
-}
-async function copy(text,el){
-  if(!text){ toast('Campo vazio'); return; }
-  let ok=false;
-  try{ if(navigator.clipboard&&window.isSecureContext){ await navigator.clipboard.writeText(text); ok=true; } }catch(e){}
-  if(!ok){
-    const ta=document.createElement('textarea');
-    ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
-    document.body.appendChild(ta); ta.focus(); ta.select();
-    try{ ok=document.execCommand('copy'); }catch(e){}
-    ta.remove();
-  }
-  toast(ok?'Copiado!':'Não foi possível copiar');
-  if(ok&&el){ el.classList.add('copied'); setTimeout(()=>el.classList.remove('copied'),700); }
-}
+    function setStatus(msg, state = "idle") {
+      const dot = document.getElementById("statusDot");
+      const text = document.getElementById("statusText");
+      text.textContent = msg;
+      dot.className = "status-dot";
+      if (state === "busy") dot.classList.add("busy");
+      if (state === "ok") dot.classList.add("ok");
+    }
 
-$('copyAll').addEventListener('click',()=>{
-  const out=[];
-  GROUPS.forEach(([title,items])=>{
-    const rows=items.filter(([k])=>data[k]).map(([k,l])=>l+': '+data[k]);
-    if(rows.length){ out.push('['+title+']'); out.push(...rows); out.push(''); }
-  });
-  copy(out.join('\n').trim(),null);
-});
-$('clear').addEventListener('click',()=>{
-  KEYS.forEach(([k])=>data[k]='');
-  render(); $('raw').textContent=''; $('rawBox').hidden=true; setStatus('');
-});
+    function showToast(msg = "Copiado para a área de transferência!") {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1800);
+    }
 
-function setStatus(msg,cls){ const s=$('status'); s.textContent=msg; s.className=cls||''; }
-function setProg(p){ $('progWrap').hidden=false; $('prog').style.width=p+'%'; }
-function busy(b){
-  ['camBtn','galBtn'].forEach(id=>$(id).setAttribute('aria-disabled',b?'true':'false'));
-  if(!b) setTimeout(()=>{ $('progWrap').hidden=true; },600);
-}
+    async function copyTextToClipboard(text, boxEl = null) {
+      if (!text || !text.trim() || text.trim() === "—") {
+        showToast("Campo vazio para copiar");
+        return;
+      }
+      const valueToCopy = text.trim();
+      let copied = false;
 
-function preprocess(img){
-  const m=Math.max(img.naturalWidth,img.naturalHeight);
-  const s=Math.min(2400/m,2);
-  const c=document.createElement('canvas');
-  c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s);
-  const x=c.getContext('2d',{willReadFrequently:true});
-  x.drawImage(img,0,0,c.width,c.height);
-  const id=x.getImageData(0,0,c.width,c.height), p=id.data, hist=new Uint32Array(256);
-  for(let i=0;i<p.length;i+=4){ const g=((p[i]*299+p[i+1]*587+p[i+2]*114)/1000)|0; p[i]=g; hist[g]++; }
-  const tot=c.width*c.height; let lo=0,hi=255,a=0;
-  for(;lo<255;lo++){ a+=hist[lo]; if(a>tot*0.02) break; }
-  a=0; for(;hi>0;hi--){ a+=hist[hi]; if(a>tot*0.02) break; }
-  const rng=Math.max(hi-lo,1);
-  for(let i=0;i<p.length;i+=4){ let g=(p[i]-lo)*255/rng; g=g<0?0:(g>255?255:g); p[i]=p[i+1]=p[i+2]=g; }
-  x.putImageData(id,0,0);
-  return c;
-}
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(valueToCopy);
+          copied = true;
+        } catch (_) {
+          copied = false;
+        }
+      }
 
-let workerP=null;
-function getWorker(){
-  if(!workerP){
-    workerP=Tesseract.createWorker('eng',1,{logger:m=>{
-      if(m.status==='recognizing text') setProg(Math.round(m.progress*100));
-      else if(/load|init/i.test(m.status)) setStatus('Carregando leitor OCR (na 1ª vez demora um pouco)...');
-    }}).catch(e=>{ workerP=null; throw e; });
-  }
-  return workerP;
-}
+      if (!copied) {
+        const temp = document.createElement("textarea");
+        temp.value = valueToCopy;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        temp.setSelectionRange(0, temp.value.length);
+        try {
+          copied = document.execCommand("copy");
+        } catch (_) {
+          copied = false;
+        }
+        document.body.removeChild(temp);
+      }
 
-async function runOcr(img){
-  if(!window.Tesseract){
-    setStatus('Leitor OCR indisponível: conecte à internet para carregá-lo (1ª vez) ou preencha manualmente abaixo.','err');
-    return;
-  }
-  busy(true); setProg(0); setStatus('Preparando imagem...');
-  try{
-    const canvas=preprocess(img);
-    const w=await getWorker();
-    setStatus('Lendo etiqueta...');
-    const r=await w.recognize(canvas);
-    const text=r.data.text||'';
-    $('raw').textContent=text; $('rawBox').hidden=false;
-    const res=parseLabel(text);
-    const n=KEYS.filter(([k])=>res[k]).length;
-    KEYS.forEach(([k])=>data[k]=res[k]||'');
-    render();
-    let msg=n+' de '+KEYS.length+' campos encontrados. Confira os valores (OCR pode confundir 0/O, 1/I, 5/S).';
-    if(res._shared) msg+=' Senha Wi-Fi única aplicada às duas bandas — confirme na etiqueta.';
-    setStatus(msg,n?(res._shared?'warn':'ok'):'err');
-    if(!n) setStatus('Nada reconhecido. Tente outra foto, mais nítida e sem reflexo.','err');
-  }catch(e){
-    setStatus('Falha na leitura: '+(e&&e.message?e.message:e)+'. Verifique a internet na 1ª utilização.','err');
-  }finally{ busy(false); }
-}
+      if (copied) {
+        if (boxEl) {
+          boxEl.classList.add("copied");
+          setTimeout(() => boxEl.classList.remove("copied"), 1100);
+        }
+        showToast(`Copiado: ${valueToCopy}`);
+      } else {
+        showToast("Não foi possível copiar automaticamente");
+      }
+    }
 
-let lastUrl=null;
-function onFile(file){
-  if(!file) return;
-  if(lastUrl) URL.revokeObjectURL(lastUrl);
-  lastUrl=URL.createObjectURL(file);
-  const img=new Image();
-  img.onload=()=>{ $('prev').src=lastUrl; $('prevWrap').hidden=false; runOcr(img); };
-  img.onerror=()=>setStatus('Não foi possível abrir a imagem.','err');
-  img.src=lastUrl;
-}
-['cam','gal'].forEach(id=>$(id).addEventListener('change',e=>{ onFile(e.target.files[0]); e.target.value=''; }));
+    function copyField(inputId, boxEl) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      copyTextToClipboard(input.value, boxEl);
+    }
 
-render();
-</script>
+    function copyTextValue(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      copyTextToClipboard(el.textContent);
+    }
+
+    function selectWifiBand(band) {
+      selectedWifiBand = band;
+      document.getElementById("btnBand24").classList.toggle("active", band === "2.4");
+      document.getElementById("btnBand5").classList.toggle("active", band === "5");
+      document.getElementById("labelWifiBand").textContent =
+        band === "2.4" ? "3. Usuário Wi-Fi (2.4 GHz)" : "3. Usuário Wi-Fi (5 GHz)";
+      updateQuickInputsFromExtracted();
+    }
+
+    function syncFromQuick(fieldName) {
+      const val = document.getElementById(fieldName).value.trim();
+      if (fieldName === "ipUser") extractedData.ipUser = val;
+      if (fieldName === "ipPass") extractedData.ipPass = val;
+      if (fieldName === "wifiSsid") {
+        if (selectedWifiBand === "5") {
+          extractedData.ssid5 = val;
+        } else {
+          extractedData.ssid24 = val;
+        }
+      }
+      if (fieldName === "wifiPass") extractedData.wifiPass = val;
+      renderFormattedSection();
+    }
+
+    function updateQuickInputsFromExtracted() {
+      document.getElementById("ipUser").value = extractedData.ipUser || "";
+      document.getElementById("ipPass").value = extractedData.ipPass || "";
+
+      const activeSsid =
+        selectedWifiBand === "5"
+          ? (extractedData.ssid5 || extractedData.ssid24 || "")
+          : (extractedData.ssid24 || extractedData.ssid5 || "");
+
+      document.getElementById("wifiSsid").value = activeSsid;
+      document.getElementById("wifiPass").value = extractedData.wifiPass || "";
+    }
+
+    function renderFormattedSection() {
+      const setTxt = (id, v) => {
+        document.getElementById(id).textContent = v && v.trim() ? v.trim() : "—";
+      };
+      setTxt("parsedModel", extractedData.model);
+      setTxt("parsedManufacturer", extractedData.manufacturer);
+      setTxt("parsedInput", extractedData.inputPower);
+      setTxt("parsedFabr", extractedData.fabr);
+      setTxt("parsedSn", extractedData.sn);
+      setTxt("parsedCmMac", extractedData.cmMac);
+      setTxt("parsedEmtaMac", extractedData.emtaMac);
+      setTxt("parsedIpLogin", extractedData.ipUser);
+      setTxt("parsedIpPass", extractedData.ipPass);
+      setTxt("parsedSsid24", extractedData.ssid24);
+      setTxt("parsedSsid5", extractedData.ssid5);
+      setTxt("parsedWifiPass", extractedData.wifiPass);
+    }
+
+    function clearAllFields() {
+      Object.keys(extractedData).forEach((k) => {
+        extractedData[k] = "";
+      });
+      document.getElementById("rawOcrText").value = "";
+      updateQuickInputsFromExtracted();
+      renderFormattedSection();
+      setStatus("Campos limpos.", "idle");
+    }
+
+    async function openCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus("Câmera direta indisponível neste navegador. Use 'Foto / Arquivo'.", "idle");
+        triggerFileFallback();
+        return;
+      }
+
+      try {
+        setStatus("Solicitando acesso à câmera traseira...", "busy");
+        stopCamera(false);
+
+        const constraints = {
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        };
+
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoEl = document.getElementById("videoEl");
+        const canvasEl = document.getElementById("photoCanvas");
+        const btnRetake = document.getElementById("btnRetake");
+
+        videoEl.srcObject = mediaStream;
+        videoEl.style.display = "block";
+        canvasEl.style.display = "none";
+        btnRetake.style.display = "none";
+
+        document.getElementById("cameraBox").classList.add("active");
+        document.getElementById("btnCapture").disabled = false;
+        document.getElementById("btnStopCam").disabled = false;
+
+        setStatus("Câmera ativa. Enquadre a etiqueta do eMTA e toque em 'Tirar Foto e Ler'.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Não foi possível abrir a câmera (" + err.message + "). Abrindo seletor de imagem...", "idle");
+        triggerFileFallback();
+      }
+    }
+
+    function stopCamera(updateMsg = true) {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        mediaStream = null;
+      }
+      document.getElementById("btnCapture").disabled = true;
+      document.getElementById("btnStopCam").disabled = true;
+      if (updateMsg) {
+        setStatus("Câmera encerrada.", "idle");
+      }
+    }
+
+    function backToLiveVideo() {
+      const videoEl = document.getElementById("videoEl");
+      const canvasEl = document.getElementById("photoCanvas");
+      const btnRetake = document.getElementById("btnRetake");
+
+      canvasEl.style.display = "none";
+      btnRetake.style.display = "none";
+      videoEl.style.display = "block";
+      document.getElementById("btnCapture").disabled = !mediaStream;
+      setStatus("Ajuste o enquadramento e toque em 'Tirar Foto e Ler'.", "ok");
+    }
+
+    function triggerFileFallback() {
+      document.getElementById("fileInput").click();
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.getElementById("photoCanvas");
+          const videoEl = document.getElementById("videoEl");
+          const ctx = canvas.getContext("2d");
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          videoEl.style.display = "none";
+          canvas.style.display = "block";
+          document.getElementById("btnRetake").style.display = "none";
+          document.getElementById("cameraBox").classList.add("active");
+
+          runOcrOnCanvas(canvas);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    function captureAndRead() {
+      const videoEl = document.getElementById("videoEl");
+      const canvas = document.getElementById("photoCanvas");
+      if (!videoEl.videoWidth || !videoEl.videoHeight) {
+        setStatus("Aguarde o vídeo iniciar antes de tirar a foto.", "busy");
+        return;
+      }
+
+      canvas.width = videoEl.videoWidth;
+      canvas.height = videoEl.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+
+      videoEl.style.display = "none";
+      canvas.style.display = "block";
+      document.getElementById("btnRetake").style.display = "inline-flex";
+      document.getElementById("btnCapture").disabled = true;
+
+      runOcrOnCanvas(canvas);
+    }
+
+    function preprocessCanvasForOcr(sourceCanvas) {
+      const scale = sourceCanvas.width < 1200 ? 1.5 : 1;
+      const workCanvas = document.createElement("canvas");
+      workCanvas.width = Math.round(sourceCanvas.width * scale);
+      workCanvas.height = Math.round(sourceCanvas.height * scale);
+      const ctx = workCanvas.getContext("2d");
+      ctx.drawImage(sourceCanvas, 0, 0, workCanvas.width, workCanvas.height);
+
+      const imgData = ctx.getImageData(0, 0, workCanvas.width, workCanvas.height);
+      const data = imgData.data;
+      // Aumenta contraste leve em escala de cinza para melhorar leitura de etiquetas
+      const contrast = 1.25;
+      const intercept = 128 * (1 - contrast);
+
+      for (let i = 0; i < data.length; i += 4) {
+        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        let val = gray * contrast + intercept;
+        if (val < 0) val = 0;
+        if (val > 255) val = 255;
+        data[i] = data[i + 1] = data[i + 2] = val;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return workCanvas;
+    }
+
+    async function ensureWorker() {
+      if (tesseractWorker) return tesseractWorker;
+      setStatus("Carregando motor OCR (primeira leitura pode levar alguns segundos)...", "busy");
+      tesseractWorker = await Tesseract.createWorker("eng", 1, {
+        logger: (m) => {
+          if (m.status === "recognizing text" && typeof m.progress === "number") {
+            const pct = Math.round(m.progress * 100);
+            setStatus(`Lendo etiqueta do eMTA... ${pct}%`, "busy");
+          }
+        }
+      });
+      return tesseractWorker;
+    }
+
+    async function runOcrOnCanvas(canvas) {
+      try {
+        const processed = preprocessCanvasForOcr(canvas);
+        const worker = await ensureWorker();
+        setStatus("Extraindo dados da etiqueta...", "busy");
+        const result = await worker.recognize(processed);
+        const rawText = (result && result.data && result.data.text) ? result.data.text : "";
+
+        document.getElementById("rawOcrText").value = rawText;
+        parseEmtaLabelText(rawText);
+        updateQuickInputsFromExtracted();
+        renderFormattedSection();
+        setStatus("Leitura concluída! Toque nos campos do topo para copiar.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao ler etiqueta: " + err.message, "idle");
+      }
+    }
+
+    function reparseFromTextarea() {
+      const rawText = document.getElementById("rawOcrText").value || "";
+      parseEmtaLabelText(rawText);
+      updateQuickInputsFromExtracted();
+      renderFormattedSection();
+      setStatus("Texto reprocessado e campos atualizados.", "ok");
+    }
+
+    function normalizeMac(rawMac) {
+      const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
+      if (hex.length === 12) {
+        return hex.match(/.{1,2}/g).join(":");
+      }
+      return (rawMac || "").trim().toUpperCase();
+    }
+
+    function parseEmtaLabelText(text) {
+      const lines = text
+        .split(/?
+/)
+        .map((l) => l.trim())
+        .filter(Boolean);
+      const joined = lines.join("
+");
+
+      // 1. Fabricantes comuns em eMTAs / Gateways Claro
+      const mfgMatch = joined.match(/(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE)/i);
+      if (mfgMatch) {
+        extractedData.manufacturer = mfgMatch[1].toUpperCase();
+      }
+
+      // 2. Modelo (ex: Model: TG3482 / DG3450 / HGJ310 / FAST3890 / CG3000)
+      const modelMatch =
+        joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
+        joined.match(/((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST)[A-Z0-9\-]{2,16})/i);
+      if (modelMatch) {
+        extractedData.model = modelMatch[1].trim();
+      }
+
+      // 3. Input / Alimentacao (ex: Input: 12V --- 2.5A ou 12V DC 3A)
+      const inputMatch =
+        joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
+        joined.match(/([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)/i);
+      if (inputMatch) {
+        extractedData.inputPower = inputMatch[1].trim();
+      }
+
+      // 4. Fabr. (Fabricacao / Data / Fabr)
+      const fabrMatch =
+        joined.match(/(?:fabr\.?|fabrica[cç][aã]o|mfd|date)\s*[:=\-]?\s*([0-9]{1,4}[\/\-][0-9]{1,2}(?:[\/\-][0-9]{2,4})?|[A-Za-z0-9\-]{3,16})/i);
+      if (fabrMatch) {
+        extractedData.fabr = fabrMatch[1].trim();
+      }
+
+      // 5. S/N (Serial Number)
+      const snMatch =
+        joined.match(/(?:s\/n|sn|serial(?:\s*(?:no|num|number))?|n[º°o]?\s*s[eé]rie)\s*[:=\-]?\s*([A-Za-z0-9\-]{6,26})/i);
+      if (snMatch) {
+        extractedData.sn = snMatch[1].trim().toUpperCase();
+      }
+
+      // 6. MACs (CM MAC e eMTA MAC)
+      const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
+      const allMacsRaw = [];
+      let mMac;
+      while ((mMac = macRegex.exec(joined)) !== null) {
+        allMacsRaw.push({ value: normalizeMac(mMac[1]), index: mMac.index });
+      }
+
+      const cmMacExplicit = joined.match(/(?:cm\s*mac|cable\s*mac|mac\s*cm)\s*[:=\-]?\s*([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/i);
+      const emtaMacExplicit = joined.match(/(?:emta\s*mac|mta\s*mac|mac\s*emta|tel\s*mac)\s*[:=\-]?\s*([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/i);
+
+      if (cmMacExplicit) {
+        extractedData.cmMac = normalizeMac(cmMacExplicit[1]);
+      }
+      if (emtaMacExplicit) {
+        extractedData.emtaMac = normalizeMac(emtaMacExplicit[1]);
+      }
+
+      const uniqueMacs = [...new Set(allMacsRaw.map((x) => x.value))];
+      if (!extractedData.cmMac && uniqueMacs.length >= 1) {
+        extractedData.cmMac = uniqueMacs[0];
+      }
+      if (!extractedData.emtaMac && uniqueMacs.length >= 2) {
+        extractedData.emtaMac = uniqueMacs.find((mc) => mc !== extractedData.cmMac) || uniqueMacs[1];
+      }
+
+      // 7. SSIDs Wi-Fi 2.4 GHz e 5 GHz (sempre comecam com CLARO_ ou NET_)
+      const ssidMatches = [];
+      const ssidRegex = /((?:CLARO|NET)_[A-Za-z0-9_\-]{2,32})/gi;
+      let sMatch;
+      while ((sMatch = ssidRegex.exec(joined)) !== null) {
+        ssidMatches.push(sMatch[1].trim());
+      }
+
+      for (const ssid of ssidMatches) {
+        const is5g = /(?:[_-]5g|_5|5ghz)/i.test(ssid);
+        const is24g = /(?:[_-]2\.?4g?|24g)/i.test(ssid);
+        if (is5g && !extractedData.ssid5) {
+          extractedData.ssid5 = ssid;
+        } else if (is24g && !extractedData.ssid24) {
+          extractedData.ssid24 = ssid;
+        } else if (!extractedData.ssid24) {
+          extractedData.ssid24 = ssid;
+        } else if (!extractedData.ssid5 && ssid !== extractedData.ssid24) {
+          extractedData.ssid5 = ssid;
+        }
+      }
+
+      // 8. Usuario e Senha do IP 192.168.0.1
+      const ipUserMatch =
+        joined.match(/(?:192\.168\.0\.1[^
+]{0,80}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
+      if (ipUserMatch) {
+        extractedData.ipUser = ipUserMatch[1].trim();
+      } else if (/admin/i.test(joined) && !extractedData.ipUser) {
+        extractedData.ipUser = "admin";
+      }
+
+      const ipPassMatch =
+        joined.match(/(?:192\.168\.0\.1[^
+]{0,100}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|pass(?:word)?|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,32})/i);
+      if (ipPassMatch) {
+        extractedData.ipPass = ipPassMatch[1].trim();
+      }
+
+      // 9. Senha da rede Wi-Fi (WPA / Wi-Fi Key / Pre-shared Key / Senha Wi-Fi)
+      const wifiPassMatch =
+        joined.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
+      if (wifiPassMatch) {
+        extractedData.wifiPass = wifiPassMatch[1].trim();
+      }
+    }
+
+    // Inicialização limpa
+    updateQuickInputsFromExtracted();
+    renderFormattedSection();
+  </script>
 </body>
 </html>
