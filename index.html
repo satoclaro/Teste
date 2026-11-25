@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Configuração eMTA / ONT 192.168.0.1 - Claro Telecom</title>
+  <title>Configuração eMTA / ONT 192.168.0.1 - Claro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -569,10 +569,10 @@
 
       <div class="wifi-band-row" role="group" aria-label="Banda Wi-Fi para o campo usuário Wi-Fi">
         <button type="button" class="band-btn active" id="btnBand24" onclick="selectWifiBand('2.4')">
-          Wi-Fi 2.4 GHz (CLARO_/NET_)
+          Wi-Fi 2.4 GHz (CLARO_)
         </button>
         <button type="button" class="band-btn" id="btnBand5" onclick="selectWifiBand('5')">
-          Wi-Fi 5 GHz (CLARO_/NET_)
+          Wi-Fi 5 GHz (CLARO_)
         </button>
       </div>
 
@@ -613,7 +613,7 @@
           />
         </div>
 
-        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_ ou NET_) -->
+        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_) -->
         <div class="quick-field" id="boxWifiSsid" onclick="copyField('wifiSsid', this)">
           <div class="quick-label">
             <span id="labelWifiBand">3. Usuário Wi-Fi (2.4 GHz)</span>
@@ -623,7 +623,7 @@
             type="text"
             id="wifiSsid"
             class="quick-input"
-            placeholder="CLARO_... ou NET_..."
+            placeholder="CLARO_..."
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -651,10 +651,10 @@
       </div>
     </section>
 
-    <!-- CAMERA / SCANNER ETIQUETA EMTA / ONT -->
+    <!-- CAMERA / SCANNER ETIQUETA EMTA / ONT CLARO -->
     <section class="card" aria-label="Câmera e leitura de etiqueta">
       <div class="card-header">
-        <div class="card-title">📷 Etiqueta eMTA / ONT (Câmera / OCR / Barcode)</div>
+        <div class="card-title">📷 Etiqueta eMTA / ONT Claro (Câmera / OCR / Barcode)</div>
       </div>
 
       <button type="button" class="btn btn-primary" onclick="toggleScanner()">
@@ -702,11 +702,16 @@
     <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA ETIQUETA -->
     <section class="card" aria-label="Informações formatadas da etiqueta">
       <div class="card-header">
-        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA / ONT</div>
+        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA / ONT (Claro)</div>
         <span class="hint-copy">Toque no valor para copiar</span>
       </div>
 
       <div class="formatted-grid" id="formattedGrid">
+        <div class="info-row" onclick="copyTextValue('parsedDocsis')">
+          <span class="info-key">DOCSIS</span>
+          <span class="info-val" id="parsedDocsis">—</span>
+        </div>
+
         <div class="info-row" onclick="copyTextValue('parsedModel')">
           <span class="info-key">Modelo</span>
           <span class="info-val" id="parsedModel">—</span>
@@ -753,12 +758,12 @@
         </div>
 
         <div class="info-row" onclick="copyTextValue('parsedSsid24')">
-          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_/NET_)</span>
+          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_)</span>
           <span class="info-val" id="parsedSsid24">—</span>
         </div>
 
         <div class="info-row" onclick="copyTextValue('parsedSsid5')">
-          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_/NET_)</span>
+          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_)</span>
           <span class="info-val" id="parsedSsid5">—</span>
         </div>
 
@@ -793,7 +798,7 @@
         type="text"
         id="archiveSearch"
         class="search-input"
-        placeholder="Buscar por modelo, fabricante, S/N, MAC, SSID ou data..."
+        placeholder="Buscar por DOCSIS, modelo, fabricante, S/N, MAC, SSID ou data..."
         oninput="renderArchiveTable()"
       />
 
@@ -815,6 +820,7 @@
           <thead>
             <tr>
               <th>Data/Hora</th>
+              <th>DOCSIS</th>
               <th>Modelo</th>
               <th>S/N</th>
               <th>CM MAC</th>
@@ -848,7 +854,7 @@
       }
     })();
 
-    const STORAGE_KEY = "claro_emta_ont_arquivo_v1";
+    const STORAGE_KEY = "claro_emta_ont_arquivo_v2";
     let archiveList = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
     let selectedWifiBand = "2.4";
@@ -862,6 +868,7 @@
     let cliqueEmAndamento = false;
 
     const extractedData = {
+      docsis: "",
       model: "",
       manufacturer: "",
       inputPower: "",
@@ -994,6 +1001,7 @@
       const setTxt = (id, v) => {
         document.getElementById(id).textContent = v && v.trim() ? v.trim() : "—";
       };
+      setTxt("parsedDocsis", extractedData.docsis);
       setTxt("parsedModel", extractedData.model);
       setTxt("parsedManufacturer", extractedData.manufacturer);
       setTxt("parsedInput", extractedData.inputPower);
@@ -1125,6 +1133,12 @@
       return (rawMac || "").trim().toUpperCase();
     }
 
+    function cleanCredentialToken(raw) {
+      return (raw || "")
+        .replace(/^[\s:=\-–—]+|[\s.,;]+$/g, "")
+        .trim();
+    }
+
     function parseEmtaLabelText(text, mergeMode = false) {
       const lines = (text || "")
         .split(/\r?\n/)
@@ -1132,11 +1146,22 @@
         .filter(Boolean);
       const joined = lines.join("\n");
 
+      // DOCSIS (ex: DOCSIS 3.1, DOCSIS 3.0, D3.1, D3.0)
+      const docsisMatch =
+        joined.match(/\bDOCSIS\s*[:=\-]?\s*(3\.[01]|2\.0|1\.[01])\b/i) ||
+        joined.match(/\bD\s*(3\.[01])\b/i);
+      if (docsisMatch) {
+        const ver = docsisMatch[1].trim();
+        extractedData.docsis = /^DOCSIS/i.test(docsisMatch[0]) ? `DOCSIS ${ver}` : `DOCSIS ${ver}`;
+      }
+
+      // Fabricante
       const mfgMatch = joined.match(/\b(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
       if (mfgMatch) {
         extractedData.manufacturer = mfgMatch[1].toUpperCase();
       }
 
+      // Modelo
       const modelMatch =
         joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
         joined.match(/\b((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
@@ -1144,6 +1169,7 @@
         extractedData.model = modelMatch[1].trim();
       }
 
+      // Input / Alimentação
       const inputMatch =
         joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
         joined.match(/\b([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)\b/i);
@@ -1151,18 +1177,21 @@
         extractedData.inputPower = inputMatch[1].trim();
       }
 
+      // Fabr. / Data / Lote
       const fabrMatch =
         joined.match(/(?:fabr\.?|fabrica[cç][aã]o|mfd|date)\s*[:=\-]?\s*([0-9]{1,4}[\/\-][0-9]{1,2}(?:[\/\-][0-9]{2,4})?|[A-Za-z0-9\-]{3,16})/i);
       if (fabrMatch) {
         extractedData.fabr = fabrMatch[1].trim();
       }
 
+      // S/N
       const snMatch =
         joined.match(/(?:s\/n|sn|serial(?:\s*(?:no|num|number))?|n[º°o]?\s*s[eé]rie)\s*[:=\-]?\s*([A-Za-z0-9\-]{6,26})/i);
       if (snMatch) {
         extractedData.sn = snMatch[1].trim().toUpperCase();
       }
 
+      // MACs (CM MAC / eMTA MAC)
       const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
       const allMacsRaw = [];
       let mMac;
@@ -1188,8 +1217,9 @@
         extractedData.emtaMac = uniqueMacs.find((mc) => mc !== extractedData.cmMac) || uniqueMacs[1];
       }
 
+      // SSIDs exclusivamente da Claro (CLARO_...)
       const ssidMatches = [];
-      const ssidRegex = /\b((?:CLARO|NET)_[A-Za-z0-9_\-]{2,32})\b/gi;
+      const ssidRegex = /\b(CLARO_[A-Za-z0-9_\-]{2,32})\b/gi;
       let sMatch;
       while ((sMatch = ssidRegex.exec(joined)) !== null) {
         ssidMatches.push(sMatch[1].trim());
@@ -1209,27 +1239,31 @@
         }
       }
 
+      // Usuário 192.168.0.1
       const ipUserMatch =
-        joined.match(/(?:192\.168\.0\.1[^\n]{0,80}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
+        joined.match(/(?:192\.168\.0\.1[^\n]{0,120}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
       if (ipUserMatch) {
-        extractedData.ipUser = ipUserMatch[1].trim();
+        extractedData.ipUser = cleanCredentialToken(ipUserMatch[1]);
       } else if (/\badmin\b/i.test(joined) && !extractedData.ipUser) {
         extractedData.ipUser = "admin";
       }
 
+      // Senha 192.168.0.1 (suporta formatos em linha ou quebra de linha após rótulo)
       const ipPassMatch =
-        joined.match(/(?:192\.168\.0\.1[^\n]{0,100}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|pass(?:word)?|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,32})/i);
+        joined.match(/(?:192\.168\.0\.1[^\n]{0,140}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|login\s*(?:pass(?:word)?|senha)|pass(?:word)?|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
       if (ipPassMatch) {
-        extractedData.ipPass = ipPassMatch[1].trim();
+        extractedData.ipPass = cleanCredentialToken(ipPassMatch[1]);
       }
 
+      // Senha Wi-Fi da Claro (suporta Wi-Fi Pass / Wi-Fi Key / WPA / Senha Wi-Fi / PSK em mesma linha ou próxima linha)
       const wifiPassMatch =
-        joined.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
+        joined.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
       if (wifiPassMatch) {
-        extractedData.wifiPass = wifiPassMatch[1].trim();
+        extractedData.wifiPass = cleanCredentialToken(wifiPassMatch[1]);
       }
 
-      if (!mergeMode && uniqueMacs.length === 0 && ssidMatches.length === 0 && !modelMatch && !snMatch) {
+      // Fallback caso venha um código MAC puro de 12 hexadecimais
+      if (!mergeMode && uniqueMacs.length === 0 && ssidMatches.length === 0 && !modelMatch && !snMatch && !docsisMatch) {
         const cleanCode = joined.replace(/\s+/g, "").trim();
         if (/^[0-9A-Fa-f]{12}$/.test(cleanCode) && !extractedData.cmMac) {
           extractedData.cmMac = normalizeMac(cleanCode);
@@ -1519,6 +1553,7 @@
       const registro = {
         id: Date.now(),
         dataHora: obterDataAtual(),
+        docsis: document.getElementById("parsedDocsis").textContent === "—" ? "" : document.getElementById("parsedDocsis").textContent.trim(),
         model: document.getElementById("parsedModel").textContent === "—" ? "" : document.getElementById("parsedModel").textContent.trim(),
         manufacturer: document.getElementById("parsedManufacturer").textContent === "—" ? "" : document.getElementById("parsedManufacturer").textContent.trim(),
         inputPower: document.getElementById("parsedInput").textContent === "—" ? "" : document.getElementById("parsedInput").textContent.trim(),
@@ -1556,6 +1591,7 @@
       const item = archiveList.find((r) => r.id === id);
       if (!item) return;
 
+      extractedData.docsis = item.docsis || "";
       extractedData.model = item.model || "";
       extractedData.manufacturer = item.manufacturer || "";
       extractedData.inputPower = item.inputPower || "";
@@ -1579,7 +1615,7 @@
       if (!termo) return archiveList;
       return archiveList.filter((r) =>
         [
-          r.dataHora, r.model, r.manufacturer, r.inputPower, r.fabr,
+          r.dataHora, r.docsis, r.model, r.manufacturer, r.inputPower, r.fabr,
           r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
           r.ssid24, r.ssid5, r.wifiPass
         ]
@@ -1596,7 +1632,7 @@
 
       if (filtrados.length === 0) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="6" style="text-align:center;color:#94a3b8;">Nenhum registro arquivado.</td>`;
+        tr.innerHTML = `<td colspan="7" style="text-align:center;color:#94a3b8;">Nenhum registro arquivado.</td>`;
         tbody.appendChild(tr);
         return;
       }
@@ -1606,6 +1642,7 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${item.dataHora || "-"}</td>
+          <td>${item.docsis || "—"}</td>
           <td>${item.model || "—"}</td>
           <td>${item.sn || "—"}</td>
           <td>${item.cmMac || "—"}</td>
@@ -1656,6 +1693,7 @@
           const normalizados = arr.map((r, idx) => ({
             id: r.id || (Date.now() + idx),
             dataHora: r.dataHora || obterDataAtual(),
+            docsis: r.docsis || "",
             model: r.model || "",
             manufacturer: r.manufacturer || "",
             inputPower: r.inputPower || "",
@@ -1694,12 +1732,12 @@
         return;
       }
       const headers = [
-        "Data_Hora", "Modelo", "Fabricante", "Input", "Fabr",
+        "Data_Hora", "DOCSIS", "Modelo", "Fabricante", "Input", "Fabr",
         "SN", "CM_MAC", "eMTA_MAC", "Usuario_192_168_0_1", "Senha_192_168_0_1",
         "SSID_2_4GHz", "SSID_5GHz", "Senha_WiFi"
       ];
       const rows = lista.map((r) => [
-        r.dataHora, r.model, r.manufacturer, r.inputPower, r.fabr,
+        r.dataHora, r.docsis, r.model, r.manufacturer, r.inputPower, r.fabr,
         r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
         r.ssid24, r.ssid5, r.wifiPass
       ].map(escapeCsv).join(";"));
@@ -1746,25 +1784,47 @@
             return;
           }
           const delimiter = lines[0].includes(";") ? ";" : ",";
+          const hasDocsisCol = /docsis/i.test(lines[0]);
           const imported = [];
           for (let i = 1; i < lines.length; i++) {
             const cols = parseCsvLine(lines[i], delimiter);
-            imported.push({
-              id: Date.now() + i,
-              dataHora: cols[0] || obterDataAtual(),
-              model: cols[1] || "",
-              manufacturer: cols[2] || "",
-              inputPower: cols[3] || "",
-              fabr: cols[4] || "",
-              sn: cols[5] || "",
-              cmMac: cols[6] || "",
-              emtaMac: cols[7] || "",
-              ipUser: cols[8] || "",
-              ipPass: cols[9] || "",
-              ssid24: cols[10] || "",
-              ssid5: cols[11] || "",
-              wifiPass: cols[12] || ""
-            });
+            if (hasDocsisCol) {
+              imported.push({
+                id: Date.now() + i,
+                dataHora: cols[0] || obterDataAtual(),
+                docsis: cols[1] || "",
+                model: cols[2] || "",
+                manufacturer: cols[3] || "",
+                inputPower: cols[4] || "",
+                fabr: cols[5] || "",
+                sn: cols[6] || "",
+                cmMac: cols[7] || "",
+                emtaMac: cols[8] || "",
+                ipUser: cols[9] || "",
+                ipPass: cols[10] || "",
+                ssid24: cols[11] || "",
+                ssid5: cols[12] || "",
+                wifiPass: cols[13] || ""
+              });
+            } else {
+              imported.push({
+                id: Date.now() + i,
+                dataHora: cols[0] || obterDataAtual(),
+                docsis: "",
+                model: cols[1] || "",
+                manufacturer: cols[2] || "",
+                inputPower: cols[3] || "",
+                fabr: cols[4] || "",
+                sn: cols[5] || "",
+                cmMac: cols[6] || "",
+                emtaMac: cols[7] || "",
+                ipUser: cols[8] || "",
+                ipPass: cols[9] || "",
+                ssid24: cols[10] || "",
+                ssid5: cols[11] || "",
+                wifiPass: cols[12] || ""
+              });
+            }
           }
           archiveList = [...imported, ...archiveList];
           saveArchiveToStorage();
@@ -1804,12 +1864,13 @@
       doc.text(`Gerado em: ${obterDataAtual()} | Total: ${lista.length} registro(s)`, 14, 22);
 
       const colunas = [
-        "Data/Hora", "Modelo", "Fabr.", "S/N", "CM MAC",
+        "Data/Hora", "DOCSIS", "Modelo", "Fabr.", "S/N", "CM MAC",
         "eMTA MAC", "192.168.0.1", "SSID 2.4G / 5G", "Senha Wi-Fi"
       ];
 
       const linhas = lista.map((r) => [
         r.dataHora || "-",
+        r.docsis || "-",
         r.model || "-",
         r.fabr || "-",
         r.sn || "-",
