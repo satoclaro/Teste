@@ -467,7 +467,7 @@
     <header>
       <div class="brand-title">
         <span class="badge-claro">Claro</span>
-        <span>eMTA 192.168.0.1</span>
+        <span>eMTA / ONT 192.168.0.1</span>
       </div>
       <a class="gateway-link" href="http://192.168.0.1" target="_blank" rel="noopener noreferrer">
         Abrir 192.168.0.1 ↗
@@ -599,7 +599,7 @@
         <div class="video-frame" id="videoFrame">
           <video id="videoEl" autoplay playsinline muted></video>
           <div class="reticle"></div>
-          <div class="reticle-caption">Alinhe a etiqueta do eMTA dentro do quadro</div>
+          <div class="reticle-caption">Alinhe a etiqueta do eMTA / ONT dentro do quadro</div>
         </div>
         <canvas id="photoCanvas" class="preview-img" style="display:none;"></canvas>
         <button type="button" class="btn btn-secondary" id="btnRetake" onclick="backToLiveVideo()" style="display:none;">
@@ -880,9 +880,50 @@
       setStatus("Campos limpos.", "idle");
     }
 
+    async function tryGetMediaStream() {
+      const attempts = [
+        {
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        },
+        {
+          audio: false,
+          video: {
+            facingMode: "environment"
+          }
+        },
+        {
+          audio: false,
+          video: true
+        }
+      ];
+
+      let lastErr = null;
+      for (const constraints of attempts) {
+        try {
+          return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error("Falha ao acessar câmera");
+    }
+
     async function openCamera() {
+      const isSecure = window.isSecureContext || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
+      if (!isSecure) {
+        setStatus("Atenção: câmera direta exige HTTPS ou localhost. Abrindo câmera nativa / arquivo...", "busy");
+        triggerFileFallback();
+        return;
+      }
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setStatus("Câmera direta indisponível neste navegador. Use 'Foto / Arquivo'.", "idle");
+        setStatus("API de câmera direta indisponível neste navegador. Abrindo câmera nativa / arquivo...", "idle");
         triggerFileFallback();
         return;
       }
@@ -891,34 +932,46 @@
         setStatus("Solicitando acesso à câmera traseira...", "busy");
         stopCamera(false);
 
-        const constraints = {
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          }
-        };
-
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        mediaStream = await tryGetMediaStream();
         const videoEl = document.getElementById("videoEl");
         const canvasEl = document.getElementById("photoCanvas");
         const btnRetake = document.getElementById("btnRetake");
 
         videoEl.srcObject = mediaStream;
+        videoEl.setAttribute("playsinline", "");
+        videoEl.setAttribute("webkit-playsinline", "");
+        videoEl.muted = true;
         videoEl.style.display = "block";
         canvasEl.style.display = "none";
         btnRetake.style.display = "none";
+
+        try {
+          await videoEl.play();
+        } catch (_) {}
 
         document.getElementById("cameraBox").classList.add("active");
         document.getElementById("btnCapture").disabled = false;
         document.getElementById("btnStopCam").disabled = false;
 
-        setStatus("Câmera ativa. Enquadre a etiqueta do eMTA e toque em 'Tirar Foto e Ler'.", "ok");
+        setStatus("Câmera ativa. Enquadre a etiqueta do eMTA ou ONT e toque em 'Tirar Foto e Ler'.", "ok");
       } catch (err) {
         console.error(err);
-        setStatus("Não foi possível abrir a câmera (" + err.message + "). Abrindo seletor de imagem...", "idle");
-        triggerFileFallback();
+        const errName = (err && err.name) ? err.name : "";
+        const errMsg = (err && err.message) ? err.message : "";
+        let friendly = "câmera direta indisponível no Chrome Android";
+        if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
+          friendly = "permissão de câmera bloqueada no Chrome ou sistema Android";
+        } else if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
+          friendly = "nenhuma câmera encontrada pelo Chrome";
+        } else if (errName === "NotReadableError" || errName === "TrackStartError") {
+          friendly = "câmera em uso por outro aplicativo (ex.: câmera/outro app)";
+        }
+        const detail = [errName, errMsg].filter(Boolean).join(": ");
+        setStatus(
+          "Aviso (" + friendly + (detail ? " - " + detail : "") + "). Abrindo câmera nativa / galeria...",
+          "idle"
+        );
+        setTimeout(() => triggerFileFallback(), 120);
       }
     }
 
@@ -1076,7 +1129,8 @@
 
     function parseEmtaLabelText(text) {
       const lines = text
-        .split(/?
+        .split(/
+?
 /)
         .map((l) => l.trim())
         .filter(Boolean);
