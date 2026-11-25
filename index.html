@@ -1127,28 +1127,26 @@
 
     function parseEmtaLabelText(text, mergeMode = false) {
       const lines = (text || "")
-        .split(/?
-/)
+        .split(/\r?\n/)
         .map((l) => l.trim())
         .filter(Boolean);
-      const joined = lines.join("
-");
+      const joined = lines.join("\n");
 
-      const mfgMatch = joined.match(/(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)/i);
+      const mfgMatch = joined.match(/\b(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
       if (mfgMatch) {
         extractedData.manufacturer = mfgMatch[1].toUpperCase();
       }
 
       const modelMatch =
         joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
-        joined.match(/((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})/i);
+        joined.match(/\b((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
       if (modelMatch) {
         extractedData.model = modelMatch[1].trim();
       }
 
       const inputMatch =
         joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
-        joined.match(/([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)/i);
+        joined.match(/\b([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)\b/i);
       if (inputMatch) {
         extractedData.inputPower = inputMatch[1].trim();
       }
@@ -1191,7 +1189,7 @@
       }
 
       const ssidMatches = [];
-      const ssidRegex = /((?:CLARO|NET)_[A-Za-z0-9_\-]{2,32})/gi;
+      const ssidRegex = /\b((?:CLARO|NET)_[A-Za-z0-9_\-]{2,32})\b/gi;
       let sMatch;
       while ((sMatch = ssidRegex.exec(joined)) !== null) {
         ssidMatches.push(sMatch[1].trim());
@@ -1212,17 +1210,15 @@
       }
 
       const ipUserMatch =
-        joined.match(/(?:192\.168\.0\.1[^
-]{0,80}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
+        joined.match(/(?:192\.168\.0\.1[^\n]{0,80}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
       if (ipUserMatch) {
         extractedData.ipUser = ipUserMatch[1].trim();
-      } else if (/admin/i.test(joined) && !extractedData.ipUser) {
+      } else if (/\badmin\b/i.test(joined) && !extractedData.ipUser) {
         extractedData.ipUser = "admin";
       }
 
       const ipPassMatch =
-        joined.match(/(?:192\.168\.0\.1[^
-]{0,100}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|pass(?:word)?|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,32})/i);
+        joined.match(/(?:192\.168\.0\.1[^\n]{0,100}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|pass(?:word)?|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,32})/i);
       if (ipPassMatch) {
         extractedData.ipPass = ipPassMatch[1].trim();
       }
@@ -1245,8 +1241,7 @@
       if (!textoBruto || !textoBruto.trim()) return;
       const rawBox = document.getElementById("rawOcrText");
       if (mergeMode && rawBox.value.trim()) {
-        rawBox.value = rawBox.value.trim() + "
-" + textoBruto.trim();
+        rawBox.value = rawBox.value.trim() + "\n" + textoBruto.trim();
       } else {
         rawBox.value = textoBruto.trim();
       }
@@ -1709,8 +1704,7 @@
         r.ssid24, r.ssid5, r.wifiPass
       ].map(escapeCsv).join(";"));
 
-      const csv = "﻿" + [headers.map(escapeCsv).join(";"), ...rows].join("
-");
+      const csv = "\uFEFF" + [headers.map(escapeCsv).join(";"), ...rows].join("\n");
       downloadBlob(csv, "arquivo_emta_ont_claro.csv", "text/csv;charset=utf-8");
       showToast("CSV exportado!");
     }
@@ -1745,9 +1739,8 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
-          const text = (e.target.result || "").replace(/^﻿/, "");
-          const lines = text.split(/?
-/).map((l) => l.trim()).filter(Boolean);
+          const text = (e.target.result || "").replace(/^\uFEFF/, "");
+          const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
           if (lines.length < 2) {
             showToast("CSV sem registros");
             return;
@@ -1862,14 +1855,13 @@
         const parensRegex = /\(([^()]{2,200})\)/g;
         let m;
         while ((m = parensRegex.exec(rawLatin1)) !== null) {
-          const cleaned = m[1].replace(/\[nr()\]/g, " ").trim();
+          const cleaned = m[1].replace(/\\[nr()\\]/g, " ").trim();
           if (/[A-Za-z0-9]/.test(cleaned)) {
             textChunks.push(cleaned);
           }
         }
 
-        const extractedText = textChunks.join("
-");
+        const extractedText = textChunks.join("\n");
         if (!extractedText.trim()) {
           showToast("Não foi possível extrair texto legível deste PDF");
           return;
