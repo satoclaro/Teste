@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Configuração eMTA 192.168.0.1 - Claro Telecom</title>
+  <title>Configuração eMTA / ONT 192.168.0.1 - Claro Telecom</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --bg-primary: #0b0f17;
       --bg-card: #131b2b;
       --bg-input: #0d1320;
       --border-color: #26334d;
-      --accent-red: #e11d48;
-      --accent-red-hover: #be123c;
+      --accent-red: #e30613;
+      --accent-red-hover: #be0510;
       --accent-blue: #38bdf8;
       --accent-green: #22c55e;
       --accent-amber: #f59e0b;
@@ -40,7 +43,7 @@
 
     .container {
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       margin: 0 auto;
       padding: 14px;
       flex: 1;
@@ -57,7 +60,7 @@
     }
 
     .brand-title {
-      font-size: 1.1rem;
+      font-size: 1.08rem;
       font-weight: 700;
       letter-spacing: 0.2px;
       display: flex;
@@ -70,7 +73,7 @@
       color: #fff;
       font-size: 0.72rem;
       font-weight: 800;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 999px;
       text-transform: uppercase;
     }
@@ -85,10 +88,6 @@
       padding: 6px 10px;
       border-radius: 8px;
       white-space: nowrap;
-    }
-
-    .gateway-link:active {
-      background: rgba(56, 189, 248, 0.24);
     }
 
     .card {
@@ -106,10 +105,11 @@
       justify-content: space-between;
       margin-bottom: 10px;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .card-title {
-      font-size: 0.92rem;
+      font-size: 0.94rem;
       font-weight: 700;
       color: var(--text-primary);
       display: flex;
@@ -134,7 +134,6 @@
       border-radius: 10px;
       padding: 9px 11px;
       cursor: pointer;
-      position: relative;
       transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
       display: flex;
       flex-direction: column;
@@ -225,23 +224,17 @@
       color: var(--accent-blue);
     }
 
-    .camera-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
     .btn {
       border: none;
-      border-radius: 10px;
-      padding: 11px 14px;
-      font-size: 0.88rem;
+      border-radius: 9px;
+      padding: 11px 13px;
+      font-size: 0.86rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       transition: opacity 0.15s ease, transform 0.08s ease;
     }
 
@@ -252,7 +245,7 @@
     .btn-primary {
       background: var(--accent-red);
       color: #ffffff;
-      flex: 1 1 200px;
+      width: 100%;
     }
 
     .btn-primary:hover {
@@ -270,95 +263,132 @@
       color: #ffffff;
     }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-pdf {
+      background: #9e040d;
+      color: #ffffff;
     }
 
-    .camera-box {
-      margin-top: 12px;
+    .btn-danger {
+      background: #b91c1c;
+      color: #ffffff;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+
+    /* Scanner / Mira / Controles da camera */
+    #reader-container {
       display: none;
-      flex-direction: column;
-      gap: 10px;
+      margin-top: 12px;
+      text-align: center;
     }
 
-    .camera-box.active {
-      display: flex;
-    }
-
-    .video-frame {
+    .camera-wrapper {
       position: relative;
       width: 100%;
-      border-radius: 12px;
+      max-width: 360px;
+      height: 220px;
+      margin: 0 auto;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--accent-red);
       background: #000;
-      aspect-ratio: 4 / 3;
+      cursor: pointer;
     }
 
-    video, canvas.preview-img {
+    #reader {
       width: 100%;
       height: 100%;
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: 100% !important;
       object-fit: cover;
-      display: block;
     }
 
-    .reticle {
+    #reader__scan_region img,
+    #reader__dashboard {
+      display: none !important;
+    }
+
+    .mira-overlay {
       position: absolute;
-      inset: 14%;
-      border: 2px dashed rgba(56, 189, 248, 0.85);
-      border-radius: 10px;
+      inset: 0;
       pointer-events: none;
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32);
-    }
-
-    .reticle-caption {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(11, 15, 23, 0.85);
-      color: #e2e8f0;
-      font-size: 0.72rem;
-      padding: 3px 9px;
-      border-radius: 999px;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    .status-bar {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 9px;
-      padding: 8px 10px;
       display: flex;
       align-items: center;
+      justify-content: center;
+    }
+
+    .mira-box {
+      width: 90%;
+      height: 92px;
+      border: 2px solid #00ff66;
+      border-radius: 6px;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.5);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mira-laser {
+      width: 96%;
+      height: 2px;
+      background: #ff1e1e;
+      box-shadow: 0 0 6px #ff1e1e;
+    }
+
+    .mira-label {
+      position: absolute;
+      top: -22px;
+      background: rgba(0, 0, 0, 0.82);
+      color: #00ff66;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .camera-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 360px;
+      margin: 8px auto 0;
+    }
+
+    .camera-controls button {
+      flex: 1 1 46%;
+      padding: 8px 9px;
+      font-size: 0.76rem;
+      border-radius: 7px;
+      background: #243047;
+      color: #f8fafc;
+      border: 1px solid var(--border-color);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #scanner-status {
+      font-size: 0.78rem;
+      color: #fb7185;
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
+      margin-top: 10px;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      flex-shrink: 0;
-    }
-
-    .status-dot.busy {
-      background: var(--accent-amber);
-      animation: pulse 1s infinite;
-    }
-
-    .status-dot.ok {
-      background: var(--accent-green);
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
+    .action-row .btn {
+      flex: 1 1 160px;
     }
 
     .formatted-grid {
@@ -367,7 +397,7 @@
       gap: 8px;
     }
 
-    @media (min-width: 500px) {
+    @media (min-width: 520px) {
       .formatted-grid {
         grid-template-columns: 1fr 1fr;
       }
@@ -417,7 +447,7 @@
     textarea.raw-text {
       width: 100%;
       margin-top: 6px;
-      min-height: 92px;
+      min-height: 86px;
       background: var(--bg-input);
       color: var(--text-secondary);
       border: 1px solid var(--border-color);
@@ -426,6 +456,62 @@
       font-size: 0.76rem;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       resize: vertical;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .io-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .io-grid .btn {
+      padding: 9px 8px;
+      font-size: 0.76rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      max-height: 290px;
+      overflow-y: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+      white-space: nowrap;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 7px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #1d283d;
+      color: #f8fafc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background: #101724;
     }
 
     .toast {
@@ -565,25 +651,33 @@
       </div>
     </section>
 
-    <!-- CAMERA E CAPTURA DE ETIQUETA EMTA -->
-    <section class="card" aria-label="Captura de etiqueta por câmera">
+    <!-- CAMERA / SCANNER ETIQUETA EMTA / ONT -->
+    <section class="card" aria-label="Câmera e leitura de etiqueta">
       <div class="card-header">
-        <div class="card-title">📷 Etiqueta do eMTA (Câmera / OCR)</div>
+        <div class="card-title">📷 Etiqueta eMTA / ONT (Câmera / OCR / Barcode)</div>
       </div>
 
-      <div class="camera-actions">
-        <button type="button" class="btn btn-primary" id="btnOpenCam" onclick="openCamera()">
-          📷 Abrir Câmera
-        </button>
-        <button type="button" class="btn btn-success" id="btnCapture" onclick="captureAndRead()" disabled>
-          📸 Tirar Foto e Ler
-        </button>
-        <button type="button" class="btn btn-secondary" onclick="triggerFileFallback()">
-          🖼️ Foto / Arquivo
-        </button>
-        <button type="button" class="btn btn-secondary" id="btnStopCam" onclick="stopCamera()" disabled>
-          ⏹️ Parar
-        </button>
+      <button type="button" class="btn btn-primary" onclick="toggleScanner()">
+        📷 Ligar e Desligar Câmera
+      </button>
+
+      <div id="reader-container">
+        <div class="camera-wrapper" onclick="capturarDaMiraAoClicar()">
+          <div id="reader"></div>
+          <div class="mira-overlay">
+            <div class="mira-box">
+              <span class="mira-label">TOQUE NA TELA PARA CAPTURAR NA MIRA</span>
+              <div class="mira-laser"></div>
+            </div>
+          </div>
+        </div>
+        <div class="camera-controls">
+          <button type="button" onclick="capturarDaMiraAoClicar()">📸 Ler Mira Agora</button>
+          <button type="button" onclick="forcarFoco()">🎯 Focar</button>
+          <button type="button" id="btn-flash" onclick="toggleFlash()">🔦 Luz</button>
+          <button type="button" onclick="triggerFileFallback()">🖼️ Foto / Arquivo</button>
+        </div>
+        <div id="scanner-status">Alinhe a linha vermelha na etiqueta e toque na tela da câmera para capturar.</div>
       </div>
 
       <input
@@ -595,31 +689,21 @@
         onchange="handleFileUpload(event)"
       />
 
-      <div class="camera-box" id="cameraBox">
-        <div class="video-frame" id="videoFrame">
-          <video id="videoEl" autoplay playsinline muted></video>
-          <div class="reticle"></div>
-          <div class="reticle-caption">Alinhe a etiqueta do eMTA / ONT dentro do quadro</div>
-        </div>
-        <canvas id="photoCanvas" class="preview-img" style="display:none;"></canvas>
-        <button type="button" class="btn btn-secondary" id="btnRetake" onclick="backToLiveVideo()" style="display:none;">
-          🔄 Tirar Outra Foto
+      <div class="action-row">
+        <button type="button" class="btn btn-success" onclick="arquivarRegistroAtual()">
+          🗄️ Arquivar eMTA / ONT
         </button>
-      </div>
-
-      <div class="status-bar" id="statusBar">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Pronto. Toque em "Abrir Câmera" para fotografar a etiqueta do eMTA.</span>
+        <button type="button" class="btn btn-secondary" onclick="clearAllFields()">
+          🧹 Limpar Campos
+        </button>
       </div>
     </section>
 
     <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA ETIQUETA -->
     <section class="card" aria-label="Informações formatadas da etiqueta">
       <div class="card-header">
-        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA</div>
-        <button type="button" class="btn btn-secondary" style="padding:5px 10px;font-size:0.75rem;" onclick="clearAllFields()">
-          Limpar
-        </button>
+        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA / ONT</div>
+        <span class="hint-copy">Toque no valor para copiar</span>
       </div>
 
       <div class="formatted-grid" id="formattedGrid">
@@ -698,6 +782,50 @@
         </div>
       </details>
     </section>
+
+    <!-- ARQUIVO DE REGISTROS: EXPORTAR / IMPORTAR CSV, JSON E PDF -->
+    <section class="card" aria-label="Registros arquivados e exportação">
+      <div class="card-header">
+        <div class="card-title">🗄️ Registros Arquivados (<span id="archiveCount">0</span>)</div>
+      </div>
+
+      <input
+        type="text"
+        id="archiveSearch"
+        class="search-input"
+        placeholder="Buscar por modelo, fabricante, S/N, MAC, SSID ou data..."
+        oninput="renderArchiveTable()"
+      />
+
+      <div class="io-grid">
+        <button type="button" class="btn btn-secondary" onclick="exportCSV()">📥 Exportar CSV</button>
+        <button type="button" class="btn btn-secondary" onclick="exportJSON()">💾 Exportar JSON</button>
+        <button type="button" class="btn btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importCsvInput').click()">📂 Importar CSV</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importJsonInput').click()">📂 Importar JSON</button>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importPdfInput').click()">📂 Importar PDF</button>
+      </div>
+
+      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)" />
+      <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none" onchange="importJSON(event)" />
+      <input type="file" id="importPdfInput" accept=".pdf,application/pdf" style="display:none" onchange="importPDF(event)" />
+
+      <div class="table-container">
+        <table id="archiveTable">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Modelo</th>
+              <th>S/N</th>
+              <th>CM MAC</th>
+              <th>Wi-Fi 2.4G / 5G</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <div class="toast" id="toast">Copiado para a área de transferência!</div>
@@ -720,9 +848,18 @@
       }
     })();
 
+    const STORAGE_KEY = "claro_emta_ont_arquivo_v1";
+    let archiveList = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
     let selectedWifiBand = "2.4";
-    let mediaStream = null;
-    let tesseractWorker = null;
+    let html5QrCode = null;
+    let cameraAtiva = false;
+    let flashAtivo = false;
+    let videoTrackAtual = null;
+    let intervaloLeituraRapida = null;
+    let ocrWorker = null;
+    let ocrOcupado = false;
+    let cliqueEmAndamento = false;
 
     const extractedData = {
       model: "",
@@ -739,13 +876,14 @@
       wifiPass: ""
     };
 
-    function setStatus(msg, state = "idle") {
-      const dot = document.getElementById("statusDot");
-      const text = document.getElementById("statusText");
-      text.textContent = msg;
-      dot.className = "status-dot";
-      if (state === "busy") dot.classList.add("busy");
-      if (state === "ok") dot.classList.add("ok");
+    function obterDataAtual() {
+      const agora = new Date();
+      const dia = String(agora.getDate()).padStart(2, "0");
+      const mes = String(agora.getMonth() + 1).padStart(2, "0");
+      const ano = agora.getFullYear();
+      const hora = String(agora.getHours()).padStart(2, "0");
+      const min = String(agora.getMinutes()).padStart(2, "0");
+      return `${dia}/${mes}/${ano} ${hora}:${min}`;
     }
 
     function showToast(msg = "Copiado para a área de transferência!") {
@@ -877,246 +1015,106 @@
       document.getElementById("rawOcrText").value = "";
       updateQuickInputsFromExtracted();
       renderFormattedSection();
-      setStatus("Campos limpos.", "idle");
+      showToast("Campos limpos");
     }
 
-    async function tryGetMediaStream() {
-      const attempts = [
-        {
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          }
-        },
-        {
-          audio: false,
-          video: {
-            facingMode: "environment"
-          }
-        },
-        {
-          audio: false,
-          video: true
-        }
-      ];
-
-      let lastErr = null;
-      for (const constraints of attempts) {
-        try {
-          return await navigator.mediaDevices.getUserMedia(constraints);
-        } catch (err) {
-          lastErr = err;
-        }
-      }
-      throw lastErr || new Error("Falha ao acessar câmera");
-    }
-
-    async function openCamera() {
-      const isSecure = window.isSecureContext || location.hostname === "localhost" || location.hostname === "127.0.0.1";
-
-      if (!isSecure) {
-        setStatus("Atenção: câmera direta exige HTTPS ou localhost. Abrindo câmera nativa / arquivo...", "busy");
-        triggerFileFallback();
-        return;
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setStatus("API de câmera direta indisponível neste navegador. Abrindo câmera nativa / arquivo...", "idle");
-        triggerFileFallback();
-        return;
-      }
-
+    async function configurarResolucaoEFoco() {
       try {
-        setStatus("Solicitando acesso à câmera traseira...", "busy");
-        stopCamera(false);
+        const videoEl = document.querySelector("#reader video");
+        if (videoEl && videoEl.srcObject) {
+          const tracks = videoEl.srcObject.getVideoTracks();
+          if (tracks && tracks.length > 0) {
+            videoTrackAtual = tracks[0];
+            const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
+            const constraints = { advanced: [] };
 
-        mediaStream = await tryGetMediaStream();
-        const videoEl = document.getElementById("videoEl");
-        const canvasEl = document.getElementById("photoCanvas");
-        const btnRetake = document.getElementById("btnRetake");
+            if (caps.focusMode && Array.isArray(caps.focusMode)) {
+              if (caps.focusMode.includes("continuous")) {
+                constraints.advanced.push({ focusMode: "continuous" });
+              } else if (caps.focusMode.includes("single-shot")) {
+                constraints.advanced.push({ focusMode: "single-shot" });
+              }
+            }
 
-        videoEl.srcObject = mediaStream;
-        videoEl.setAttribute("playsinline", "");
-        videoEl.setAttribute("webkit-playsinline", "");
-        videoEl.muted = true;
-        videoEl.style.display = "block";
-        canvasEl.style.display = "none";
-        btnRetake.style.display = "none";
-
-        try {
-          await videoEl.play();
-        } catch (_) {}
-
-        document.getElementById("cameraBox").classList.add("active");
-        document.getElementById("btnCapture").disabled = false;
-        document.getElementById("btnStopCam").disabled = false;
-
-        setStatus("Câmera ativa. Enquadre a etiqueta do eMTA ou ONT e toque em 'Tirar Foto e Ler'.", "ok");
-      } catch (err) {
-        console.error(err);
-        const errName = (err && err.name) ? err.name : "";
-        const errMsg = (err && err.message) ? err.message : "";
-        let friendly = "câmera direta indisponível no Chrome Android";
-        if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
-          friendly = "permissão de câmera bloqueada no Chrome ou sistema Android";
-        } else if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
-          friendly = "nenhuma câmera encontrada pelo Chrome";
-        } else if (errName === "NotReadableError" || errName === "TrackStartError") {
-          friendly = "câmera em uso por outro aplicativo (ex.: câmera/outro app)";
-        }
-        const detail = [errName, errMsg].filter(Boolean).join(": ");
-        setStatus(
-          "Aviso (" + friendly + (detail ? " - " + detail : "") + "). Abrindo câmera nativa / galeria...",
-          "idle"
-        );
-        setTimeout(() => triggerFileFallback(), 120);
-      }
-    }
-
-    function stopCamera(updateMsg = true) {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop());
-        mediaStream = null;
-      }
-      document.getElementById("btnCapture").disabled = true;
-      document.getElementById("btnStopCam").disabled = true;
-      if (updateMsg) {
-        setStatus("Câmera encerrada.", "idle");
-      }
-    }
-
-    function backToLiveVideo() {
-      const videoEl = document.getElementById("videoEl");
-      const canvasEl = document.getElementById("photoCanvas");
-      const btnRetake = document.getElementById("btnRetake");
-
-      canvasEl.style.display = "none";
-      btnRetake.style.display = "none";
-      videoEl.style.display = "block";
-      document.getElementById("btnCapture").disabled = !mediaStream;
-      setStatus("Ajuste o enquadramento e toque em 'Tirar Foto e Ler'.", "ok");
-    }
-
-    function triggerFileFallback() {
-      document.getElementById("fileInput").click();
-    }
-
-    function handleFileUpload(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const img = new Image();
-        img.onload = function () {
-          const canvas = document.getElementById("photoCanvas");
-          const videoEl = document.getElementById("videoEl");
-          const ctx = canvas.getContext("2d");
-
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-
-          videoEl.style.display = "none";
-          canvas.style.display = "block";
-          document.getElementById("btnRetake").style.display = "none";
-          document.getElementById("cameraBox").classList.add("active");
-
-          runOcrOnCanvas(canvas);
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-      event.target.value = "";
-    }
-
-    function captureAndRead() {
-      const videoEl = document.getElementById("videoEl");
-      const canvas = document.getElementById("photoCanvas");
-      if (!videoEl.videoWidth || !videoEl.videoHeight) {
-        setStatus("Aguarde o vídeo iniciar antes de tirar a foto.", "busy");
-        return;
-      }
-
-      canvas.width = videoEl.videoWidth;
-      canvas.height = videoEl.videoHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-
-      videoEl.style.display = "none";
-      canvas.style.display = "block";
-      document.getElementById("btnRetake").style.display = "inline-flex";
-      document.getElementById("btnCapture").disabled = true;
-
-      runOcrOnCanvas(canvas);
-    }
-
-    function preprocessCanvasForOcr(sourceCanvas) {
-      const scale = sourceCanvas.width < 1200 ? 1.5 : 1;
-      const workCanvas = document.createElement("canvas");
-      workCanvas.width = Math.round(sourceCanvas.width * scale);
-      workCanvas.height = Math.round(sourceCanvas.height * scale);
-      const ctx = workCanvas.getContext("2d");
-      ctx.drawImage(sourceCanvas, 0, 0, workCanvas.width, workCanvas.height);
-
-      const imgData = ctx.getImageData(0, 0, workCanvas.width, workCanvas.height);
-      const data = imgData.data;
-      // Aumenta contraste leve em escala de cinza para melhorar leitura de etiquetas
-      const contrast = 1.25;
-      const intercept = 128 * (1 - contrast);
-
-      for (let i = 0; i < data.length; i += 4) {
-        const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        let val = gray * contrast + intercept;
-        if (val < 0) val = 0;
-        if (val > 255) val = 255;
-        data[i] = data[i + 1] = data[i + 2] = val;
-      }
-      ctx.putImageData(imgData, 0, 0);
-      return workCanvas;
-    }
-
-    async function ensureWorker() {
-      if (tesseractWorker) return tesseractWorker;
-      setStatus("Carregando motor OCR (primeira leitura pode levar alguns segundos)...", "busy");
-      tesseractWorker = await Tesseract.createWorker("eng", 1, {
-        logger: (m) => {
-          if (m.status === "recognizing text" && typeof m.progress === "number") {
-            const pct = Math.round(m.progress * 100);
-            setStatus(`Lendo etiqueta do eMTA... ${pct}%`, "busy");
+            if (constraints.advanced.length > 0 && videoTrackAtual.applyConstraints) {
+              await videoTrackAtual.applyConstraints(constraints);
+            }
           }
         }
-      });
-      return tesseractWorker;
+      } catch (e) {}
     }
 
-    async function runOcrOnCanvas(canvas) {
+    async function forcarFoco() {
+      const statusDiv = document.getElementById("scanner-status");
       try {
-        const processed = preprocessCanvasForOcr(canvas);
-        const worker = await ensureWorker();
-        setStatus("Extraindo dados da etiqueta...", "busy");
-        const result = await worker.recognize(processed);
-        const rawText = (result && result.data && result.data.text) ? result.data.text : "";
-
-        document.getElementById("rawOcrText").value = rawText;
-        parseEmtaLabelText(rawText);
-        updateQuickInputsFromExtracted();
-        renderFormattedSection();
-        setStatus("Leitura concluída! Toque nos campos do topo para copiar.", "ok");
-      } catch (err) {
-        console.error(err);
-        setStatus("Erro ao ler etiqueta: " + err.message, "idle");
+        if (!videoTrackAtual) {
+          const videoEl = document.querySelector("#reader video");
+          if (videoEl && videoEl.srcObject) {
+            const tracks = videoEl.srcObject.getVideoTracks();
+            if (tracks && tracks.length > 0) videoTrackAtual = tracks[0];
+          }
+        }
+        if (videoTrackAtual && videoTrackAtual.applyConstraints) {
+          const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
+          if (caps.focusMode) {
+            if (caps.focusMode.includes("single-shot")) {
+              await videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "single-shot" }] });
+            }
+            if (caps.focusMode.includes("continuous")) {
+              setTimeout(() => {
+                videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
+              }, 400);
+            }
+            statusDiv.innerText = "🎯 Ajustando foco na etiqueta...";
+            return;
+          }
+        }
+        statusDiv.innerText = "Aproxime ou afaste levemente o celular (~10-15 cm) para focar.";
+      } catch (e) {
+        statusDiv.innerText = "Ajuste a distância (~10-15 cm) para ajudar o foco da câmera.";
       }
     }
 
-    function reparseFromTextarea() {
-      const rawText = document.getElementById("rawOcrText").value || "";
-      parseEmtaLabelText(rawText);
-      updateQuickInputsFromExtracted();
-      renderFormattedSection();
-      setStatus("Texto reprocessado e campos atualizados.", "ok");
+    async function toggleFlash() {
+      const statusDiv = document.getElementById("scanner-status");
+      const btnFlash = document.getElementById("btn-flash");
+      try {
+        if (!videoTrackAtual) {
+          const videoEl = document.querySelector("#reader video");
+          if (videoEl && videoEl.srcObject) {
+            const tracks = videoEl.srcObject.getVideoTracks();
+            if (tracks && tracks.length > 0) videoTrackAtual = tracks[0];
+          }
+        }
+        if (!videoTrackAtual || !videoTrackAtual.applyConstraints) {
+          statusDiv.innerText = "Lanterna não suportada neste aparelho.";
+          return;
+        }
+        const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
+        if (!caps.torch) {
+          statusDiv.innerText = "Lanterna não disponível nesta câmera.";
+          return;
+        }
+        flashAtivo = !flashAtivo;
+        await videoTrackAtual.applyConstraints({ advanced: [{ torch: flashAtivo }] });
+        btnFlash.innerText = flashAtivo ? "🔦 Apagar Luz" : "🔦 Luz";
+      } catch (e) {
+        statusDiv.innerText = "Não foi possível alternar a lanterna.";
+      }
+    }
+
+    async function obterOcrWorker() {
+      if (ocrWorker) return ocrWorker;
+      if (window.Tesseract) {
+        try {
+          ocrWorker = await Tesseract.createWorker("eng", 1, {
+            logger: () => {}
+          });
+        } catch (e) {
+          ocrWorker = null;
+        }
+      }
+      return ocrWorker;
     }
 
     function normalizeMac(rawMac) {
@@ -1127,31 +1125,27 @@
       return (rawMac || "").trim().toUpperCase();
     }
 
-    function parseEmtaLabelText(text) {
-      const lines = text
-        .split(/
-?
+    function parseEmtaLabelText(text, mergeMode = false) {
+      const lines = (text || "")
+        .split(/?
 /)
         .map((l) => l.trim())
         .filter(Boolean);
       const joined = lines.join("
 ");
 
-      // 1. Fabricantes comuns em eMTAs / Gateways Claro
-      const mfgMatch = joined.match(/(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE)/i);
+      const mfgMatch = joined.match(/(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)/i);
       if (mfgMatch) {
         extractedData.manufacturer = mfgMatch[1].toUpperCase();
       }
 
-      // 2. Modelo (ex: Model: TG3482 / DG3450 / HGJ310 / FAST3890 / CG3000)
       const modelMatch =
         joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
-        joined.match(/((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST)[A-Z0-9\-]{2,16})/i);
+        joined.match(/((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})/i);
       if (modelMatch) {
         extractedData.model = modelMatch[1].trim();
       }
 
-      // 3. Input / Alimentacao (ex: Input: 12V --- 2.5A ou 12V DC 3A)
       const inputMatch =
         joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
         joined.match(/([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)/i);
@@ -1159,21 +1153,18 @@
         extractedData.inputPower = inputMatch[1].trim();
       }
 
-      // 4. Fabr. (Fabricacao / Data / Fabr)
       const fabrMatch =
         joined.match(/(?:fabr\.?|fabrica[cç][aã]o|mfd|date)\s*[:=\-]?\s*([0-9]{1,4}[\/\-][0-9]{1,2}(?:[\/\-][0-9]{2,4})?|[A-Za-z0-9\-]{3,16})/i);
       if (fabrMatch) {
         extractedData.fabr = fabrMatch[1].trim();
       }
 
-      // 5. S/N (Serial Number)
       const snMatch =
         joined.match(/(?:s\/n|sn|serial(?:\s*(?:no|num|number))?|n[º°o]?\s*s[eé]rie)\s*[:=\-]?\s*([A-Za-z0-9\-]{6,26})/i);
       if (snMatch) {
         extractedData.sn = snMatch[1].trim().toUpperCase();
       }
 
-      // 6. MACs (CM MAC e eMTA MAC)
       const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
       const allMacsRaw = [];
       let mMac;
@@ -1199,7 +1190,6 @@
         extractedData.emtaMac = uniqueMacs.find((mc) => mc !== extractedData.cmMac) || uniqueMacs[1];
       }
 
-      // 7. SSIDs Wi-Fi 2.4 GHz e 5 GHz (sempre comecam com CLARO_ ou NET_)
       const ssidMatches = [];
       const ssidRegex = /((?:CLARO|NET)_[A-Za-z0-9_\-]{2,32})/gi;
       let sMatch;
@@ -1210,9 +1200,9 @@
       for (const ssid of ssidMatches) {
         const is5g = /(?:[_-]5g|_5|5ghz)/i.test(ssid);
         const is24g = /(?:[_-]2\.?4g?|24g)/i.test(ssid);
-        if (is5g && !extractedData.ssid5) {
+        if (is5g && (!extractedData.ssid5 || !mergeMode)) {
           extractedData.ssid5 = ssid;
-        } else if (is24g && !extractedData.ssid24) {
+        } else if (is24g && (!extractedData.ssid24 || !mergeMode)) {
           extractedData.ssid24 = ssid;
         } else if (!extractedData.ssid24) {
           extractedData.ssid24 = ssid;
@@ -1221,7 +1211,6 @@
         }
       }
 
-      // 8. Usuario e Senha do IP 192.168.0.1
       const ipUserMatch =
         joined.match(/(?:192\.168\.0\.1[^
 ]{0,80}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
@@ -1238,17 +1227,667 @@
         extractedData.ipPass = ipPassMatch[1].trim();
       }
 
-      // 9. Senha da rede Wi-Fi (WPA / Wi-Fi Key / Pre-shared Key / Senha Wi-Fi)
       const wifiPassMatch =
         joined.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
       if (wifiPassMatch) {
         extractedData.wifiPass = wifiPassMatch[1].trim();
       }
+
+      if (!mergeMode && uniqueMacs.length === 0 && ssidMatches.length === 0 && !modelMatch && !snMatch) {
+        const cleanCode = joined.replace(/\s+/g, "").trim();
+        if (/^[0-9A-Fa-f]{12}$/.test(cleanCode) && !extractedData.cmMac) {
+          extractedData.cmMac = normalizeMac(cleanCode);
+        }
+      }
     }
 
-    // Inicialização limpa
+    function aplicarLeituraNaTela(textoBruto, mergeMode = true) {
+      if (!textoBruto || !textoBruto.trim()) return;
+      const rawBox = document.getElementById("rawOcrText");
+      if (mergeMode && rawBox.value.trim()) {
+        rawBox.value = rawBox.value.trim() + "
+" + textoBruto.trim();
+      } else {
+        rawBox.value = textoBruto.trim();
+      }
+      parseEmtaLabelText(rawBox.value, false);
+      updateQuickInputsFromExtracted();
+      renderFormattedSection();
+    }
+
+    async function capturarDaMiraAoClicar() {
+      const statusDiv = document.getElementById("scanner-status");
+      const videoEl = document.querySelector("#reader video");
+      if (!cameraAtiva) return;
+
+      forcarFoco().catch(() => {});
+      if (cliqueEmAndamento || !videoEl || videoEl.readyState < 2) return;
+
+      cliqueEmAndamento = true;
+      statusDiv.innerText = "📸 Lendo etiqueta na mira...";
+
+      try {
+        const vw = videoEl.videoWidth;
+        const vh = videoEl.videoHeight;
+        if (!vw || !vh) return;
+
+        const cropW = Math.floor(vw * 0.92);
+        const cropH = Math.floor(vh * 0.45);
+        const cropX = Math.floor((vw - cropW) / 2);
+        const cropY = Math.floor((vh - cropH) / 2);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = cropW;
+        canvas.height = cropH;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+        let encontrouAlgo = false;
+
+        if ("BarcodeDetector" in window) {
+          try {
+            const detector = new BarcodeDetector();
+            const barcodes = await detector.detect(canvas);
+            for (const bc of barcodes) {
+              if (bc.rawValue && bc.rawValue.trim()) {
+                aplicarLeituraNaTela(bc.rawValue.trim(), true);
+                encontrouAlgo = true;
+              }
+            }
+          } catch (e) {}
+        }
+
+        const worker = await obterOcrWorker();
+        if (worker && !ocrOcupado) {
+          ocrOcupado = true;
+          try {
+            const { data: { text } } = await worker.recognize(canvas);
+            if (text && text.trim()) {
+              aplicarLeituraNaTela(text.trim(), true);
+              encontrouAlgo = true;
+            }
+          } finally {
+            ocrOcupado = false;
+          }
+        }
+
+        if (encontrouAlgo) {
+          if (navigator.vibrate) navigator.vibrate([70, 30, 70]);
+          statusDiv.innerText = "✅ Dados extraídos! Confira os campos no topo e no fim da página.";
+        } else {
+          statusDiv.innerText = "Sem texto nítido na captura. Aproxime ou toque em 'Foto / Arquivo'.";
+        }
+      } catch (e) {
+        statusDiv.innerText = "Erro ao ler mira: " + e.message;
+      } finally {
+        cliqueEmAndamento = false;
+      }
+    }
+
+    function iniciarLeituraHibrida() {
+      const videoEl = document.querySelector("#reader video");
+      if (!videoEl) return;
+
+      if (intervaloLeituraRapida) {
+        clearInterval(intervaloLeituraRapida);
+        intervaloLeituraRapida = null;
+      }
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      let detectorNativo = null;
+
+      if ("BarcodeDetector" in window) {
+        try {
+          detectorNativo = new BarcodeDetector();
+        } catch (e) {
+          detectorNativo = null;
+        }
+      }
+
+      obterOcrWorker().catch(() => {});
+
+      let cicloEmExecucao = false;
+      intervaloLeituraRapida = setInterval(async () => {
+        if (!cameraAtiva || cicloEmExecucao || !videoEl || videoEl.readyState < 2) return;
+        cicloEmExecucao = true;
+        try {
+          const vw = videoEl.videoWidth;
+          const vh = videoEl.videoHeight;
+          if (!vw || !vh) return;
+
+          const cropW = Math.floor(vw * 0.90);
+          const cropH = Math.floor(vh * 0.35);
+          const cropX = Math.floor((vw - cropW) / 2);
+          const cropY = Math.floor((vh - cropH) / 2);
+
+          canvas.width = cropW;
+          canvas.height = cropH;
+          ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+          if (detectorNativo) {
+            const barcodes = await detectorNativo.detect(canvas);
+            for (const bc of barcodes) {
+              if (bc.rawValue && bc.rawValue.trim()) {
+                aplicarLeituraNaTela(bc.rawValue.trim(), true);
+              }
+            }
+          }
+        } catch (e) {}
+        finally {
+          cicloEmExecucao = false;
+        }
+      }, 450);
+    }
+
+    function toggleScanner() {
+      const container = document.getElementById("reader-container");
+      const statusDiv = document.getElementById("scanner-status");
+
+      if (!cameraAtiva) {
+        container.style.display = "block";
+        flashAtivo = false;
+        videoTrackAtual = null;
+        document.getElementById("btn-flash").innerText = "🔦 Luz";
+        statusDiv.innerText = "Alinhe a linha vermelha na etiqueta e toque na tela da câmera para capturar.";
+
+        const formatosSuportados = [
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.CODE_93,
+          Html5QrcodeSupportedFormats.ITF,
+          Html5QrcodeSupportedFormats.CODABAR,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.DATA_MATRIX
+        ];
+
+        html5QrCode = new Html5Qrcode("reader", {
+          formatsToSupport: formatosSuportados,
+          useBarCodeDetectorIfSupported: false,
+          verbose: false
+        });
+
+        const cameraConfig = {
+          facingMode: "environment",
+          focusMode: "continuous"
+        };
+
+        html5QrCode.start(
+          cameraConfig,
+          {
+            fps: 20,
+            videoConstraints: {
+              facingMode: { ideal: "environment" },
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 },
+              focusMode: { ideal: "continuous" }
+            },
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+              return {
+                width: Math.floor(viewfinderWidth * 0.88),
+                height: Math.floor(viewfinderHeight * 0.45)
+              };
+            }
+          },
+          (decodedText) => {
+            if (decodedText && decodedText.trim()) {
+              aplicarLeituraNaTela(decodedText.trim(), true);
+              statusDiv.innerText = "✅ Código lido! Toque na mira para ler o restante da etiqueta ou desligue a câmera.";
+            }
+          },
+          (errorMessage) => {}
+        ).then(() => {
+          setTimeout(() => {
+            configurarResolucaoEFoco();
+            iniciarLeituraHibrida();
+          }, 300);
+        }).catch(err => {
+          statusDiv.innerText = "Erro ao acessar câmera (" + err + "). Abrindo Foto / Arquivo...";
+          triggerFileFallback();
+        });
+        cameraAtiva = true;
+      } else {
+        pararScanner();
+      }
+    }
+
+    function pararScanner() {
+      const container = document.getElementById("reader-container");
+      if (intervaloLeituraRapida) {
+        clearInterval(intervaloLeituraRapida);
+        intervaloLeituraRapida = null;
+      }
+      videoTrackAtual = null;
+      flashAtivo = false;
+      if (html5QrCode && cameraAtiva) {
+        html5QrCode.stop().then(() => {
+          container.style.display = "none";
+          cameraAtiva = false;
+        }).catch(() => {
+          container.style.display = "none";
+          cameraAtiva = false;
+        });
+      } else {
+        container.style.display = "none";
+        cameraAtiva = false;
+      }
+    }
+
+    function triggerFileFallback() {
+      document.getElementById("fileInput").click();
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = async function() {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+
+          const worker = await obterOcrWorker();
+          if (worker) {
+            showToast("Lendo etiqueta da foto...");
+            const { data: { text } } = await worker.recognize(canvas);
+            if (text && text.trim()) {
+              aplicarLeituraNaTela(text.trim(), false);
+              showToast("Etiqueta extraída!");
+            }
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    function reparseFromTextarea() {
+      const rawText = document.getElementById("rawOcrText").value || "";
+      parseEmtaLabelText(rawText, false);
+      updateQuickInputsFromExtracted();
+      renderFormattedSection();
+      showToast("Texto reprocessado!");
+    }
+
+    // --- ARQUIVAMENTO E EXPORTACAO / IMPORTACAO (CSV, JSON, PDF) ---
+    function saveArchiveToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(archiveList));
+    }
+
+    function arquivarRegistroAtual() {
+      const registro = {
+        id: Date.now(),
+        dataHora: obterDataAtual(),
+        model: document.getElementById("parsedModel").textContent === "—" ? "" : document.getElementById("parsedModel").textContent.trim(),
+        manufacturer: document.getElementById("parsedManufacturer").textContent === "—" ? "" : document.getElementById("parsedManufacturer").textContent.trim(),
+        inputPower: document.getElementById("parsedInput").textContent === "—" ? "" : document.getElementById("parsedInput").textContent.trim(),
+        fabr: document.getElementById("parsedFabr").textContent === "—" ? "" : document.getElementById("parsedFabr").textContent.trim(),
+        sn: document.getElementById("parsedSn").textContent === "—" ? "" : document.getElementById("parsedSn").textContent.trim(),
+        cmMac: document.getElementById("parsedCmMac").textContent === "—" ? "" : document.getElementById("parsedCmMac").textContent.trim(),
+        emtaMac: document.getElementById("parsedEmtaMac").textContent === "—" ? "" : document.getElementById("parsedEmtaMac").textContent.trim(),
+        ipUser: document.getElementById("ipUser").value.trim(),
+        ipPass: document.getElementById("ipPass").value.trim(),
+        ssid24: document.getElementById("parsedSsid24").textContent === "—" ? "" : document.getElementById("parsedSsid24").textContent.trim(),
+        ssid5: document.getElementById("parsedSsid5").textContent === "—" ? "" : document.getElementById("parsedSsid5").textContent.trim(),
+        wifiPass: document.getElementById("wifiPass").value.trim()
+      };
+
+      const temAlgumDado = Object.keys(registro).some((k) => k !== "id" && k !== "dataHora" && registro[k]);
+      if (!temAlgumDado) {
+        showToast("Nenhum dado preenchido para arquivar");
+        return;
+      }
+
+      archiveList.unshift(registro);
+      saveArchiveToStorage();
+      renderArchiveTable();
+      showToast("Registro arquivado com sucesso!");
+    }
+
+    function removerRegistroArquivado(id) {
+      archiveList = archiveList.filter((item) => item.id !== id);
+      saveArchiveToStorage();
+      renderArchiveTable();
+      showToast("Registro removido do arquivo");
+    }
+
+    function carregarRegistroNaTela(id) {
+      const item = archiveList.find((r) => r.id === id);
+      if (!item) return;
+
+      extractedData.model = item.model || "";
+      extractedData.manufacturer = item.manufacturer || "";
+      extractedData.inputPower = item.inputPower || "";
+      extractedData.fabr = item.fabr || "";
+      extractedData.sn = item.sn || "";
+      extractedData.cmMac = item.cmMac || "";
+      extractedData.emtaMac = item.emtaMac || "";
+      extractedData.ipUser = item.ipUser || "";
+      extractedData.ipPass = item.ipPass || "";
+      extractedData.ssid24 = item.ssid24 || "";
+      extractedData.ssid5 = item.ssid5 || "";
+      extractedData.wifiPass = item.wifiPass || "";
+
+      updateQuickInputsFromExtracted();
+      renderFormattedSection();
+      showToast("Registro carregado nos campos");
+    }
+
+    function obterArquivoFiltrado() {
+      const termo = (document.getElementById("archiveSearch")?.value || "").trim().toLowerCase();
+      if (!termo) return archiveList;
+      return archiveList.filter((r) =>
+        [
+          r.dataHora, r.model, r.manufacturer, r.inputPower, r.fabr,
+          r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
+          r.ssid24, r.ssid5, r.wifiPass
+        ]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(termo))
+      );
+    }
+
+    function renderArchiveTable() {
+      const tbody = document.querySelector("#archiveTable tbody");
+      const filtrados = obterArquivoFiltrado();
+      document.getElementById("archiveCount").textContent = filtrados.length;
+      tbody.innerHTML = "";
+
+      if (filtrados.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="6" style="text-align:center;color:#94a3b8;">Nenhum registro arquivado.</td>`;
+        tbody.appendChild(tr);
+        return;
+      }
+
+      filtrados.forEach((item) => {
+        const wifiResumo = [item.ssid24, item.ssid5].filter(Boolean).join(" / ") || "—";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.dataHora || "-"}</td>
+          <td>${item.model || "—"}</td>
+          <td>${item.sn || "—"}</td>
+          <td>${item.cmMac || "—"}</td>
+          <td>${wifiResumo}</td>
+          <td>
+            <button type="button" class="btn btn-secondary" style="padding:5px 8px;font-size:0.72rem;" onclick="carregarRegistroNaTela(${item.id})">Usar</button>
+            <button type="button" class="btn btn-danger" onclick="removerRegistroArquivado(${item.id})">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function downloadBlob(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportJSON() {
+      const lista = obterArquivoFiltrado();
+      if (lista.length === 0) {
+        showToast("Sem registros para exportar em JSON");
+        return;
+      }
+      downloadBlob(JSON.stringify(lista, null, 2), "arquivo_emta_ont_claro.json", "application/json;charset=utf-8");
+      showToast("JSON exportado!");
+    }
+
+    function importJSON(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const arr = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.dados) ? parsed.dados : null);
+          if (!arr) {
+            showToast("JSON inválido");
+            return;
+          }
+          const normalizados = arr.map((r, idx) => ({
+            id: r.id || (Date.now() + idx),
+            dataHora: r.dataHora || obterDataAtual(),
+            model: r.model || "",
+            manufacturer: r.manufacturer || "",
+            inputPower: r.inputPower || "",
+            fabr: r.fabr || "",
+            sn: r.sn || "",
+            cmMac: r.cmMac || "",
+            emtaMac: r.emtaMac || "",
+            ipUser: r.ipUser || "",
+            ipPass: r.ipPass || "",
+            ssid24: r.ssid24 || "",
+            ssid5: r.ssid5 || "",
+            wifiPass: r.wifiPass || ""
+          }));
+          archiveList = [...normalizados, ...archiveList];
+          saveArchiveToStorage();
+          renderArchiveTable();
+          showToast(`${normalizados.length} registro(s) importado(s) do JSON!`);
+        } catch (err) {
+          showToast("Erro ao importar JSON: " + err.message);
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function escapeCsv(val) {
+      const s = String(val ?? "");
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+
+    function exportCSV() {
+      const lista = obterArquivoFiltrado();
+      if (lista.length === 0) {
+        showToast("Sem registros para exportar em CSV");
+        return;
+      }
+      const headers = [
+        "Data_Hora", "Modelo", "Fabricante", "Input", "Fabr",
+        "SN", "CM_MAC", "eMTA_MAC", "Usuario_192_168_0_1", "Senha_192_168_0_1",
+        "SSID_2_4GHz", "SSID_5GHz", "Senha_WiFi"
+      ];
+      const rows = lista.map((r) => [
+        r.dataHora, r.model, r.manufacturer, r.inputPower, r.fabr,
+        r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
+        r.ssid24, r.ssid5, r.wifiPass
+      ].map(escapeCsv).join(";"));
+
+      const csv = "﻿" + [headers.map(escapeCsv).join(";"), ...rows].join("
+");
+      downloadBlob(csv, "arquivo_emta_ont_claro.csv", "text/csv;charset=utf-8");
+      showToast("CSV exportado!");
+    }
+
+    function parseCsvLine(line, delimiter = ";") {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === delimiter && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += ch;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function importCSV(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const text = (e.target.result || "").replace(/^﻿/, "");
+          const lines = text.split(/?
+/).map((l) => l.trim()).filter(Boolean);
+          if (lines.length < 2) {
+            showToast("CSV sem registros");
+            return;
+          }
+          const delimiter = lines[0].includes(";") ? ";" : ",";
+          const imported = [];
+          for (let i = 1; i < lines.length; i++) {
+            const cols = parseCsvLine(lines[i], delimiter);
+            imported.push({
+              id: Date.now() + i,
+              dataHora: cols[0] || obterDataAtual(),
+              model: cols[1] || "",
+              manufacturer: cols[2] || "",
+              inputPower: cols[3] || "",
+              fabr: cols[4] || "",
+              sn: cols[5] || "",
+              cmMac: cols[6] || "",
+              emtaMac: cols[7] || "",
+              ipUser: cols[8] || "",
+              ipPass: cols[9] || "",
+              ssid24: cols[10] || "",
+              ssid5: cols[11] || "",
+              wifiPass: cols[12] || ""
+            });
+          }
+          archiveList = [...imported, ...archiveList];
+          saveArchiveToStorage();
+          renderArchiveTable();
+          showToast(`${imported.length} registro(s) importado(s) do CSV!`);
+        } catch (err) {
+          showToast("Erro ao importar CSV: " + err.message);
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    function exportPDF() {
+      const lista = obterArquivoFiltrado();
+      if (lista.length === 0) {
+        showToast("Sem registros para exportar em PDF");
+        return;
+      }
+      if (!window.jspdf) {
+        showToast("Biblioteca PDF não carregada");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+      doc.setTextColor(227, 6, 19);
+      doc.setFontSize(15);
+      doc.setFont(undefined, "bold");
+      doc.text("Arquivo eMTA / ONT - 192.168.0.1 (Claro)", 14, 15);
+
+      doc.setTextColor(90, 90, 90);
+      doc.setFontSize(9);
+      doc.setFont(undefined, "normal");
+      doc.text(`Gerado em: ${obterDataAtual()} | Total: ${lista.length} registro(s)`, 14, 22);
+
+      const colunas = [
+        "Data/Hora", "Modelo", "Fabr.", "S/N", "CM MAC",
+        "eMTA MAC", "192.168.0.1", "SSID 2.4G / 5G", "Senha Wi-Fi"
+      ];
+
+      const linhas = lista.map((r) => [
+        r.dataHora || "-",
+        r.model || "-",
+        r.fabr || "-",
+        r.sn || "-",
+        r.cmMac || "-",
+        r.emtaMac || "-",
+        [r.ipUser, r.ipPass].filter(Boolean).join(" / ") || "-",
+        [r.ssid24, r.ssid5].filter(Boolean).join(" / ") || "-",
+        r.wifiPass || "-"
+      ]);
+
+      doc.autoTable({
+        head: [colunas],
+        body: linhas,
+        startY: 26,
+        theme: "grid",
+        headStyles: {
+          fillColor: [227, 6, 19],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          fontSize: 8
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [30, 30, 30]
+        },
+        margin: { left: 14, right: 14 }
+      });
+
+      doc.save("arquivo_emta_ont_claro.pdf");
+      showToast("PDF exportado!");
+    }
+
+    async function importPDF(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      try {
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const rawLatin1 = new TextDecoder("latin1").decode(bytes);
+
+        const textChunks = [];
+        const parensRegex = /\(([^()]{2,200})\)/g;
+        let m;
+        while ((m = parensRegex.exec(rawLatin1)) !== null) {
+          const cleaned = m[1].replace(/\[nr()\]/g, " ").trim();
+          if (/[A-Za-z0-9]/.test(cleaned)) {
+            textChunks.push(cleaned);
+          }
+        }
+
+        const extractedText = textChunks.join("
+");
+        if (!extractedText.trim()) {
+          showToast("Não foi possível extrair texto legível deste PDF");
+          return;
+        }
+
+        aplicarLeituraNaTela(extractedText, false);
+        arquivarRegistroAtual();
+        showToast("Dados extraídos e arquivados a partir do PDF!");
+      } catch (err) {
+        showToast("Erro ao importar PDF: " + err.message);
+      } finally {
+        event.target.value = "";
+      }
+    }
+
     updateQuickInputsFromExtracted();
     renderFormattedSection();
+    renderArchiveTable();
   </script>
 </body>
 </html>
