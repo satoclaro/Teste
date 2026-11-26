@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Configuração eMTA / ONT 192.168.0.1 - Claro</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <title>Configuração eMTA / ONT 192.168.0.1 - Claro / NET</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -155,6 +154,10 @@
       background: rgba(34, 197, 94, 0.1);
     }
 
+    .quick-field.missing-highlight {
+      border-color: var(--accent-amber);
+    }
+
     .quick-label {
       font-size: 0.69rem;
       font-weight: 700;
@@ -227,14 +230,14 @@
     .btn {
       border: none;
       border-radius: 9px;
-      padding: 11px 13px;
-      font-size: 0.86rem;
+      padding: 12px 14px;
+      font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
+      gap: 8px;
       transition: opacity 0.15s ease, transform 0.08s ease;
     }
 
@@ -250,6 +253,13 @@
 
     .btn-primary:hover {
       background: var(--accent-red-hover);
+    }
+
+    .btn-capture-big {
+      background: #0284c7;
+      color: #ffffff;
+      width: 100%;
+      margin-top: 8px;
     }
 
     .btn-secondary {
@@ -275,8 +285,8 @@
       font-size: 0.75rem;
     }
 
-    /* Scanner / Mira / Controles da camera */
-    #reader-container {
+    /* CAMERA DE FOTO EM ALTA RESOLUCAO */
+    #camera-container {
       display: none;
       margin-top: 12px;
       text-align: center;
@@ -285,86 +295,58 @@
     .camera-wrapper {
       position: relative;
       width: 100%;
-      max-width: 360px;
-      height: 220px;
+      max-width: 480px;
+      height: 310px;
       margin: 0 auto;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       border: 2px solid var(--accent-red);
       background: #000;
       cursor: pointer;
     }
 
-    #reader {
+    #cameraVideo {
       width: 100%;
       height: 100%;
-    }
-
-    #reader video {
-      width: 100% !important;
-      height: 100% !important;
       object-fit: cover;
+      display: block;
     }
 
-    #reader__scan_region img,
-    #reader__dashboard {
-      display: none !important;
-    }
-
-    .mira-overlay {
+    .frame-guide {
       position: absolute;
-      inset: 0;
+      inset: 14px;
+      border: 2px dashed rgba(0, 255, 102, 0.85);
+      border-radius: 10px;
       pointer-events: none;
       display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
+      padding: 6px;
     }
 
-    .mira-box {
-      width: 90%;
-      height: 92px;
-      border: 2px solid #00ff66;
-      border-radius: 6px;
-      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.5);
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mira-laser {
-      width: 96%;
-      height: 2px;
-      background: #ff1e1e;
-      box-shadow: 0 0 6px #ff1e1e;
-    }
-
-    .mira-label {
-      position: absolute;
-      top: -22px;
-      background: rgba(0, 0, 0, 0.82);
+    .frame-tag {
+      background: rgba(0, 0, 0, 0.8);
       color: #00ff66;
-      font-size: 10px;
-      font-weight: bold;
-      padding: 2px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
     }
 
     .camera-controls {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      max-width: 360px;
+      max-width: 480px;
       margin: 8px auto 0;
     }
 
     .camera-controls button {
-      flex: 1 1 46%;
-      padding: 8px 9px;
-      font-size: 0.76rem;
-      border-radius: 7px;
+      flex: 1 1 30%;
+      padding: 9px 8px;
+      font-size: 0.78rem;
+      border-radius: 8px;
       background: #243047;
       color: #f8fafc;
       border: 1px solid var(--border-color);
@@ -372,12 +354,49 @@
       cursor: pointer;
     }
 
+    .camera-controls button.btn-shutter {
+      background: var(--accent-green);
+      color: #052e16;
+      border-color: #4ade80;
+    }
+
     #scanner-status {
-      font-size: 0.78rem;
-      color: #fb7185;
+      font-size: 0.8rem;
+      color: #38bdf8;
       font-weight: 700;
       margin-top: 8px;
-      min-height: 18px;
+      min-height: 20px;
+    }
+
+    #previewContainer {
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    #capturedPreview {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar-wrap {
+      display: none;
+      width: 100%;
+      height: 8px;
+      background: #0d1320;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #e30613, #38bdf8, #22c55e);
+      transition: width 0.25s ease;
     }
 
     .action-row {
@@ -418,6 +437,10 @@
       border-color: var(--accent-blue);
     }
 
+    .info-row.priority-field {
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+
     .info-key {
       font-size: 0.68rem;
       text-transform: uppercase;
@@ -447,7 +470,7 @@
     textarea.raw-text {
       width: 100%;
       margin-top: 6px;
-      min-height: 86px;
+      min-height: 96px;
       background: var(--bg-input);
       color: var(--text-secondary);
       border: 1px solid var(--border-color);
@@ -569,10 +592,10 @@
 
       <div class="wifi-band-row" role="group" aria-label="Banda Wi-Fi para o campo usuário Wi-Fi">
         <button type="button" class="band-btn active" id="btnBand24" onclick="selectWifiBand('2.4')">
-          Wi-Fi 2.4 GHz (CLARO_)
+          Wi-Fi 2.4 GHz (CLARO_ / NET_)
         </button>
         <button type="button" class="band-btn" id="btnBand5" onclick="selectWifiBand('5')">
-          Wi-Fi 5 GHz (CLARO_)
+          Wi-Fi 5 GHz (CLARO_ / NET_)
         </button>
       </div>
 
@@ -613,7 +636,7 @@
           />
         </div>
 
-        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_) -->
+        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_ ou NET_) -->
         <div class="quick-field" id="boxWifiSsid" onclick="copyField('wifiSsid', this)">
           <div class="quick-label">
             <span id="labelWifiBand">3. Usuário Wi-Fi (2.4 GHz)</span>
@@ -623,7 +646,7 @@
             type="text"
             id="wifiSsid"
             class="quick-input"
-            placeholder="CLARO_..."
+            placeholder="CLARO_... ou NET_..."
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -651,33 +674,42 @@
       </div>
     </section>
 
-    <!-- CAMERA / SCANNER ETIQUETA EMTA / ONT CLARO -->
-    <section class="card" aria-label="Câmera e leitura de etiqueta">
+    <!-- CAPTURA DE FOTO DA ETIQUETA EMTA / ONT -->
+    <section class="card" aria-label="Captura de foto da etiqueta">
       <div class="card-header">
-        <div class="card-title">📷 Etiqueta eMTA / ONT Claro (Câmera / OCR / Barcode)</div>
+        <div class="card-title">📸 Capturar Foto da Etiqueta eMTA / ONT</div>
       </div>
 
-      <button type="button" class="btn btn-primary" onclick="toggleScanner()">
-        📷 Ligar e Desligar Câmera
+      <button type="button" class="btn btn-primary" onclick="toggleCamera()">
+        📷 Abrir / Fechar Câmera de Foto
       </button>
 
-      <div id="reader-container">
-        <div class="camera-wrapper" onclick="capturarDaMiraAoClicar()">
-          <div id="reader"></div>
-          <div class="mira-overlay">
-            <div class="mira-box">
-              <span class="mira-label">TOQUE NA TELA PARA CAPTURAR NA MIRA</span>
-              <div class="mira-laser"></div>
-            </div>
+      <button type="button" class="btn btn-capture-big" onclick="triggerNativePhotoCapture()">
+        📱 Tirar Foto Direto (Câmera Nativa / Galeria)
+      </button>
+
+      <div id="camera-container">
+        <div class="camera-wrapper" onclick="capturarFotoEExtrairTudo()">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="frame-guide">
+            <span class="frame-tag">ENQUADRE TODA A ETIQUETA E TOQUE PARA FOTOGRAFAR</span>
+            <span class="frame-tag">CLARO_ / NET_ • 192.168.0.1 • SENHAS • MAC • S/N</span>
           </div>
         </div>
         <div class="camera-controls">
-          <button type="button" onclick="capturarDaMiraAoClicar()">📸 Ler Mira Agora</button>
+          <button type="button" class="btn-shutter" onclick="capturarFotoEExtrairTudo()">📸 Capturar Foto e Extrair</button>
           <button type="button" onclick="forcarFoco()">🎯 Focar</button>
           <button type="button" id="btn-flash" onclick="toggleFlash()">🔦 Luz</button>
-          <button type="button" onclick="triggerFileFallback()">🖼️ Foto / Arquivo</button>
         </div>
-        <div id="scanner-status">Alinhe a linha vermelha na etiqueta e toque na tela da câmera para capturar.</div>
+      </div>
+
+      <div id="scanner-status">Enquadre toda a etiqueta (usuário/senha 192.168.0.1 e Wi-Fi CLARO_/NET_) e capture a foto.</div>
+      <div class="progress-bar-wrap" id="progressWrap">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+
+      <div id="previewContainer">
+        <img id="capturedPreview" alt="Prévia da foto da etiqueta capturada" />
       </div>
 
       <input
@@ -686,7 +718,7 @@
         accept="image/*"
         capture="environment"
         style="display:none"
-        onchange="handleFileUpload(event)"
+        onchange="handlePhotoFileSelected(event)"
       />
 
       <div class="action-row">
@@ -699,14 +731,39 @@
       </div>
     </section>
 
-    <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA ETIQUETA -->
+    <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA FOTO -->
     <section class="card" aria-label="Informações formatadas da etiqueta">
       <div class="card-header">
-        <div class="card-title">📋 Dados Formatados da Etiqueta eMTA / ONT (Claro)</div>
+        <div class="card-title">📋 Dados Extraídos da Foto da Etiqueta</div>
         <span class="hint-copy">Toque no valor para copiar</span>
       </div>
 
       <div class="formatted-grid" id="formattedGrid">
+        <div class="info-row priority-field" onclick="copyTextValue('parsedIpLogin')">
+          <span class="info-key">Usuário 192.168.0.1</span>
+          <span class="info-val" id="parsedIpLogin">—</span>
+        </div>
+
+        <div class="info-row priority-field" onclick="copyTextValue('parsedIpPass')">
+          <span class="info-key">Senha 192.168.0.1</span>
+          <span class="info-val" id="parsedIpPass">—</span>
+        </div>
+
+        <div class="info-row priority-field" onclick="copyTextValue('parsedSsid24')">
+          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_ / NET_)</span>
+          <span class="info-val" id="parsedSsid24">—</span>
+        </div>
+
+        <div class="info-row priority-field" onclick="copyTextValue('parsedSsid5')">
+          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_ / NET_)</span>
+          <span class="info-val" id="parsedSsid5">—</span>
+        </div>
+
+        <div class="info-row priority-field" onclick="copyTextValue('parsedWifiPass')">
+          <span class="info-key">Senha Wi-Fi</span>
+          <span class="info-val" id="parsedWifiPass">—</span>
+        </div>
+
         <div class="info-row" onclick="copyTextValue('parsedDocsis')">
           <span class="info-key">DOCSIS</span>
           <span class="info-val" id="parsedDocsis">—</span>
@@ -746,39 +803,14 @@
           <span class="info-key">eMTA MAC</span>
           <span class="info-val" id="parsedEmtaMac">—</span>
         </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedIpLogin')">
-          <span class="info-key">Usuário 192.168.0.1</span>
-          <span class="info-val" id="parsedIpLogin">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedIpPass')">
-          <span class="info-key">Senha 192.168.0.1</span>
-          <span class="info-val" id="parsedIpPass">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedSsid24')">
-          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_)</span>
-          <span class="info-val" id="parsedSsid24">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedSsid5')">
-          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_)</span>
-          <span class="info-val" id="parsedSsid5">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedWifiPass')">
-          <span class="info-key">Senha Wi-Fi</span>
-          <span class="info-val" id="parsedWifiPass">—</span>
-        </div>
       </div>
 
-      <details class="raw-ocr-box">
-        <summary>Ver / editar texto bruto lido pela câmera (OCR)</summary>
+      <details class="raw-ocr-box" open>
+        <summary>Texto completo extraído da foto (OCR multi-passagem)</summary>
         <textarea
           id="rawOcrText"
           class="raw-text"
-          placeholder="O texto reconhecido da etiqueta aparecerá aqui. Você pode colar ou editar manualmente e clicar em Reprocessar."
+          placeholder="O texto completo extraído da foto aparecerá aqui. Você também pode editar/colar e clicar em Reprocessar."
         ></textarea>
         <div style="margin-top:8px;display:flex;justify-content:flex-end;">
           <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.78rem;" onclick="reparseFromTextarea()">
@@ -798,7 +830,7 @@
         type="text"
         id="archiveSearch"
         class="search-input"
-        placeholder="Buscar por DOCSIS, modelo, fabricante, S/N, MAC, SSID ou data..."
+        placeholder="Buscar por DOCSIS, modelo, S/N, MAC, SSID CLARO_/NET_ ou data..."
         oninput="renderArchiveTable()"
       />
 
@@ -822,9 +854,9 @@
               <th>Data/Hora</th>
               <th>DOCSIS</th>
               <th>Modelo</th>
-              <th>S/N</th>
-              <th>CM MAC</th>
-              <th>Wi-Fi 2.4G / 5G</th>
+              <th>192.168.0.1 (Usr/Senha)</th>
+              <th>Wi-Fi (CLARO_/NET_)</th>
+              <th>Senha Wi-Fi</th>
               <th>Ação</th>
             </tr>
           </thead>
@@ -854,18 +886,16 @@
       }
     })();
 
-    const STORAGE_KEY = "claro_emta_ont_arquivo_v2";
+    const STORAGE_KEY = "claro_net_emta_ont_arquivo_v3";
     let archiveList = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
     let selectedWifiBand = "2.4";
-    let html5QrCode = null;
+    let mediaStream = null;
     let cameraAtiva = false;
     let flashAtivo = false;
     let videoTrackAtual = null;
-    let intervaloLeituraRapida = null;
     let ocrWorker = null;
-    let ocrOcupado = false;
-    let cliqueEmAndamento = false;
+    let extracaoEmAndamento = false;
 
     const extractedData = {
       docsis: "",
@@ -900,11 +930,18 @@
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => {
         toast.classList.remove("show");
-      }, 1800);
+      }, 1900);
+    }
+
+    function setProgress(percent, visible = true) {
+      const wrap = document.getElementById("progressWrap");
+      const fill = document.getElementById("progressFill");
+      wrap.style.display = visible ? "block" : "none";
+      fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
     }
 
     async function copyTextToClipboard(text, boxEl = null) {
-      if (!text || !text.trim() || text.trim() === "—") {
+      if (!text || !text.trim() || text.trim() === "—" || text.trim().startsWith("(Não")) {
         showToast("Campo vazio para copiar");
         return;
       }
@@ -995,12 +1032,25 @@
 
       document.getElementById("wifiSsid").value = activeSsid;
       document.getElementById("wifiPass").value = extractedData.wifiPass || "";
+
+      document.getElementById("boxIpUser").classList.toggle("missing-highlight", !extractedData.ipUser);
+      document.getElementById("boxIpPass").classList.toggle("missing-highlight", !extractedData.ipPass);
+      document.getElementById("boxWifiSsid").classList.toggle("missing-highlight", !activeSsid);
+      document.getElementById("boxWifiPass").classList.toggle("missing-highlight", !extractedData.wifiPass);
     }
 
-    function renderFormattedSection() {
-      const setTxt = (id, v) => {
-        document.getElementById(id).textContent = v && v.trim() ? v.trim() : "—";
+    function renderFormattedSection(afterExtraction = false) {
+      const setTxt = (id, v, fallbackIfExtracted = "—") => {
+        const clean = v && v.trim() ? v.trim() : "";
+        document.getElementById(id).textContent = clean || (afterExtraction ? fallbackIfExtracted : "—");
       };
+
+      setTxt("parsedIpLogin", extractedData.ipUser, "(Não identificado na foto — toque no topo para preencher)");
+      setTxt("parsedIpPass", extractedData.ipPass, "(Não identificado na foto — toque no topo para preencher)");
+      setTxt("parsedSsid24", extractedData.ssid24, "(Não identificado — verifique CLARO_ / NET_)");
+      setTxt("parsedSsid5", extractedData.ssid5, "(Não identificado — verifique CLARO_ / NET_)");
+      setTxt("parsedWifiPass", extractedData.wifiPass, "(Não identificado na foto — toque no topo para preencher)");
+
       setTxt("parsedDocsis", extractedData.docsis);
       setTxt("parsedModel", extractedData.model);
       setTxt("parsedManufacturer", extractedData.manufacturer);
@@ -1009,11 +1059,6 @@
       setTxt("parsedSn", extractedData.sn);
       setTxt("parsedCmMac", extractedData.cmMac);
       setTxt("parsedEmtaMac", extractedData.emtaMac);
-      setTxt("parsedIpLogin", extractedData.ipUser);
-      setTxt("parsedIpPass", extractedData.ipPass);
-      setTxt("parsedSsid24", extractedData.ssid24);
-      setTxt("parsedSsid5", extractedData.ssid5);
-      setTxt("parsedWifiPass", extractedData.wifiPass);
     }
 
     function clearAllFields() {
@@ -1021,47 +1066,84 @@
         extractedData[k] = "";
       });
       document.getElementById("rawOcrText").value = "";
+      document.getElementById("previewContainer").style.display = "none";
+      setProgress(0, false);
       updateQuickInputsFromExtracted();
-      renderFormattedSection();
+      renderFormattedSection(false);
       showToast("Campos limpos");
     }
 
-    async function configurarResolucaoEFoco() {
+    // --- CONTROLE DA CAMERA DE FOTO ---
+    async function toggleCamera() {
+      if (cameraAtiva) {
+        pararCamera();
+        return;
+      }
+
+      const container = document.getElementById("camera-container");
+      const videoEl = document.getElementById("cameraVideo");
+      const statusDiv = document.getElementById("scanner-status");
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusDiv.innerText = "Câmera web indisponível. Abrindo câmera nativa...";
+        triggerNativePhotoCapture();
+        return;
+      }
+
       try {
-        const videoEl = document.querySelector("#reader video");
-        if (videoEl && videoEl.srcObject) {
-          const tracks = videoEl.srcObject.getVideoTracks();
-          if (tracks && tracks.length > 0) {
-            videoTrackAtual = tracks[0];
-            const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
-            const constraints = { advanced: [] };
+        flashAtivo = false;
+        document.getElementById("btn-flash").innerText = "🔦 Luz";
+        statusDiv.innerText = "Iniciando câmera em alta resolução...";
 
-            if (caps.focusMode && Array.isArray(caps.focusMode)) {
-              if (caps.focusMode.includes("continuous")) {
-                constraints.advanced.push({ focusMode: "continuous" });
-              } else if (caps.focusMode.includes("single-shot")) {
-                constraints.advanced.push({ focusMode: "single-shot" });
-              }
-            }
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920, max: 3840 },
+            height: { ideal: 1080, max: 2160 }
+          }
+        });
 
-            if (constraints.advanced.length > 0 && videoTrackAtual.applyConstraints) {
-              await videoTrackAtual.applyConstraints(constraints);
-            }
+        videoEl.srcObject = mediaStream;
+        await videoEl.play();
+        container.style.display = "block";
+        cameraAtiva = true;
+
+        const tracks = mediaStream.getVideoTracks();
+        if (tracks && tracks.length > 0) {
+          videoTrackAtual = tracks[0];
+          const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
+          if (caps.focusMode && caps.focusMode.includes("continuous")) {
+            videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
           }
         }
-      } catch (e) {}
+
+        statusDiv.innerText = "📸 Enquadre toda a etiqueta e toque na imagem ou em 'Capturar Foto e Extrair'.";
+      } catch (err) {
+        statusDiv.innerText = "Não foi possível abrir o vídeo direto (" + err.message + "). Abrindo câmera nativa...";
+        triggerNativePhotoCapture();
+      }
+    }
+
+    function pararCamera() {
+      const container = document.getElementById("camera-container");
+      const videoEl = document.getElementById("cameraVideo");
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((t) => t.stop());
+        mediaStream = null;
+      }
+      if (videoEl) {
+        videoEl.srcObject = null;
+      }
+      videoTrackAtual = null;
+      flashAtivo = false;
+      cameraAtiva = false;
+      container.style.display = "none";
     }
 
     async function forcarFoco() {
       const statusDiv = document.getElementById("scanner-status");
       try {
-        if (!videoTrackAtual) {
-          const videoEl = document.querySelector("#reader video");
-          if (videoEl && videoEl.srcObject) {
-            const tracks = videoEl.srcObject.getVideoTracks();
-            if (tracks && tracks.length > 0) videoTrackAtual = tracks[0];
-          }
-        }
         if (videoTrackAtual && videoTrackAtual.applyConstraints) {
           const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
           if (caps.focusMode) {
@@ -1073,13 +1155,13 @@
                 videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
               }, 400);
             }
-            statusDiv.innerText = "🎯 Ajustando foco na etiqueta...";
+            statusDiv.innerText = "🎯 Foco ajustado!";
             return;
           }
         }
-        statusDiv.innerText = "Aproxime ou afaste levemente o celular (~10-15 cm) para focar.";
-      } catch (e) {
-        statusDiv.innerText = "Ajuste a distância (~10-15 cm) para ajudar o foco da câmera.";
+        statusDiv.innerText = "Mantenha o aparelho firme a ~12-18 cm da etiqueta antes de capturar.";
+      } catch (_) {
+        statusDiv.innerText = "Mantenha firme a ~12-18 cm da etiqueta e capture a foto.";
       }
     }
 
@@ -1087,28 +1169,130 @@
       const statusDiv = document.getElementById("scanner-status");
       const btnFlash = document.getElementById("btn-flash");
       try {
-        if (!videoTrackAtual) {
-          const videoEl = document.querySelector("#reader video");
-          if (videoEl && videoEl.srcObject) {
-            const tracks = videoEl.srcObject.getVideoTracks();
-            if (tracks && tracks.length > 0) videoTrackAtual = tracks[0];
-          }
-        }
         if (!videoTrackAtual || !videoTrackAtual.applyConstraints) {
-          statusDiv.innerText = "Lanterna não suportada neste aparelho.";
+          statusDiv.innerText = "Lanterna indisponível neste modo.";
           return;
         }
         const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
         if (!caps.torch) {
-          statusDiv.innerText = "Lanterna não disponível nesta câmera.";
+          statusDiv.innerText = "Lanterna não suportada nesta lente.";
           return;
         }
         flashAtivo = !flashAtivo;
         await videoTrackAtual.applyConstraints({ advanced: [{ torch: flashAtivo }] });
         btnFlash.innerText = flashAtivo ? "🔦 Apagar Luz" : "🔦 Luz";
-      } catch (e) {
-        statusDiv.innerText = "Não foi possível alternar a lanterna.";
+      } catch (_) {
+        statusDiv.innerText = "Erro ao acionar lanterna.";
       }
+    }
+
+    function triggerNativePhotoCapture() {
+      document.getElementById("fileInput").click();
+    }
+
+    async function handlePhotoFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = async function() {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          document.getElementById("capturedPreview").src = e.target.result;
+          document.getElementById("previewContainer").style.display = "block";
+
+          await processarFotoCompletaMultiPassagem(canvas);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    async function capturarFotoEExtrairTudo() {
+      const videoEl = document.getElementById("cameraVideo");
+      const statusDiv = document.getElementById("scanner-status");
+      if (!cameraAtiva || !videoEl || videoEl.readyState < 2 || extracaoEmAndamento) return;
+
+      await forcarFoco();
+      await new Promise((r) => setTimeout(r, 220));
+
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      if (!vw || !vh) {
+        statusDiv.innerText = "Aguarde a imagem da câmera estabilizar e tente novamente.";
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = vw;
+      canvas.height = vh;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(videoEl, 0, 0, vw, vh);
+
+      try {
+        document.getElementById("capturedPreview").src = canvas.toDataURL("image/jpeg", 0.92);
+        document.getElementById("previewContainer").style.display = "block";
+      } catch (_) {}
+
+      await processarFotoCompletaMultiPassagem(canvas);
+    }
+
+    // --- PRE-PROCESSAMENTO DE IMAGEM PARA MAXIMIZAR OCR EM ETIQUETAS ---
+    function criarCanvasPreProcessado(sourceCanvas, mode = "contrast", scaleFactor = 1.6) {
+      const maxDim = 2400;
+      let targetW = Math.round(sourceCanvas.width * scaleFactor);
+      let targetH = Math.round(sourceCanvas.height * scaleFactor);
+      if (targetW > maxDim || targetH > maxDim) {
+        const ratio = Math.min(maxDim / targetW, maxDim / targetH);
+        targetW = Math.round(targetW * ratio);
+        targetH = Math.round(targetH * ratio);
+      }
+
+      const out = document.createElement("canvas");
+      out.width = targetW;
+      out.height = targetH;
+      const ctx = out.getContext("2d", { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(sourceCanvas, 0, 0, targetW, targetH);
+
+      const imgData = ctx.getImageData(0, 0, targetW, targetH);
+      const data = imgData.data;
+
+      // Calcula luminância média para binarização adaptativa
+      let sumLum = 0;
+      const totalPixels = targetW * targetH;
+      for (let i = 0; i < data.length; i += 4) {
+        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        sumLum += lum;
+      }
+      const avgLum = sumLum / Math.max(1, totalPixels);
+
+      for (let i = 0; i < data.length; i += 4) {
+        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        let val;
+        if (mode === "binarize") {
+          const threshold = avgLum * 0.92;
+          val = lum > threshold ? 255 : 0;
+        } else {
+          // Alto contraste + nitidez leve
+          const contrasted = ((lum - 128) * 1.65) + 128;
+          val = Math.max(0, Math.min(255, contrasted));
+        }
+        data[i] = val;
+        data[i + 1] = val;
+        data[i + 2] = val;
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return out;
     }
 
     async function obterOcrWorker() {
@@ -1125,6 +1309,110 @@
       return ocrWorker;
     }
 
+    async function processarFotoCompletaMultiPassagem(photoCanvas) {
+      if (extracaoEmAndamento) return;
+      extracaoEmAndamento = true;
+      const statusDiv = document.getElementById("scanner-status");
+      setProgress(10, true);
+
+      try {
+        const blocosDeTexto = [];
+
+        // Passagem 1: BarcodeDetector nativo (se disponível) na foto inteira
+        statusDiv.innerText = "🔍 Passagem 1/4: Lendo códigos de barras e QR Codes da foto...";
+        if ("BarcodeDetector" in window) {
+          try {
+            const detector = new BarcodeDetector();
+            const barcodes = await detector.detect(photoCanvas);
+            for (const bc of barcodes) {
+              if (bc.rawValue && bc.rawValue.trim()) {
+                blocosDeTexto.push(bc.rawValue.trim());
+              }
+            }
+          } catch (_) {}
+        }
+        setProgress(28, true);
+
+        const worker = await obterOcrWorker();
+        if (!worker) {
+          statusDiv.innerText = "Biblioteca OCR indisponível (verifique conexão com internet).";
+          setProgress(0, false);
+          return;
+        }
+
+        // Passagem 2: OCR na foto ampliada com alto contraste (PSM 6 - bloco uniforme de texto)
+        statusDiv.innerText = "🔍 Passagem 2/4: Extraindo texto de alta definição (alto contraste)...";
+        const canvasContrast = criarCanvasPreProcessado(photoCanvas, "contrast", 1.7);
+        await worker.setParameters({
+          tessedit_pageseg_mode: "6",
+          preserve_interword_spaces: "1"
+        });
+        const res1 = await worker.recognize(canvasContrast);
+        if (res1 && res1.data && res1.data.text) {
+          blocosDeTexto.push(res1.data.text.trim());
+        }
+        setProgress(62, true);
+
+        // Passagem 3: OCR binarizado (preto e branco puro) para letras pequenas de senha/IP
+        statusDiv.innerText = "🔍 Passagem 3/4: Reforçando leitura de senhas (192.168.0.1 e Wi-Fi)...";
+        const canvasBinary = criarCanvasPreProcessado(photoCanvas, "binarize", 1.8);
+        await worker.setParameters({
+          tessedit_pageseg_mode: "11",
+          preserve_interword_spaces: "1"
+        });
+        const res2 = await worker.recognize(canvasBinary);
+        if (res2 && res2.data && res2.data.text) {
+          blocosDeTexto.push(res2.data.text.trim());
+        }
+        setProgress(88, true);
+
+        // Passagem 4: OCR na imagem original sem filtro caso a iluminação já estivesse ideal
+        statusDiv.innerText = "🔍 Passagem 4/4: Consolidando todos os campos extraídos...";
+        await worker.setParameters({
+          tessedit_pageseg_mode: "3",
+          preserve_interword_spaces: "1"
+        });
+        const res3 = await worker.recognize(photoCanvas);
+        if (res3 && res3.data && res3.data.text) {
+          blocosDeTexto.push(res3.data.text.trim());
+        }
+        setProgress(100, true);
+
+        const textoConsolidado = blocosDeTexto.filter(Boolean).join("\n--- PASSAGEM ---\n");
+        document.getElementById("rawOcrText").value = textoConsolidado;
+
+        // Reseta e extrai tudo do zero a partir das 4 passagens
+        Object.keys(extractedData).forEach((k) => {
+          extractedData[k] = "";
+        });
+        parseEmtaLabelText(textoConsolidado, false);
+        updateQuickInputsFromExtracted();
+        renderFormattedSection(true);
+
+        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+
+        const faltantes = [];
+        if (!extractedData.ipUser) faltantes.push("Usuário 192.168.0.1");
+        if (!extractedData.ipPass) faltantes.push("Senha 192.168.0.1");
+        if (!extractedData.ssid24 && !extractedData.ssid5) faltantes.push("SSID CLARO_/NET_");
+        if (!extractedData.wifiPass) faltantes.push("Senha Wi-Fi");
+
+        if (faltantes.length === 0) {
+          statusDiv.innerText = "✅ Extração máxima concluída! Usuário/Senha 192.168.0.1 e Wi-Fi preenchidos.";
+          showToast("Todas as credenciais extraídas!");
+        } else {
+          statusDiv.innerText = `⚠️ Foto extraída! Verifique/complete se necessário: ${faltantes.join(", ")}.`;
+          showToast("Extração concluída — confira os campos");
+        }
+      } catch (err) {
+        statusDiv.innerText = "Erro ao processar foto: " + err.message;
+      } finally {
+        extracaoEmAndamento = false;
+        setTimeout(() => setProgress(0, false), 1200);
+      }
+    }
+
+    // --- PARSER AVANCADO PARA ETIQUETAS CLARO_ E NET_ ---
     function normalizeMac(rawMac) {
       const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
       if (hex.length === 12) {
@@ -1135,33 +1423,47 @@
 
     function cleanCredentialToken(raw) {
       return (raw || "")
-        .replace(/^[\s:=\-–—]+|[\s.,;]+$/g, "")
+        .replace(/^[\s:=\-–—•·|"'`]+|[\s.,;|"'`]+$/g, "")
         .trim();
     }
 
+    function normalizeOcrSsid(rawSsid) {
+      // Corrige pequenas confusões comuns do OCR no prefixo CLARO_ ou NET_
+      return rawSsid
+        .replace(/^CLAR0_/i, "CLARO_")
+        .replace(/^CL4RO_/i, "CLARO_")
+        .replace(/^N3T_/i, "NET_")
+        .replace(/\s+/g, "")
+        .trim();
+    }
+
+    function isLikelyLabelKeyword(token) {
+      return /^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1)$/i.test(token);
+    }
+
     function parseEmtaLabelText(text, mergeMode = false) {
-      const lines = (text || "")
+      const rawText = (text || "");
+      const lines = rawText
         .split(/\r?\n/)
         .map((l) => l.trim())
-        .filter(Boolean);
+        .filter((l) => l && l !== "--- PASSAGEM ---");
       const joined = lines.join("\n");
 
-      // DOCSIS (ex: DOCSIS 3.1, DOCSIS 3.0, D3.1, D3.0)
+      // 1. DOCSIS
       const docsisMatch =
         joined.match(/\bDOCSIS\s*[:=\-]?\s*(3\.[01]|2\.0|1\.[01])\b/i) ||
         joined.match(/\bD\s*(3\.[01])\b/i);
       if (docsisMatch) {
-        const ver = docsisMatch[1].trim();
-        extractedData.docsis = /^DOCSIS/i.test(docsisMatch[0]) ? `DOCSIS ${ver}` : `DOCSIS ${ver}`;
+        extractedData.docsis = `DOCSIS ${docsisMatch[1].trim()}`;
       }
 
-      // Fabricante
+      // 2. Fabricante
       const mfgMatch = joined.match(/\b(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
       if (mfgMatch) {
         extractedData.manufacturer = mfgMatch[1].toUpperCase();
       }
 
-      // Modelo
+      // 3. Modelo
       const modelMatch =
         joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
         joined.match(/\b((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
@@ -1169,7 +1471,7 @@
         extractedData.model = modelMatch[1].trim();
       }
 
-      // Input / Alimentação
+      // 4. Input / Alimentação
       const inputMatch =
         joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
         joined.match(/\b([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)\b/i);
@@ -1177,21 +1479,21 @@
         extractedData.inputPower = inputMatch[1].trim();
       }
 
-      // Fabr. / Data / Lote
+      // 5. Fabr. / Data / Lote
       const fabrMatch =
         joined.match(/(?:fabr\.?|fabrica[cç][aã]o|mfd|date)\s*[:=\-]?\s*([0-9]{1,4}[\/\-][0-9]{1,2}(?:[\/\-][0-9]{2,4})?|[A-Za-z0-9\-]{3,16})/i);
       if (fabrMatch) {
         extractedData.fabr = fabrMatch[1].trim();
       }
 
-      // S/N
+      // 6. S/N
       const snMatch =
         joined.match(/(?:s\/n|sn|serial(?:\s*(?:no|num|number))?|n[º°o]?\s*s[eé]rie)\s*[:=\-]?\s*([A-Za-z0-9\-]{6,26})/i);
       if (snMatch) {
         extractedData.sn = snMatch[1].trim().toUpperCase();
       }
 
-      // MACs (CM MAC / eMTA MAC)
+      // 7. MACs (CM MAC / eMTA MAC)
       const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
       const allMacsRaw = [];
       let mMac;
@@ -1217,12 +1519,15 @@
         extractedData.emtaMac = uniqueMacs.find((mc) => mc !== extractedData.cmMac) || uniqueMacs[1];
       }
 
-      // SSIDs exclusivamente da Claro (CLARO_...)
+      // 8. Redes Wi-Fi: sempre procurar nomes começando com "CLARO_" ou "NET_"
       const ssidMatches = [];
-      const ssidRegex = /\b(CLARO_[A-Za-z0-9_\-]{2,32})\b/gi;
+      const ssidRegex = /\b((?:CLARO|CLAR0|CL4RO|NET|N3T)_[A-Za-z0-9_\-]{2,36})\b/gi;
       let sMatch;
       while ((sMatch = ssidRegex.exec(joined)) !== null) {
-        ssidMatches.push(sMatch[1].trim());
+        const norm = normalizeOcrSsid(sMatch[1]);
+        if (!ssidMatches.includes(norm)) {
+          ssidMatches.push(norm);
+        }
       }
 
       for (const ssid of ssidMatches) {
@@ -1239,308 +1544,124 @@
         }
       }
 
-      // Usuário 192.168.0.1
-      const ipUserMatch =
-        joined.match(/(?:192\.168\.0\.1[^\n]{0,120}?)?(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
-      if (ipUserMatch) {
-        extractedData.ipUser = cleanCredentialToken(ipUserMatch[1]);
-      } else if (/\badmin\b/i.test(joined) && !extractedData.ipUser) {
+      // 9. Análise linha a linha para Usuário e Senha do IP 192.168.0.1 e Senha Wi-Fi
+      let contextoAtual = ""; // "ip" ou "wifi"
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const nextLine = lines[i + 1] || "";
+
+        if (/192\.168\.0\.1|configura[cç][aã]o|acesso\s*(?:ao\s*)?(?:modem|roteador|gateway)|admin/i.test(line)) {
+          contextoAtual = "ip";
+        }
+        if (/wi-?fi|wlan|wireless|ssid|wpa|psk|(?:CLARO|NET)_/i.test(line)) {
+          contextoAtual = "wifi";
+        }
+
+        // Captura Usuário 192.168.0.1
+        const usrLineMatch = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
+        if (usrLineMatch && !isLikelyLabelKeyword(usrLineMatch[1])) {
+          if (!extractedData.ipUser || contextoAtual === "ip") {
+            extractedData.ipUser = cleanCredentialToken(usrLineMatch[1]);
+          }
+        } else if (/^(?:user(?:name)?|usu[aá]rio|login)\s*[:=\-]?$/i.test(line) && nextLine) {
+          const cand = cleanCredentialToken(nextLine.split(/\s+/)[0]);
+          if (cand && !isLikelyLabelKeyword(cand) && !extractedData.ipUser) {
+            extractedData.ipUser = cand;
+          }
+        }
+
+        // Captura Senha Wi-Fi (se estiver no contexto Wi-Fi ou rótulo explícito de Wi-Fi/WPA/PSK)
+        const explicitWifiPass = line.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
+        if (explicitWifiPass && !isLikelyLabelKeyword(explicitWifiPass[1])) {
+          extractedData.wifiPass = cleanCredentialToken(explicitWifiPass[1]);
+        }
+
+        // Captura Senha 192.168.0.1 (rótulo explícito de admin/login/192.168.0.1)
+        const explicitIpPass = line.match(/(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login|acesso)|login\s*(?:pass(?:word)?|senha))\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
+        if (explicitIpPass && !isLikelyLabelKeyword(explicitIpPass[1])) {
+          extractedData.ipPass = cleanCredentialToken(explicitIpPass[1]);
+        }
+
+        // Rótulos genéricos "Password:" / "Senha:" / "Key:" diferenciados pelo contexto (IP vs Wi-Fi)
+        const genericPassMatch = line.match(/^(?:pass(?:word)?|senha|pwd|key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})?$/i);
+        if (genericPassMatch) {
+          let candidate = cleanCredentialToken(genericPassMatch[1] || "");
+          if (!candidate && nextLine) {
+            candidate = cleanCredentialToken(nextLine.split(/\s+/)[0]);
+          }
+          if (candidate && !isLikelyLabelKeyword(candidate)) {
+            if (contextoAtual === "wifi") {
+              if (!extractedData.wifiPass) extractedData.wifiPass = candidate;
+            } else if (contextoAtual === "ip") {
+              if (!extractedData.ipPass) extractedData.ipPass = candidate;
+            } else {
+              // Se ainda não há senha de IP, preenche IP primeiro e depois Wi-Fi
+              if (!extractedData.ipPass) {
+                extractedData.ipPass = candidate;
+              } else if (!extractedData.wifiPass && candidate !== extractedData.ipPass) {
+                extractedData.wifiPass = candidate;
+              }
+            }
+          }
+        }
+
+        // Se a linha contém "192.168.0.1" e um token de senha logo após na mesma linha ou na seguinte
+        if (/192\.168\.0\.1/.test(line)) {
+          const inlineCred = line.match(/192\.168\.0\.1.*?(?:user|usu[aá]rio|login)?\s*[:=\-]?\s*(admin|[A-Za-z0-9._\-]{3,20})?\s*(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
+          if (inlineCred) {
+            if (inlineCred[1] && !extractedData.ipUser) extractedData.ipUser = cleanCredentialToken(inlineCred[1]);
+            if (inlineCred[2] && !extractedData.ipPass) extractedData.ipPass = cleanCredentialToken(inlineCred[2]);
+          }
+        }
+
+        // Se a linha contém o SSID CLARO_ ou NET_ e logo depois vem a senha na mesma linha ou na próxima
+        if (/(?:CLARO|NET)_[A-Za-z0-9_\-]+/i.test(line)) {
+          const sameLineAfterSsid = line.replace(/.*?(?:CLARO|NET)_[A-Za-z0-9_\-]+/i, "").trim();
+          const passAfterSsid = sameLineAfterSsid.match(/(?:pass(?:word)?|senha|key|wpa2?|psk)?\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
+          if (passAfterSsid && !isLikelyLabelKeyword(passAfterSsid[1]) && !/^(?:CLARO|NET)_/i.test(passAfterSsid[1]) && !extractedData.wifiPass) {
+            extractedData.wifiPass = cleanCredentialToken(passAfterSsid[1]);
+          }
+        }
+      }
+
+      // 10. Fallbacks globais multi-linha se algum dos campos críticos ainda ficou vazio
+      if (!extractedData.ipUser && /\badmin\b/i.test(joined)) {
         extractedData.ipUser = "admin";
       }
 
-      // Senha 192.168.0.1 (suporta formatos em linha ou quebra de linha após rótulo)
-      const ipPassMatch =
-        joined.match(/(?:192\.168\.0\.1[^\n]{0,140}?)?(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login)|login\s*(?:pass(?:word)?|senha)|pass(?:word)?|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
-      if (ipPassMatch) {
-        extractedData.ipPass = cleanCredentialToken(ipPassMatch[1]);
-      }
-
-      // Senha Wi-Fi da Claro (suporta Wi-Fi Pass / Wi-Fi Key / WPA / Senha Wi-Fi / PSK em mesma linha ou próxima linha)
-      const wifiPassMatch =
-        joined.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
-      if (wifiPassMatch) {
-        extractedData.wifiPass = cleanCredentialToken(wifiPassMatch[1]);
-      }
-
-      // Fallback caso venha um código MAC puro de 12 hexadecimais
-      if (!mergeMode && uniqueMacs.length === 0 && ssidMatches.length === 0 && !modelMatch && !snMatch && !docsisMatch) {
-        const cleanCode = joined.replace(/\s+/g, "").trim();
-        if (/^[0-9A-Fa-f]{12}$/.test(cleanCode) && !extractedData.cmMac) {
-          extractedData.cmMac = normalizeMac(cleanCode);
-        }
-      }
-    }
-
-    function aplicarLeituraNaTela(textoBruto, mergeMode = true) {
-      if (!textoBruto || !textoBruto.trim()) return;
-      const rawBox = document.getElementById("rawOcrText");
-      if (mergeMode && rawBox.value.trim()) {
-        rawBox.value = rawBox.value.trim() + "\n" + textoBruto.trim();
-      } else {
-        rawBox.value = textoBruto.trim();
-      }
-      parseEmtaLabelText(rawBox.value, false);
-      updateQuickInputsFromExtracted();
-      renderFormattedSection();
-    }
-
-    async function capturarDaMiraAoClicar() {
-      const statusDiv = document.getElementById("scanner-status");
-      const videoEl = document.querySelector("#reader video");
-      if (!cameraAtiva) return;
-
-      forcarFoco().catch(() => {});
-      if (cliqueEmAndamento || !videoEl || videoEl.readyState < 2) return;
-
-      cliqueEmAndamento = true;
-      statusDiv.innerText = "📸 Lendo etiqueta na mira...";
-
-      try {
-        const vw = videoEl.videoWidth;
-        const vh = videoEl.videoHeight;
-        if (!vw || !vh) return;
-
-        const cropW = Math.floor(vw * 0.92);
-        const cropH = Math.floor(vh * 0.45);
-        const cropX = Math.floor((vw - cropW) / 2);
-        const cropY = Math.floor((vh - cropH) / 2);
-
-        const canvas = document.createElement("canvas");
-        canvas.width = cropW;
-        canvas.height = cropH;
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-        let encontrouAlgo = false;
-
-        if ("BarcodeDetector" in window) {
-          try {
-            const detector = new BarcodeDetector();
-            const barcodes = await detector.detect(canvas);
-            for (const bc of barcodes) {
-              if (bc.rawValue && bc.rawValue.trim()) {
-                aplicarLeituraNaTela(bc.rawValue.trim(), true);
-                encontrouAlgo = true;
-              }
-            }
-          } catch (e) {}
-        }
-
-        const worker = await obterOcrWorker();
-        if (worker && !ocrOcupado) {
-          ocrOcupado = true;
-          try {
-            const { data: { text } } = await worker.recognize(canvas);
-            if (text && text.trim()) {
-              aplicarLeituraNaTela(text.trim(), true);
-              encontrouAlgo = true;
-            }
-          } finally {
-            ocrOcupado = false;
-          }
-        }
-
-        if (encontrouAlgo) {
-          if (navigator.vibrate) navigator.vibrate([70, 30, 70]);
-          statusDiv.innerText = "✅ Dados extraídos! Confira os campos no topo e no fim da página.";
-        } else {
-          statusDiv.innerText = "Sem texto nítido na captura. Aproxime ou toque em 'Foto / Arquivo'.";
-        }
-      } catch (e) {
-        statusDiv.innerText = "Erro ao ler mira: " + e.message;
-      } finally {
-        cliqueEmAndamento = false;
-      }
-    }
-
-    function iniciarLeituraHibrida() {
-      const videoEl = document.querySelector("#reader video");
-      if (!videoEl) return;
-
-      if (intervaloLeituraRapida) {
-        clearInterval(intervaloLeituraRapida);
-        intervaloLeituraRapida = null;
-      }
-
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      let detectorNativo = null;
-
-      if ("BarcodeDetector" in window) {
-        try {
-          detectorNativo = new BarcodeDetector();
-        } catch (e) {
-          detectorNativo = null;
+      if (!extractedData.ipPass) {
+        const globalIpPass = joined.match(/(?:192\.168\.0\.1[\s\S]{0,160}?)(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
+        if (globalIpPass && !isLikelyLabelKeyword(globalIpPass[1])) {
+          extractedData.ipPass = cleanCredentialToken(globalIpPass[1]);
         }
       }
 
-      obterOcrWorker().catch(() => {});
-
-      let cicloEmExecucao = false;
-      intervaloLeituraRapida = setInterval(async () => {
-        if (!cameraAtiva || cicloEmExecucao || !videoEl || videoEl.readyState < 2) return;
-        cicloEmExecucao = true;
-        try {
-          const vw = videoEl.videoWidth;
-          const vh = videoEl.videoHeight;
-          if (!vw || !vh) return;
-
-          const cropW = Math.floor(vw * 0.90);
-          const cropH = Math.floor(vh * 0.35);
-          const cropX = Math.floor((vw - cropW) / 2);
-          const cropY = Math.floor((vh - cropH) / 2);
-
-          canvas.width = cropW;
-          canvas.height = cropH;
-          ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-          if (detectorNativo) {
-            const barcodes = await detectorNativo.detect(canvas);
-            for (const bc of barcodes) {
-              if (bc.rawValue && bc.rawValue.trim()) {
-                aplicarLeituraNaTela(bc.rawValue.trim(), true);
-              }
-            }
-          }
-        } catch (e) {}
-        finally {
-          cicloEmExecucao = false;
+      if (!extractedData.wifiPass) {
+        const globalWifiPass = joined.match(/(?:(?:CLARO|NET)_[A-Za-z0-9_\-]+[\s\S]{0,160}?)(?:pass(?:word)?|senha|key|wpa(?:2|3)?|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
+        if (globalWifiPass && !isLikelyLabelKeyword(globalWifiPass[1])) {
+          extractedData.wifiPass = cleanCredentialToken(globalWifiPass[1]);
         }
-      }, 450);
-    }
-
-    function toggleScanner() {
-      const container = document.getElementById("reader-container");
-      const statusDiv = document.getElementById("scanner-status");
-
-      if (!cameraAtiva) {
-        container.style.display = "block";
-        flashAtivo = false;
-        videoTrackAtual = null;
-        document.getElementById("btn-flash").innerText = "🔦 Luz";
-        statusDiv.innerText = "Alinhe a linha vermelha na etiqueta e toque na tela da câmera para capturar.";
-
-        const formatosSuportados = [
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.CODE_93,
-          Html5QrcodeSupportedFormats.ITF,
-          Html5QrcodeSupportedFormats.CODABAR,
-          Html5QrcodeSupportedFormats.QR_CODE,
-          Html5QrcodeSupportedFormats.DATA_MATRIX
-        ];
-
-        html5QrCode = new Html5Qrcode("reader", {
-          formatsToSupport: formatosSuportados,
-          useBarCodeDetectorIfSupported: false,
-          verbose: false
-        });
-
-        const cameraConfig = {
-          facingMode: "environment",
-          focusMode: "continuous"
-        };
-
-        html5QrCode.start(
-          cameraConfig,
-          {
-            fps: 20,
-            videoConstraints: {
-              facingMode: { ideal: "environment" },
-              width: { min: 640, ideal: 1280, max: 1920 },
-              height: { min: 480, ideal: 720, max: 1080 },
-              focusMode: { ideal: "continuous" }
-            },
-            qrbox: function(viewfinderWidth, viewfinderHeight) {
-              return {
-                width: Math.floor(viewfinderWidth * 0.88),
-                height: Math.floor(viewfinderHeight * 0.45)
-              };
-            }
-          },
-          (decodedText) => {
-            if (decodedText && decodedText.trim()) {
-              aplicarLeituraNaTela(decodedText.trim(), true);
-              statusDiv.innerText = "✅ Código lido! Toque na mira para ler o restante da etiqueta ou desligue a câmera.";
-            }
-          },
-          (errorMessage) => {}
-        ).then(() => {
-          setTimeout(() => {
-            configurarResolucaoEFoco();
-            iniciarLeituraHibrida();
-          }, 300);
-        }).catch(err => {
-          statusDiv.innerText = "Erro ao acessar câmera (" + err + "). Abrindo Foto / Arquivo...";
-          triggerFileFallback();
-        });
-        cameraAtiva = true;
-      } else {
-        pararScanner();
       }
-    }
 
-    function pararScanner() {
-      const container = document.getElementById("reader-container");
-      if (intervaloLeituraRapida) {
-        clearInterval(intervaloLeituraRapida);
-        intervaloLeituraRapida = null;
+      // Fallback para QR Code Wi-Fi padrão (WIFI:S:CLARO_XXX;T:WPA;P:SENHA;;)
+      const qrWifiMatch = joined.match(/WIFI:[^;\n]*S:((?:CLARO|NET)_[^;\n]+)[^;\n]*;[^;\n]*P:([^;\n]+)/i);
+      if (qrWifiMatch) {
+        const qrSsid = normalizeOcrSsid(qrWifiMatch[1]);
+        const qrPass = cleanCredentialToken(qrWifiMatch[2]);
+        if (!extractedData.ssid24) extractedData.ssid24 = qrSsid;
+        if (!extractedData.wifiPass) extractedData.wifiPass = qrPass;
       }
-      videoTrackAtual = null;
-      flashAtivo = false;
-      if (html5QrCode && cameraAtiva) {
-        html5QrCode.stop().then(() => {
-          container.style.display = "none";
-          cameraAtiva = false;
-        }).catch(() => {
-          container.style.display = "none";
-          cameraAtiva = false;
-        });
-      } else {
-        container.style.display = "none";
-        cameraAtiva = false;
-      }
-    }
-
-    function triggerFileFallback() {
-      document.getElementById("fileInput").click();
-    }
-
-    async function handleFileUpload(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = async function() {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-
-          const worker = await obterOcrWorker();
-          if (worker) {
-            showToast("Lendo etiqueta da foto...");
-            const { data: { text } } = await worker.recognize(canvas);
-            if (text && text.trim()) {
-              aplicarLeituraNaTela(text.trim(), false);
-              showToast("Etiqueta extraída!");
-            }
-          }
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-      event.target.value = "";
     }
 
     function reparseFromTextarea() {
       const rawText = document.getElementById("rawOcrText").value || "";
+      Object.keys(extractedData).forEach((k) => {
+        extractedData[k] = "";
+      });
       parseEmtaLabelText(rawText, false);
       updateQuickInputsFromExtracted();
-      renderFormattedSection();
+      renderFormattedSection(true);
       showToast("Texto reprocessado!");
     }
 
@@ -1549,22 +1670,28 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(archiveList));
     }
 
+    function cleanDisplayValue(id) {
+      const txt = (document.getElementById(id).textContent || "").trim();
+      if (!txt || txt === "—" || txt.startsWith("(Não identificado")) return "";
+      return txt;
+    }
+
     function arquivarRegistroAtual() {
       const registro = {
         id: Date.now(),
         dataHora: obterDataAtual(),
-        docsis: document.getElementById("parsedDocsis").textContent === "—" ? "" : document.getElementById("parsedDocsis").textContent.trim(),
-        model: document.getElementById("parsedModel").textContent === "—" ? "" : document.getElementById("parsedModel").textContent.trim(),
-        manufacturer: document.getElementById("parsedManufacturer").textContent === "—" ? "" : document.getElementById("parsedManufacturer").textContent.trim(),
-        inputPower: document.getElementById("parsedInput").textContent === "—" ? "" : document.getElementById("parsedInput").textContent.trim(),
-        fabr: document.getElementById("parsedFabr").textContent === "—" ? "" : document.getElementById("parsedFabr").textContent.trim(),
-        sn: document.getElementById("parsedSn").textContent === "—" ? "" : document.getElementById("parsedSn").textContent.trim(),
-        cmMac: document.getElementById("parsedCmMac").textContent === "—" ? "" : document.getElementById("parsedCmMac").textContent.trim(),
-        emtaMac: document.getElementById("parsedEmtaMac").textContent === "—" ? "" : document.getElementById("parsedEmtaMac").textContent.trim(),
+        docsis: cleanDisplayValue("parsedDocsis"),
+        model: cleanDisplayValue("parsedModel"),
+        manufacturer: cleanDisplayValue("parsedManufacturer"),
+        inputPower: cleanDisplayValue("parsedInput"),
+        fabr: cleanDisplayValue("parsedFabr"),
+        sn: cleanDisplayValue("parsedSn"),
+        cmMac: cleanDisplayValue("parsedCmMac"),
+        emtaMac: cleanDisplayValue("parsedEmtaMac"),
         ipUser: document.getElementById("ipUser").value.trim(),
         ipPass: document.getElementById("ipPass").value.trim(),
-        ssid24: document.getElementById("parsedSsid24").textContent === "—" ? "" : document.getElementById("parsedSsid24").textContent.trim(),
-        ssid5: document.getElementById("parsedSsid5").textContent === "—" ? "" : document.getElementById("parsedSsid5").textContent.trim(),
+        ssid24: cleanDisplayValue("parsedSsid24"),
+        ssid5: cleanDisplayValue("parsedSsid5"),
         wifiPass: document.getElementById("wifiPass").value.trim()
       };
 
@@ -1606,7 +1733,7 @@
       extractedData.wifiPass = item.wifiPass || "";
 
       updateQuickInputsFromExtracted();
-      renderFormattedSection();
+      renderFormattedSection(false);
       showToast("Registro carregado nos campos");
     }
 
@@ -1638,15 +1765,16 @@
       }
 
       filtrados.forEach((item) => {
+        const ipCred = [item.ipUser, item.ipPass].filter(Boolean).join(" / ") || "—";
         const wifiResumo = [item.ssid24, item.ssid5].filter(Boolean).join(" / ") || "—";
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${item.dataHora || "-"}</td>
           <td>${item.docsis || "—"}</td>
           <td>${item.model || "—"}</td>
-          <td>${item.sn || "—"}</td>
-          <td>${item.cmMac || "—"}</td>
+          <td>${ipCred}</td>
           <td>${wifiResumo}</td>
+          <td>${item.wifiPass || "—"}</td>
           <td>
             <button type="button" class="btn btn-secondary" style="padding:5px 8px;font-size:0.72rem;" onclick="carregarRegistroNaTela(${item.id})">Usar</button>
             <button type="button" class="btn btn-danger" onclick="removerRegistroArquivado(${item.id})">Excluir</button>
@@ -1674,7 +1802,7 @@
         showToast("Sem registros para exportar em JSON");
         return;
       }
-      downloadBlob(JSON.stringify(lista, null, 2), "arquivo_emta_ont_claro.json", "application/json;charset=utf-8");
+      downloadBlob(JSON.stringify(lista, null, 2), "arquivo_emta_ont_claro_net.json", "application/json;charset=utf-8");
       showToast("JSON exportado!");
     }
 
@@ -1743,7 +1871,7 @@
       ].map(escapeCsv).join(";"));
 
       const csv = "\uFEFF" + [headers.map(escapeCsv).join(";"), ...rows].join("\n");
-      downloadBlob(csv, "arquivo_emta_ont_claro.csv", "text/csv;charset=utf-8");
+      downloadBlob(csv, "arquivo_emta_ont_claro_net.csv", "text/csv;charset=utf-8");
       showToast("CSV exportado!");
     }
 
@@ -1856,7 +1984,7 @@
       doc.setTextColor(227, 6, 19);
       doc.setFontSize(15);
       doc.setFont(undefined, "bold");
-      doc.text("Arquivo eMTA / ONT - 192.168.0.1 (Claro)", 14, 15);
+      doc.text("Arquivo eMTA / ONT - 192.168.0.1 (Claro / NET)", 14, 15);
 
       doc.setTextColor(90, 90, 90);
       doc.setFontSize(9);
@@ -1864,15 +1992,14 @@
       doc.text(`Gerado em: ${obterDataAtual()} | Total: ${lista.length} registro(s)`, 14, 22);
 
       const colunas = [
-        "Data/Hora", "DOCSIS", "Modelo", "Fabr.", "S/N", "CM MAC",
-        "eMTA MAC", "192.168.0.1", "SSID 2.4G / 5G", "Senha Wi-Fi"
+        "Data/Hora", "DOCSIS", "Modelo", "S/N", "CM MAC",
+        "eMTA MAC", "192.168.0.1 (Usr/Senha)", "SSID 2.4G / 5G", "Senha Wi-Fi"
       ];
 
       const linhas = lista.map((r) => [
         r.dataHora || "-",
         r.docsis || "-",
         r.model || "-",
-        r.fabr || "-",
         r.sn || "-",
         r.cmMac || "-",
         r.emtaMac || "-",
@@ -1899,7 +2026,7 @@
         margin: { left: 14, right: 14 }
       });
 
-      doc.save("arquivo_emta_ont_claro.pdf");
+      doc.save("arquivo_emta_ont_claro_net.pdf");
       showToast("PDF exportado!");
     }
 
@@ -1928,7 +2055,13 @@
           return;
         }
 
-        aplicarLeituraNaTela(extractedText, false);
+        document.getElementById("rawOcrText").value = extractedText;
+        Object.keys(extractedData).forEach((k) => {
+          extractedData[k] = "";
+        });
+        parseEmtaLabelText(extractedText, false);
+        updateQuickInputsFromExtracted();
+        renderFormattedSection(true);
         arquivarRegistroAtual();
         showToast("Dados extraídos e arquivados a partir do PDF!");
       } catch (err) {
@@ -1939,7 +2072,7 @@
     }
 
     updateQuickInputsFromExtracted();
-    renderFormattedSection();
+    renderFormattedSection(false);
     renderArchiveTable();
   </script>
 </body>
