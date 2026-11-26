@@ -610,7 +610,7 @@
             type="text"
             id="ipUser"
             class="quick-input"
-            placeholder="Usuário admin..."
+            placeholder="CLARO_... ou admin"
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -628,7 +628,7 @@
             type="text"
             id="ipPass"
             class="quick-input"
-            placeholder="Senha admin..."
+            placeholder="Senha 192.168.0.1..."
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -869,14 +869,14 @@
   <div class="toast" id="toast">Copiado para a área de transferência!</div>
 
   <!-- RODAPE FIXO: ATUALIZADO SOMENTE QUANDO EDITAR A REVISAO -->
-  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37</footer>
+  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.2 - 26/11/2026 20:30</footer>
 
   <script>
     // Metadados da revisão (atualizar manualmente apenas quando houver edição de revisão)
     const APP_REVISION = Object.freeze({
       author: "Fernando Sato",
-      version: "1.1",
-      updatedAt: "24/11/2026 20:37"
+      version: "1.2",
+      updatedAt: "26/11/2026 20:30"
     });
 
     (function renderStaticFooter() {
@@ -1244,9 +1244,9 @@
       await processarFotoCompletaMultiPassagem(canvas);
     }
 
-    // --- PRE-PROCESSAMENTO DE IMAGEM PARA MAXIMIZAR OCR EM ETIQUETAS ---
-    function criarCanvasPreProcessado(sourceCanvas, mode = "contrast", scaleFactor = 1.6) {
-      const maxDim = 2400;
+    // --- PRE-PROCESSAMENTO DE IMAGEM PARA PRESERVAR UNDERLINE (_) E CARACTERES PEQUENOS ---
+    function criarCanvasPreProcessado(sourceCanvas, mode = "contrast", scaleFactor = 2.0) {
+      const maxDim = 2800;
       let targetW = Math.round(sourceCanvas.width * scaleFactor);
       let targetH = Math.round(sourceCanvas.height * scaleFactor);
       if (targetW > maxDim || targetH > maxDim) {
@@ -1266,7 +1266,6 @@
       const imgData = ctx.getImageData(0, 0, targetW, targetH);
       const data = imgData.data;
 
-      // Calcula luminância média para binarização adaptativa
       let sumLum = 0;
       const totalPixels = targetW * targetH;
       for (let i = 0; i < data.length; i += 4) {
@@ -1279,11 +1278,14 @@
         const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         let val;
         if (mode === "binarize") {
-          const threshold = avgLum * 0.92;
+          // Limiar suave (0.86) para não apagar traços finos horizontais como o underline "_"
+          const threshold = avgLum * 0.86;
           val = lum > threshold ? 255 : 0;
+        } else if (mode === "soft_contrast") {
+          const contrasted = ((lum - 128) * 1.45) + 128;
+          val = Math.max(0, Math.min(255, contrasted));
         } else {
-          // Alto contraste + nitidez leve
-          const contrasted = ((lum - 128) * 1.65) + 128;
+          const contrasted = ((lum - 128) * 1.75) + 128;
           val = Math.max(0, Math.min(255, contrasted));
         }
         data[i] = val;
@@ -1331,7 +1333,7 @@
             }
           } catch (_) {}
         }
-        setProgress(28, true);
+        setProgress(25, true);
 
         const worker = await obterOcrWorker();
         if (!worker) {
@@ -1340,9 +1342,9 @@
           return;
         }
 
-        // Passagem 2: OCR na foto ampliada com alto contraste (PSM 6 - bloco uniforme de texto)
-        statusDiv.innerText = "🔍 Passagem 2/4: Extraindo texto de alta definição (alto contraste)...";
-        const canvasContrast = criarCanvasPreProcessado(photoCanvas, "contrast", 1.7);
+        // Passagem 2: OCR em alta escala (2.0x) com contraste preservando underline "_"
+        statusDiv.innerText = "🔍 Passagem 2/4: Lendo CLARO_ / NET_ e credenciais 192.168.0.1...";
+        const canvasContrast = criarCanvasPreProcessado(photoCanvas, "soft_contrast", 2.0);
         await worker.setParameters({
           tessedit_pageseg_mode: "6",
           preserve_interword_spaces: "1"
@@ -1351,11 +1353,11 @@
         if (res1 && res1.data && res1.data.text) {
           blocosDeTexto.push(res1.data.text.trim());
         }
-        setProgress(62, true);
+        setProgress(58, true);
 
-        // Passagem 3: OCR binarizado (preto e branco puro) para letras pequenas de senha/IP
-        statusDiv.innerText = "🔍 Passagem 3/4: Reforçando leitura de senhas (192.168.0.1 e Wi-Fi)...";
-        const canvasBinary = criarCanvasPreProcessado(photoCanvas, "binarize", 1.8);
+        // Passagem 3: OCR binarizado com limiar suave para traços finos (_) e senhas pequenas
+        statusDiv.innerText = "🔍 Passagem 3/4: Reforçando leitura de underline (_) e senhas...";
+        const canvasBinary = criarCanvasPreProcessado(photoCanvas, "binarize", 2.1);
         await worker.setParameters({
           tessedit_pageseg_mode: "11",
           preserve_interword_spaces: "1"
@@ -1364,9 +1366,9 @@
         if (res2 && res2.data && res2.data.text) {
           blocosDeTexto.push(res2.data.text.trim());
         }
-        setProgress(88, true);
+        setProgress(85, true);
 
-        // Passagem 4: OCR na imagem original sem filtro caso a iluminação já estivesse ideal
+        // Passagem 4: OCR na imagem original (PSM 3)
         statusDiv.innerText = "🔍 Passagem 4/4: Consolidando todos os campos extraídos...";
         await worker.setParameters({
           tessedit_pageseg_mode: "3",
@@ -1381,7 +1383,6 @@
         const textoConsolidado = blocosDeTexto.filter(Boolean).join("\n--- PASSAGEM ---\n");
         document.getElementById("rawOcrText").value = textoConsolidado;
 
-        // Reseta e extrai tudo do zero a partir das 4 passagens
         Object.keys(extractedData).forEach((k) => {
           extractedData[k] = "";
         });
@@ -1398,10 +1399,10 @@
         if (!extractedData.wifiPass) faltantes.push("Senha Wi-Fi");
 
         if (faltantes.length === 0) {
-          statusDiv.innerText = "✅ Extração máxima concluída! Usuário/Senha 192.168.0.1 e Wi-Fi preenchidos.";
+          statusDiv.innerText = "✅ Extração concluída! Usuário/Senha 192.168.0.1 e Wi-Fi CLARO_/NET_ preenchidos.";
           showToast("Todas as credenciais extraídas!");
         } else {
-          statusDiv.innerText = `⚠️ Foto extraída! Verifique/complete se necessário: ${faltantes.join(", ")}.`;
+          statusDiv.innerText = `⚠️ Foto extraída! Confira/complete: ${faltantes.join(", ")}.`;
           showToast("Extração concluída — confira os campos");
         }
       } catch (err) {
@@ -1412,7 +1413,7 @@
       }
     }
 
-    // --- PARSER AVANCADO PARA ETIQUETAS CLARO_ E NET_ ---
+    // --- PARSER REFORCADO PARA CAPTURAR UNDERLINE (_), CLARO_, NET_, USUARIO E SENHA 192.168.0.1 ---
     function normalizeMac(rawMac) {
       const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
       if (hex.length === 12) {
@@ -1427,18 +1428,62 @@
         .trim();
     }
 
-    function normalizeOcrSsid(rawSsid) {
-      // Corrige pequenas confusões comuns do OCR no prefixo CLARO_ ou NET_
-      return rawSsid
-        .replace(/^CLAR0_/i, "CLARO_")
-        .replace(/^CL4RO_/i, "CLARO_")
-        .replace(/^N3T_/i, "NET_")
-        .replace(/\s+/g, "")
-        .trim();
+    // Normaliza tokens que começam com CLARO ou NET restaurando o "_" quando o OCR omite ou troca por espaço/hífen/ponto
+    function normalizeClaroNetIdentifier(rawToken) {
+      let s = (rawToken || "").trim();
+      // Corrige confusões comuns de OCR nas letras iniciais
+      s = s
+        .replace(/^CLAR0/i, "CLARO")
+        .replace(/^CL4RO/i, "CLARO")
+        .replace(/^CIARO/i, "CLARO")
+        .replace(/^N3T/i, "NET");
+
+      // Garante o underline imediatamente após CLARO ou NET (ex.: "CLARO 2G_ABCD" -> "CLARO_2G_ABCD", "CLARO-ABCD" -> "CLARO_ABCD", "CLAROABCD" -> "CLARO_ABCD")
+      s = s.replace(/^(CLARO|NET)[\s\-._]+/i, (_, prefix) => `${prefix.toUpperCase()}_`);
+      s = s.replace(/^(CLARO|NET)(?=[A-Za-z0-9])/i, (_, prefix) => `${prefix.toUpperCase()}_`);
+
+      // Converte espaços internos ou hífens perdidos entre sufixos conhecidos (ex.: "CLARO_2G ABCD" ou "CLARO_ABCD 5G") em "_"
+      s = s.replace(/\s+/g, "_");
+      s = s.replace(/__+/g, "_");
+      s = s.replace(/[^A-Za-z0-9_\-]/g, "");
+      return s;
+    }
+
+    function isClaroOrNetToken(token) {
+      return /^(?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)(?:_|\b|[\s\-._]|[A-Za-z0-9])/i.test((token || "").trim());
     }
 
     function isLikelyLabelKeyword(token) {
-      return /^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1)$/i.test(token);
+      return /^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1|configuracao|configuração|acesso|rede|nome)$/i.test(token);
+    }
+
+    function extractClaroNetCandidatesFromText(text) {
+      const results = [];
+      const addCandidate = (raw) => {
+        const norm = normalizeClaroNetIdentifier(raw);
+        if (/^(?:CLARO|NET)_[A-Za-z0-9_\-]{2,36}$/i.test(norm) && !results.includes(norm)) {
+          results.push(norm);
+        }
+      };
+
+      // 1) Padrão já com underline, hífen ou colado: CLARO_XXXX, CLARO-XXXX, CLAROXXXX, NET_XXXX
+      const regexDirect = /\b((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)(?:_[A-Za-z0-9_\-]{2,36}|-[A-Za-z0-9_\-]{2,36}|[A-Za-z0-9_\-]{3,36}))\b/gi;
+      let m;
+      while ((m = regexDirect.exec(text)) !== null) {
+        addCandidate(m[1]);
+      }
+
+      // 2) Padrão onde o OCR leu espaço no lugar do underline "_" (ex.: "CLARO 2G A1B2" ou "CLARO A1B2C3")
+      const regexSpaced = /\b((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)\s+(?:(?:2\.?4G|2G|5G)\s+)?[A-Za-z0-9_\-]{3,28}(?:\s+(?:2\.?4G|2G|5G))?)\b/gi;
+      while ((m = regexSpaced.exec(text)) !== null) {
+        const candidate = m[1];
+        // Evita capturar frases comuns como "CLARO BRASIL" ou "NET SERVICOS"
+        if (!/^(?:CLARO|NET)\s+(?:BRASIL|SERVICOS|SERVIÇOS|WIFI|WI-FI|FIBRA|MOVEL|MÓVEL|TV)$/i.test(candidate.trim())) {
+          addCandidate(candidate);
+        }
+      }
+
+      return results;
     }
 
     function parseEmtaLabelText(text, mergeMode = false) {
@@ -1519,84 +1564,91 @@
         extractedData.emtaMac = uniqueMacs.find((mc) => mc !== extractedData.cmMac) || uniqueMacs[1];
       }
 
-      // 8. Redes Wi-Fi: sempre procurar nomes começando com "CLARO_" ou "NET_"
-      const ssidMatches = [];
-      const ssidRegex = /\b((?:CLARO|CLAR0|CL4RO|NET|N3T)_[A-Za-z0-9_\-]{2,36})\b/gi;
-      let sMatch;
-      while ((sMatch = ssidRegex.exec(joined)) !== null) {
-        const norm = normalizeOcrSsid(sMatch[1]);
-        if (!ssidMatches.includes(norm)) {
-          ssidMatches.push(norm);
-        }
-      }
+      // 8. Coleta todos os identificadores CLARO_ / NET_ (com restauração automática do underline "_")
+      const allClaroNetTokens = extractClaroNetCandidatesFromText(joined);
 
-      for (const ssid of ssidMatches) {
-        const is5g = /(?:[_-]5g|_5|5ghz)/i.test(ssid);
-        const is24g = /(?:[_-]2\.?4g?|24g)/i.test(ssid);
-        if (is5g && (!extractedData.ssid5 || !mergeMode)) {
-          extractedData.ssid5 = ssid;
-        } else if (is24g && (!extractedData.ssid24 || !mergeMode)) {
-          extractedData.ssid24 = ssid;
-        } else if (!extractedData.ssid24) {
-          extractedData.ssid24 = ssid;
-        } else if (!extractedData.ssid5 && ssid !== extractedData.ssid24) {
-          extractedData.ssid5 = ssid;
-        }
-      }
-
-      // 9. Análise linha a linha para Usuário e Senha do IP 192.168.0.1 e Senha Wi-Fi
+      // 9. Análise linha a linha com foco em:
+      //    - Usuário IP 192.168.0.1 (inclusive quando fica logo abaixo de 192.168.0.1 ou depois de "Usuário:" começando com CLARO_)
+      //    - Senha IP 192.168.0.1
+      //    - Rede Wi-Fi (CLARO_ / NET_) e Senha Wi-Fi
       let contextoAtual = ""; // "ip" ou "wifi"
+      let linhasAposIp = 0;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const nextLine = lines[i + 1] || "";
+        const nextLine2 = lines[i + 2] || "";
 
-        if (/192\.168\.0\.1|configura[cç][aã]o|acesso\s*(?:ao\s*)?(?:modem|roteador|gateway)|admin/i.test(line)) {
+        if (/192\.168\.0\.1|configura[cç][aã]o|acesso\s*(?:ao\s*)?(?:modem|roteador|gateway)/i.test(line)) {
           contextoAtual = "ip";
+          linhasAposIp = 0;
+        } else if (contextoAtual === "ip") {
+          linhasAposIp++;
         }
-        if (/wi-?fi|wlan|wireless|ssid|wpa|psk|(?:CLARO|NET)_/i.test(line)) {
+
+        if (/wi-?fi|wlan|wireless|ssid|wpa|psk/i.test(line)) {
           contextoAtual = "wifi";
         }
 
-        // Captura Usuário 192.168.0.1
-        const usrLineMatch = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,28})/i);
-        if (usrLineMatch && !isLikelyLabelKeyword(usrLineMatch[1])) {
-          if (!extractedData.ipUser || contextoAtual === "ip") {
-            extractedData.ipUser = cleanCredentialToken(usrLineMatch[1]);
-          }
+        // Caso específico descrito pelo técnico:
+        // Logo abaixo de 192.168.0.1 e depois de "Usuário" aparece um identificador que começa com CLARO_ (ou NET_)
+        const usrWithClaroNet = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)[\s_\-A-Za-z0-9]{2,36})/i);
+        if (usrWithClaroNet) {
+          extractedData.ipUser = normalizeClaroNetIdentifier(usrWithClaroNet[1]);
         } else if (/^(?:user(?:name)?|usu[aá]rio|login)\s*[:=\-]?$/i.test(line) && nextLine) {
-          const cand = cleanCredentialToken(nextLine.split(/\s+/)[0]);
-          if (cand && !isLikelyLabelKeyword(cand) && !extractedData.ipUser) {
-            extractedData.ipUser = cand;
+          if (isClaroOrNetToken(nextLine)) {
+            extractedData.ipUser = normalizeClaroNetIdentifier(nextLine);
+          } else {
+            const cand = cleanCredentialToken(nextLine.split(/\s+/)[0]);
+            if (cand && !isLikelyLabelKeyword(cand) && !extractedData.ipUser) {
+              extractedData.ipUser = cand;
+            }
+          }
+        } else {
+          // Usuário padrão (admin ou outro) na linha de Usuário/Login
+          const usrLineMatch = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,32})/i);
+          if (usrLineMatch && !isLikelyLabelKeyword(usrLineMatch[1])) {
+            const rawUsr = usrLineMatch[1];
+            const finalUsr = isClaroOrNetToken(rawUsr) ? normalizeClaroNetIdentifier(rawUsr) : cleanCredentialToken(rawUsr);
+            if (!extractedData.ipUser || contextoAtual === "ip") {
+              extractedData.ipUser = finalUsr;
+            }
           }
         }
 
-        // Captura Senha Wi-Fi (se estiver no contexto Wi-Fi ou rótulo explícito de Wi-Fi/WPA/PSK)
+        // Se estamos logo abaixo de 192.168.0.1 (até 3 linhas) e a linha começa diretamente com CLARO_ / NET_
+        if (contextoAtual === "ip" && linhasAposIp > 0 && linhasAposIp <= 3 && !extractedData.ipUser) {
+          const lineClaroMatch = line.match(/^((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)[\s_\-A-Za-z0-9]{2,36})/i);
+          if (lineClaroMatch) {
+            extractedData.ipUser = normalizeClaroNetIdentifier(lineClaroMatch[1]);
+          }
+        }
+
+        // Captura Senha Wi-Fi explícita
         const explicitWifiPass = line.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
         if (explicitWifiPass && !isLikelyLabelKeyword(explicitWifiPass[1])) {
           extractedData.wifiPass = cleanCredentialToken(explicitWifiPass[1]);
         }
 
-        // Captura Senha 192.168.0.1 (rótulo explícito de admin/login/192.168.0.1)
+        // Captura Senha 192.168.0.1 explícita
         const explicitIpPass = line.match(/(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login|acesso)|login\s*(?:pass(?:word)?|senha))\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
         if (explicitIpPass && !isLikelyLabelKeyword(explicitIpPass[1])) {
           extractedData.ipPass = cleanCredentialToken(explicitIpPass[1]);
         }
 
-        // Rótulos genéricos "Password:" / "Senha:" / "Key:" diferenciados pelo contexto (IP vs Wi-Fi)
+        // Rótulos "Password:" / "Senha:" / "Key:" diferenciados pelo contexto (192.168.0.1 vs Wi-Fi)
         const genericPassMatch = line.match(/^(?:pass(?:word)?|senha|pwd|key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})?$/i);
         if (genericPassMatch) {
           let candidate = cleanCredentialToken(genericPassMatch[1] || "");
-          if (!candidate && nextLine) {
+          if (!candidate && nextLine && !isClaroOrNetToken(nextLine)) {
             candidate = cleanCredentialToken(nextLine.split(/\s+/)[0]);
           }
-          if (candidate && !isLikelyLabelKeyword(candidate)) {
+          if (candidate && !isLikelyLabelKeyword(candidate) && !isClaroOrNetToken(candidate)) {
             if (contextoAtual === "wifi") {
               if (!extractedData.wifiPass) extractedData.wifiPass = candidate;
             } else if (contextoAtual === "ip") {
               if (!extractedData.ipPass) extractedData.ipPass = candidate;
             } else {
-              // Se ainda não há senha de IP, preenche IP primeiro e depois Wi-Fi
               if (!extractedData.ipPass) {
                 extractedData.ipPass = candidate;
               } else if (!extractedData.wifiPass && candidate !== extractedData.ipPass) {
@@ -1606,48 +1658,122 @@
           }
         }
 
-        // Se a linha contém "192.168.0.1" e um token de senha logo após na mesma linha ou na seguinte
+        // Linha contendo 192.168.0.1 + usuário/senha inline ou nas linhas imediatas abaixo
         if (/192\.168\.0\.1/.test(line)) {
-          const inlineCred = line.match(/192\.168\.0\.1.*?(?:user|usu[aá]rio|login)?\s*[:=\-]?\s*(admin|[A-Za-z0-9._\-]{3,20})?\s*(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
-          if (inlineCred) {
-            if (inlineCred[1] && !extractedData.ipUser) extractedData.ipUser = cleanCredentialToken(inlineCred[1]);
-            if (inlineCred[2] && !extractedData.ipPass) extractedData.ipPass = cleanCredentialToken(inlineCred[2]);
+          const inlineClaroUsr = line.match(/192\.168\.0\.1.*?((?:CLARO|CLAR0|CL4RO|NET)[\s_\-A-Za-z0-9]{2,32})/i);
+          if (inlineClaroUsr && !extractedData.ipUser) {
+            extractedData.ipUser = normalizeClaroNetIdentifier(inlineClaroUsr[1]);
           }
+
+          // Verifica as próximas 2 linhas logo abaixo de 192.168.0.1
+          [nextLine, nextLine2].forEach((subL) => {
+            if (!subL) return;
+            const subUsr = subL.match(/(?:user(?:name)?|usu[aá]rio|login)?\s*[:=\-]?\s*((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)[\s_\-A-Za-z0-9]{2,36})/i);
+            if (subUsr && !extractedData.ipUser) {
+              extractedData.ipUser = normalizeClaroNetIdentifier(subUsr[1]);
+            }
+            const subPass = subL.match(/(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
+            if (subPass && !isLikelyLabelKeyword(subPass[1]) && !isClaroOrNetToken(subPass[1]) && !extractedData.ipPass) {
+              extractedData.ipPass = cleanCredentialToken(subPass[1]);
+            }
+          });
         }
 
-        // Se a linha contém o SSID CLARO_ ou NET_ e logo depois vem a senha na mesma linha ou na próxima
-        if (/(?:CLARO|NET)_[A-Za-z0-9_\-]+/i.test(line)) {
-          const sameLineAfterSsid = line.replace(/.*?(?:CLARO|NET)_[A-Za-z0-9_\-]+/i, "").trim();
-          const passAfterSsid = sameLineAfterSsid.match(/(?:pass(?:word)?|senha|key|wpa2?|psk)?\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
-          if (passAfterSsid && !isLikelyLabelKeyword(passAfterSsid[1]) && !/^(?:CLARO|NET)_/i.test(passAfterSsid[1]) && !extractedData.wifiPass) {
-            extractedData.wifiPass = cleanCredentialToken(passAfterSsid[1]);
+        // Linha com SSID CLARO_ ou NET_ seguido da senha na mesma linha ou na próxima linha
+        if (/(?:CLARO|CLAR0|CL4RO|NET|N3T)[\s_\-A-Za-z0-9]{2,36}/i.test(line)) {
+          const afterSsid = line.replace(/.*?(?:CLARO|CLAR0|CL4RO|NET|N3T)[\s_\-A-Za-z0-9]{2,36}/i, "").trim();
+          const passSameLine = afterSsid.match(/(?:pass(?:word)?|senha|key|wpa2?|psk)?\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
+          if (passSameLine && !isLikelyLabelKeyword(passSameLine[1]) && !isClaroOrNetToken(passSameLine[1])) {
+            if (contextoAtual === "ip" && !extractedData.ipPass) {
+              extractedData.ipPass = cleanCredentialToken(passSameLine[1]);
+            } else if (!extractedData.wifiPass) {
+              extractedData.wifiPass = cleanCredentialToken(passSameLine[1]);
+            }
+          } else if (nextLine) {
+            const passNextLine = nextLine.match(/^(?:pass(?:word)?|senha|key|wpa2?|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{6,40})/i);
+            if (passNextLine && !isLikelyLabelKeyword(passNextLine[1]) && !isClaroOrNetToken(passNextLine[1]) && !extractedData.wifiPass) {
+              extractedData.wifiPass = cleanCredentialToken(passNextLine[1]);
+            }
           }
         }
       }
 
-      // 10. Fallbacks globais multi-linha se algum dos campos críticos ainda ficou vazio
+      // 10. Distribuição inteligente dos tokens CLARO_ / NET_ entre Usuário 192.168.0.1 e SSIDs Wi-Fi (2.4 GHz e 5 GHz)
+      for (const token of allClaroNetTokens) {
+        const is5g = /(?:[_-]5g|_5|5ghz)/i.test(token);
+        const is24g = /(?:[_-]2\.?4g?|[_-]2g|24g)/i.test(token);
+
+        // Se o token não tem sufixo de banda (2G/5G) e o usuário 192.168.0.1 ainda está vazio
+        // e existem outros tokens com banda Wi-Fi, este token sem banda costuma ser o Usuário 192.168.0.1
+        const temOutrosComBanda = allClaroNetTokens.some((t) => /(?:[_-]5g|_5|5ghz|[_-]2\.?4g?|[_-]2g|24g)/i.test(t));
+        if (!extractedData.ipUser && !is5g && !is24g && temOutrosComBanda) {
+          extractedData.ipUser = token;
+          continue;
+        }
+
+        // Evita duplicar o mesmo token se ele já foi identificado exclusivamente como ipUser e há outros para Wi-Fi
+        if (token === extractedData.ipUser && allClaroNetTokens.length > 1) {
+          continue;
+        }
+
+        if (is5g && (!extractedData.ssid5 || !mergeMode)) {
+          extractedData.ssid5 = token;
+        } else if (is24g && (!extractedData.ssid24 || !mergeMode)) {
+          extractedData.ssid24 = token;
+        } else if (!extractedData.ssid24) {
+          extractedData.ssid24 = token;
+        } else if (!extractedData.ssid5 && token !== extractedData.ssid24) {
+          extractedData.ssid5 = token;
+        }
+      }
+
+      // Se só existe um token CLARO_/NET_ na etiqueta inteira e o usuário 192.168.0.1 ficou vazio,
+      // verifica se a etiqueta menciona 192.168.0.1 antes dele
+      if (!extractedData.ipUser && allClaroNetTokens.length === 1) {
+        const idxIp = joined.search(/192\.168\.0\.1/);
+        const tokenBase = allClaroNetTokens[0].replace(/^CLARO_|^NET_/i, "");
+        const idxTok = joined.indexOf(tokenBase);
+        if (idxIp !== -1 && idxTok !== -1 && idxTok > idxIp && (idxTok - idxIp) < 120) {
+          extractedData.ipUser = allClaroNetTokens[0];
+        }
+      }
+
+      // Fallback final para ipUser caso seja "admin" explícito
       if (!extractedData.ipUser && /\badmin\b/i.test(joined)) {
         extractedData.ipUser = "admin";
       }
 
+      // Fallbacks globais multi-linha para senhas
       if (!extractedData.ipPass) {
-        const globalIpPass = joined.match(/(?:192\.168\.0\.1[\s\S]{0,160}?)(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
-        if (globalIpPass && !isLikelyLabelKeyword(globalIpPass[1])) {
+        const globalIpPass = joined.match(/(?:192\.168\.0\.1[\s\S]{0,180}?)(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
+        if (globalIpPass && !isLikelyLabelKeyword(globalIpPass[1]) && !isClaroOrNetToken(globalIpPass[1])) {
           extractedData.ipPass = cleanCredentialToken(globalIpPass[1]);
         }
       }
 
       if (!extractedData.wifiPass) {
-        const globalWifiPass = joined.match(/(?:(?:CLARO|NET)_[A-Za-z0-9_\-]+[\s\S]{0,160}?)(?:pass(?:word)?|senha|key|wpa(?:2|3)?|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
-        if (globalWifiPass && !isLikelyLabelKeyword(globalWifiPass[1])) {
+        const globalWifiPass = joined.match(/(?:(?:CLARO|NET)_[A-Za-z0-9_\-]+[\s\S]{0,180}?)(?:pass(?:word)?|senha|key|wpa(?:2|3)?|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
+        if (globalWifiPass && !isLikelyLabelKeyword(globalWifiPass[1]) && !isClaroOrNetToken(globalWifiPass[1])) {
           extractedData.wifiPass = cleanCredentialToken(globalWifiPass[1]);
         }
       }
 
+      // Se ainda houver uma segunda senha solta na etiqueta diferente da senha do IP, atribui ao Wi-Fi
+      if (extractedData.ipPass && !extractedData.wifiPass) {
+        const allPassMatches = [...joined.matchAll(/(?:pass(?:word)?|senha|key|wpa2?|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/gi)];
+        for (const pm of allPassMatches) {
+          const cand = cleanCredentialToken(pm[1]);
+          if (cand && cand !== extractedData.ipPass && !isLikelyLabelKeyword(cand) && !isClaroOrNetToken(cand)) {
+            extractedData.wifiPass = cand;
+            break;
+          }
+        }
+      }
+
       // Fallback para QR Code Wi-Fi padrão (WIFI:S:CLARO_XXX;T:WPA;P:SENHA;;)
-      const qrWifiMatch = joined.match(/WIFI:[^;\n]*S:((?:CLARO|NET)_[^;\n]+)[^;\n]*;[^;\n]*P:([^;\n]+)/i);
+      const qrWifiMatch = joined.match(/WIFI:[^;\n]*S:((?:CLARO|NET)[^;\n]+)[^;\n]*;[^;\n]*P:([^;\n]+)/i);
       if (qrWifiMatch) {
-        const qrSsid = normalizeOcrSsid(qrWifiMatch[1]);
+        const qrSsid = normalizeClaroNetIdentifier(qrWifiMatch[1]);
         const qrPass = cleanCredentialToken(qrWifiMatch[2]);
         if (!extractedData.ssid24) extractedData.ssid24 = qrSsid;
         if (!extractedData.wifiPass) extractedData.wifiPass = qrPass;
