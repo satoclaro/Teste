@@ -805,7 +805,7 @@
       </div>
 
       <details class="raw-ocr-box" open>
-        <summary>Texto completo extraído da foto (OCR rápido multi-passagem)</summary>
+        <summary>Texto completo extraído da foto (OCR rápido multi-passagem + recorte inferior)</summary>
         <textarea
           id="rawOcrText"
           class="raw-text"
@@ -868,14 +868,14 @@
   <div class="toast" id="toast">Copiado para a área de transferência!</div>
 
   <!-- RODAPE FIXO: ATUALIZADO SOMENTE QUANDO EDITAR A REVISAO -->
-  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.3 - 26/11/2026 20:38</footer>
+  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.4 - 26/11/2026 20:53</footer>
 
   <script>
     // Metadados da revisão (atualizar manualmente apenas quando houver edição de revisão)
     const APP_REVISION = Object.freeze({
       author: "Fernando Sato",
-      version: "1.3",
-      updatedAt: "26/11/2026 20:38"
+      version: "1.4",
+      updatedAt: "26/11/2026 20:53"
     });
 
     (function renderStaticFooter() {
@@ -1198,7 +1198,7 @@
         const img = new Image();
         img.onload = async function() {
           const canvas = document.createElement("canvas");
-          const maxSide = 1920;
+          const maxSide = 2000;
           let w = img.naturalWidth || img.width;
           let h = img.naturalHeight || img.height;
           if (w > maxSide || h > maxSide) {
@@ -1248,7 +1248,7 @@
       await processarFotoRapido(canvas);
     }
 
-    // --- PRE-PROCESSAMENTO RAPIDO COM PRESERVACAO DE UNDERLINE (_) ---
+    // --- PRE-PROCESSAMENTO RAPIDO + RECORTE DA AREA DE CREDENCIAIS (INFERIOR) ---
     function criarCanvasRapido(sourceCanvas, mode = "soft_contrast", scaleFactor = 1.65) {
       const maxDim = 2200;
       let targetW = Math.round(sourceCanvas.width * scaleFactor);
@@ -1271,7 +1271,7 @@
       const data = imgData.data;
 
       let sumLum = 0;
-      const step = 16; // Amostragem rápida para calcular limiar médio sem atraso
+      const step = 16;
       let sampled = 0;
       for (let i = 0; i < data.length; i += 4 * step) {
         sumLum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
@@ -1298,6 +1298,22 @@
       return out;
     }
 
+    // Recorta a metade inferior da etiqueta onde ficam IP / Usuário / Senha e SSID / SENHA Wi-Fi
+    function criarRecorteCredenciais(photoCanvas) {
+      const sy = Math.floor(photoCanvas.height * 0.56);
+      const sh = Math.max(60, photoCanvas.height - sy);
+      const sx = Math.floor(photoCanvas.width * 0.04);
+      const sw = Math.max(100, Math.floor(photoCanvas.width * 0.78));
+
+      const crop = document.createElement("canvas");
+      crop.width = sw;
+      crop.height = sh;
+      const cctx = crop.getContext("2d", { willReadFrequently: true });
+      cctx.drawImage(photoCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+      return criarCanvasRapido(crop, "soft_contrast", 2.1);
+    }
+
     async function obterOcrWorker() {
       if (ocrWorker) return ocrWorker;
       if (window.Tesseract) {
@@ -1312,7 +1328,6 @@
       return ocrWorker;
     }
 
-    // Pipeline rápido em 2 passagens OCR + BarcodeDetector para agilizar em campo
     async function processarFotoRapido(photoCanvas) {
       if (extracaoEmAndamento) return;
       extracaoEmAndamento = true;
@@ -1323,7 +1338,6 @@
       try {
         const blocosDeTexto = [];
 
-        // Etapa 1: BarcodeDetector nativo (instantâneo quando suportado)
         statusDiv.innerText = "⚡ 1/3: Lendo códigos e preparando imagem...";
         if ("BarcodeDetector" in window) {
           try {
@@ -1345,8 +1359,8 @@
           return;
         }
 
-        // Etapa 2: OCR principal com contraste reforçado (PSM 6)
-        statusDiv.innerText = "⚡ 2/3: Extraindo usuários, senhas, Wi-Fi e S/N/MAC...";
+        // Passagem 1: Etiqueta inteira com contraste reforçado
+        statusDiv.innerText = "⚡ 2/3: Extraindo etiqueta completa...";
         const canvasContrast = criarCanvasRapido(photoCanvas, "soft_contrast", 1.65);
         await worker.setParameters({
           tessedit_pageseg_mode: "6",
@@ -1356,16 +1370,12 @@
         if (res1 && res1.data && res1.data.text) {
           blocosDeTexto.push(res1.data.text.trim());
         }
-        setProgress(72, true);
+        setProgress(70, true);
 
-        // Etapa 3: OCR binarizado rápido (PSM 11) para senhas e underscores
-        statusDiv.innerText = "⚡ 3/3: Reforçando senhas e caracteres...";
-        const canvasBinary = criarCanvasRapido(photoCanvas, "binarize", 1.75);
-        await worker.setParameters({
-          tessedit_pageseg_mode: "11",
-          preserve_interword_spaces: "1"
-        });
-        const res2 = await worker.recognize(canvasBinary);
+        // Passagem 2: Zoom na área inferior de Usuário/Senha 192.168.0.1 e SSID/SENHA Wi-Fi
+        statusDiv.innerText = "⚡ 3/3: Ampliando usuários e senhas (192.168.0.1 e Wi-Fi)...";
+        const canvasCreds = criarRecorteCredenciais(photoCanvas);
+        const res2 = await worker.recognize(canvasCreds);
         if (res2 && res2.data && res2.data.text) {
           blocosDeTexto.push(res2.data.text.trim());
         }
@@ -1405,13 +1415,20 @@
       }
     }
 
-    // --- PARSER ESPECIALIZADO: SENHAS ABAIXO, WI-FI 2.4GHZ, S/N JUNTO COM BARCODE/MACs ---
+    // --- PARSER DE ALTA PRECISAO PARA ETIQUETAS CLARO / NET / CBN / EMTA / ONT ---
     function normalizeMac(rawMac) {
       const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
       if (hex.length === 12) {
         return hex.match(/.{1,2}/g).join(":");
       }
       return (rawMac || "").trim().toUpperCase();
+    }
+
+    function normalizeHexCode(rawCode) {
+      return (rawCode || "")
+        .replace(/[^0-9A-Za-z]/g, "")
+        .toUpperCase()
+        .replace(/O/g, "0");
     }
 
     function isValidMacHex12(token) {
@@ -1433,12 +1450,13 @@
         .replace(/^CIARO/i, "CLARO")
         .replace(/^N3T/i, "NET");
 
+      // Normaliza padrões como CLARO_2G3430B5, CLARO_5G3430B5 ou CLARO_3430B5
       s = s.replace(/^(CLARO|NET)[\s\-._]+/i, (_, prefix) => `${prefix.toUpperCase()}_`);
       s = s.replace(/^(CLARO|NET)(?=[A-Za-z0-9])/i, (_, prefix) => `${prefix.toUpperCase()}_`);
       s = s.replace(/\s+/g, "_");
       s = s.replace(/__+/g, "_");
       s = s.replace(/[^A-Za-z0-9_\-]/g, "");
-      return s;
+      return s.toUpperCase();
     }
 
     function isClaroOrNetToken(token) {
@@ -1448,11 +1466,9 @@
     function isLikelyLabelOrBarcodeNoise(token) {
       const t = (token || "").trim();
       if (!t) return true;
-      if (/^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1|configuracao|configuração|acesso|rede|nome|ghz|2\.4|2\.4g|5g|wpa|wpa2|psk)$/i.test(t)) {
+      if (/^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1|configuracao|configuração|acesso|rede|nome|ghz|2\.4|2\.4g|5g|wpa|wpa2|psk|anatel)$/i.test(t)) {
         return true;
       }
-      // Ignora códigos de barras numéricos/hexadecimais longos isolados (ex.: 12 a 20 caracteres sem letras de palavra)
-      if (/^[0-9A-Fa-f]{12,20}$/.test(t)) return true;
       return false;
     }
 
@@ -1482,9 +1498,7 @@
       return results;
     }
 
-    // Extrai S/N separando códigos de barras colados e MACs (CM MAC / eMTA MAC)
     function extractSerialAndMacs(joined, lines) {
-      // 1. Extrai todos os MACs primeiro para não confundi-los com S/N
       const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
       const allMacs = [];
       let mMac;
@@ -1508,7 +1522,6 @@
         allMacs.map((m) => m.replace(/[^0-9A-Fa-f]/g, "").toUpperCase())
       );
 
-      // 2. Extrai S/N removendo eventual código de barras ou MAC colado na mesma linha
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const nextLine = lines[i + 1] || "";
@@ -1522,13 +1535,11 @@
         }
 
         if (rawSnCandidate) {
-          // Divide por espaços ou barras e escolhe o token de serial válido que não seja MAC ou código de barras numérico longo
           const parts = rawSnCandidate.split(/[\s|/]+/).map((p) => p.replace(/[^A-Za-z0-9\-]/g, "")).filter(Boolean);
           for (const part of parts) {
             const up = part.toUpperCase();
             if (macHexSet.has(up.replace(/[^0-9A-Fa-f]/g, ""))) continue;
             if (/^(?:CM|EMTA|MTA|MAC|DOCSIS|MODEL|MOD|FABR|INPUT)$/i.test(up)) continue;
-            // Se houver código de barras numérico puro de 14+ dígitos colado, ignora em favor do S/N alfanumérico (6-22 chars)
             if (/^[0-9]{14,}$/.test(up) && parts.length > 1) continue;
             if (/^[A-Z0-9\-]{6,22}$/.test(up)) {
               extractedData.sn = up;
@@ -1557,7 +1568,7 @@
       }
 
       // Fabricante
-      const mfgMatch = joined.match(/\b(ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
+      const mfgMatch = joined.match(/\b(CBN|ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
       if (mfgMatch) {
         extractedData.manufacturer = mfgMatch[1].toUpperCase();
       }
@@ -1565,14 +1576,14 @@
       // Modelo
       const modelMatch =
         joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
-        joined.match(/\b((?:TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
+        joined.match(/\b((?:CH|TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
       if (modelMatch) {
         extractedData.model = modelMatch[1].trim();
       }
 
       // Input
       const inputMatch =
-        joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*[-~]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
+        joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*\d+\s*W)?(?:\s*[,;]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
         joined.match(/\b([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)\b/i);
       if (inputMatch) {
         extractedData.inputPower = inputMatch[1].trim();
@@ -1591,11 +1602,42 @@
       // Identificadores CLARO_ / NET_
       const allClaroNetTokens = extractClaroNetCandidatesFromText(joined);
 
-      // Varredura contextual linha por linha:
-      // - Usuário 192.168.0.1 e Senha 192.168.0.1 (geralmente logo abaixo do usuário)
-      // - SSID Wi-Fi (2.4 GHz / CLARO_ / NET_) e Senha Wi-Fi (geralmente logo abaixo do SSID / usuário Wi-Fi)
-      let contextoAtual = ""; // "ip" ou "wifi"
-      let linhasAposIp = 0;
+      // Extração direta de padrões explícitos em etiquetas Claro/NET/CBN:
+      // Ex.: "Usuário: CLARO_3430B5" / "Senha: B4F2673430B5"
+      // Ex.: "SSID 2.4GHz: CLARO_2G3430B5" / "SENHA: 673430B5"
+      // Ex.: "SSID 5GHz: CLARO_5G3430B5" / "SENHA: 673430B5"
+      const directUserMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]+\s*([A-Za-z0-9_.\-@]{3,36})/i);
+      if (directUserMatch && !isLikelyLabelOrBarcodeNoise(directUserMatch[1])) {
+        extractedData.ipUser = isClaroOrNetToken(directUserMatch[1])
+          ? normalizeClaroNetIdentifier(directUserMatch[1])
+          : cleanCredentialToken(directUserMatch[1]);
+      }
+
+      // Senha do 192.168.0.1: prioriza a senha associada ao bloco Usuário/IP (ex.: "Senha: B4F2673430B5" logo após Usuário)
+      const ipBlockSenhaMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|192\.168\.0\.1)[\s\S]{0,120}?(?:senha|password|pass|pwd)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,40})/i);
+      if (ipBlockSenhaMatch && !isLikelyLabelOrBarcodeNoise(ipBlockSenhaMatch[1])) {
+        extractedData.ipPass = cleanCredentialToken(ipBlockSenhaMatch[1]).toUpperCase();
+      }
+
+      // SSID 2.4GHz e SSID 5GHz explícitos
+      const ssid24Match = joined.match(/ssid\s*2\.?4\s*g(?:hz)?\s*[:=\-]+\s*([A-Za-z0-9_\-]{3,36})/i);
+      if (ssid24Match) {
+        extractedData.ssid24 = normalizeClaroNetIdentifier(ssid24Match[1]);
+      }
+
+      const ssid5Match = joined.match(/ssid\s*5\s*g(?:hz)?\s*[:=\-]+\s*([A-Za-z0-9_\-]{3,36})/i);
+      if (ssid5Match) {
+        extractedData.ssid5 = normalizeClaroNetIdentifier(ssid5Match[1]);
+      }
+
+      // Senha Wi-Fi: prioriza a senha associada ao SSID 2.4GHz / 5GHz / Wi-Fi
+      const wifiBlockSenhaMatch = joined.match(/(?:ssid\s*(?:2\.?4\s*g|5\s*g|wi-?fi)|wi-?fi|wlan)[\s\S]{0,120}?(?:senha|password|pass|key|wpa2?|psk)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
+      if (wifiBlockSenhaMatch && !isLikelyLabelOrBarcodeNoise(wifiBlockSenhaMatch[1])) {
+        extractedData.wifiPass = cleanCredentialToken(wifiBlockSenhaMatch[1]).toUpperCase();
+      }
+
+      // Varredura linha por linha para casos sem rótulo explícito ou com quebra de linha
+      let contextoAtual = "";
       let linhasAposIpUser = 99;
       let linhasAposWifiSsid = 99;
 
@@ -1603,147 +1645,94 @@
         const line = lines[i];
         const nextLine = lines[i + 1] || "";
 
-        if (/192\.168\.0\.1|configura[cç][aã]o|acesso\s*(?:ao\s*)?(?:modem|roteador|gateway)/i.test(line)) {
+        if (/192\.168\.0\.1|usu[aá]rio\s*[:=]/i.test(line)) {
           contextoAtual = "ip";
-          linhasAposIp = 0;
-        } else if (contextoAtual === "ip") {
-          linhasAposIp++;
         }
-
-        if (/(?:wi-?fi|wlan|wireless|ssid|2\.?4\s*ghz|5\s*ghz)/i.test(line)) {
+        if (/(?:ssid|wi-?fi|wlan|2\.?4\s*ghz|5\s*ghz)/i.test(line)) {
           contextoAtual = "wifi";
         }
 
         if (linhasAposIpUser < 99) linhasAposIpUser++;
         if (linhasAposWifiSsid < 99) linhasAposWifiSsid++;
 
-        // Usuário com CLARO_ / NET_
-        const usrWithClaroNet = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)[\s_\-A-Za-z0-9]{2,36})/i);
-        if (usrWithClaroNet) {
-          extractedData.ipUser = normalizeClaroNetIdentifier(usrWithClaroNet[1]);
+        if (/(?:usu[aá]rio|user(?:name)?|login)/i.test(line) && !/ssid/i.test(line)) {
           linhasAposIpUser = 0;
-        } else if (/^(?:user(?:name)?|usu[aá]rio|login)\s*[:=\-]?$/i.test(line) && nextLine) {
-          if (isClaroOrNetToken(nextLine)) {
-            extractedData.ipUser = normalizeClaroNetIdentifier(nextLine);
-            linhasAposIpUser = 0;
-          } else {
-            const cand = cleanCredentialToken(nextLine.split(/\s+/)[0]);
-            if (cand && !isLikelyLabelOrBarcodeNoise(cand) && !extractedData.ipUser) {
-              extractedData.ipUser = cand;
-              linhasAposIpUser = 0;
-            }
-          }
-        } else {
-          const usrLineMatch = line.match(/(?:user(?:name)?|usu[aá]rio|login|admin\s*user)\s*[:=\-]?\s*([A-Za-z0-9@._\-]{2,32})/i);
-          if (usrLineMatch && !isLikelyLabelOrBarcodeNoise(usrLineMatch[1])) {
-            const rawUsr = usrLineMatch[1];
-            const finalUsr = isClaroOrNetToken(rawUsr) ? normalizeClaroNetIdentifier(rawUsr) : cleanCredentialToken(rawUsr);
-            if (!extractedData.ipUser || contextoAtual === "ip") {
-              extractedData.ipUser = finalUsr;
-              linhasAposIpUser = 0;
-            }
-          }
         }
-
-        if (contextoAtual === "ip" && linhasAposIp > 0 && linhasAposIp <= 3 && !extractedData.ipUser) {
-          const lineClaroMatch = line.match(/^((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)[\s_\-A-Za-z0-9]{2,36})/i);
-          if (lineClaroMatch) {
-            extractedData.ipUser = normalizeClaroNetIdentifier(lineClaroMatch[1]);
-            linhasAposIpUser = 0;
-          }
-        }
-
-        // Marca linha com SSID CLARO_ / NET_ ou "2.4 GHz"
-        if (/(?:CLARO|CLAR0|CL4RO|NET|N3T)[\s_\-A-Za-z0-9]{2,36}/i.test(line) || /\b2\.?4\s*ghz\b/i.test(line)) {
+        if (/(?:ssid|2\.?4\s*ghz|5\s*ghz)/i.test(line)) {
           linhasAposWifiSsid = 0;
         }
 
-        // Senha Wi-Fi explícita
-        const explicitWifiPass = line.match(/(?:wi-?fi\s*(?:password|pass|key|senha)|wpa(?:2|3)?(?:\s*[-/]?\s*psk)?(?:\s*(?:key|pass|senha))?|chave(?:\s*wi-?fi)?|pre-?shared\s*key|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
-        if (explicitWifiPass && !isLikelyLabelOrBarcodeNoise(explicitWifiPass[1])) {
-          extractedData.wifiPass = cleanCredentialToken(explicitWifiPass[1]);
-        }
-
-        // Senha 192.168.0.1 explícita
-        const explicitIpPass = line.match(/(?:admin\s*(?:pass(?:word)?|senha)|senha\s*(?:192\.168\.0\.1|admin|login|acesso)|login\s*(?:pass(?:word)?|senha))\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
-        if (explicitIpPass && !isLikelyLabelOrBarcodeNoise(explicitIpPass[1])) {
-          extractedData.ipPass = cleanCredentialToken(explicitIpPass[1]);
-        }
-
-        // Rótulo "Password:" / "Senha:" / "Key:" (mesma linha ou linha logo abaixo)
-        const genericPassMatch = line.match(/^(?:pass(?:word)?|senha|pwd|key)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})?$/i);
-        if (genericPassMatch) {
-          let candidate = cleanCredentialToken(genericPassMatch[1] || "");
-          if (!candidate && nextLine && !isClaroOrNetToken(nextLine)) {
-            candidate = cleanCredentialToken(nextLine.split(/\s+/)[0]);
-          }
-          if (candidate && !isLikelyLabelOrBarcodeNoise(candidate) && !isClaroOrNetToken(candidate)) {
-            if (contextoAtual === "wifi" || linhasAposWifiSsid <= 2) {
-              if (!extractedData.wifiPass) extractedData.wifiPass = candidate;
-            } else if (contextoAtual === "ip" || linhasAposIpUser <= 2) {
-              if (!extractedData.ipPass) extractedData.ipPass = candidate;
-            } else {
-              if (!extractedData.ipPass) {
-                extractedData.ipPass = candidate;
-              } else if (!extractedData.wifiPass && candidate !== extractedData.ipPass) {
-                extractedData.wifiPass = candidate;
-              }
-            }
+        // Captura "Senha: ..." em qualquer linha
+        const senhaLineMatch = line.match(/^(?:senha|password|pass|pwd|key)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})$/i);
+        if (senhaLineMatch && !isLikelyLabelOrBarcodeNoise(senhaLineMatch[1])) {
+          const val = cleanCredentialToken(senhaLineMatch[1]).toUpperCase();
+          if (contextoAtual === "wifi" || linhasAposWifiSsid <= 2) {
+            if (!extractedData.wifiPass) extractedData.wifiPass = val;
+          } else if (contextoAtual === "ip" || linhasAposIpUser <= 2) {
+            if (!extractedData.ipPass) extractedData.ipPass = val;
+          } else {
+            if (!extractedData.ipPass) extractedData.ipPass = val;
+            else if (!extractedData.wifiPass && val !== extractedData.ipPass) extractedData.wifiPass = val;
           }
         }
 
-        // Linha logo abaixo do usuário 192.168.0.1 contendo valor de senha direto (sem palavra "senha")
+        // Se a senha estiver logo na linha abaixo sem a palavra "Senha"
         if (!extractedData.ipPass && linhasAposIpUser === 1) {
-          const directBelowUser = cleanCredentialToken(line.split(/\s+/)[0]);
+          const belowIpUser = cleanCredentialToken(line.split(/\s+/)[0]).toUpperCase();
           if (
-            directBelowUser &&
-            !isLikelyLabelOrBarcodeNoise(directBelowUser) &&
-            !isClaroOrNetToken(directBelowUser) &&
-            !isValidMacHex12(directBelowUser) &&
-            !/^192\.168\./.test(directBelowUser) &&
-            directBelowUser.length >= 4 &&
-            directBelowUser.length <= 36
+            belowIpUser &&
+            !isLikelyLabelOrBarcodeNoise(belowIpUser) &&
+            !isClaroOrNetToken(belowIpUser) &&
+            !isValidMacHex12(belowIpUser) &&
+            !/^192\.168\./.test(belowIpUser) &&
+            belowIpUser.length >= 4 &&
+            belowIpUser.length <= 36
           ) {
-            extractedData.ipPass = directBelowUser;
+            extractedData.ipPass = belowIpUser;
           }
         }
 
-        // Linha logo abaixo do SSID Wi-Fi / 2.4 GHz contendo senha direto (sem palavra "senha")
         if (!extractedData.wifiPass && linhasAposWifiSsid === 1) {
-          const directBelowWifi = cleanCredentialToken(line.split(/\s+/)[0]);
+          const belowWifi = cleanCredentialToken(line.split(/\s+/)[0]).toUpperCase();
           if (
-            directBelowWifi &&
-            !isLikelyLabelOrBarcodeNoise(directBelowWifi) &&
-            !isClaroOrNetToken(directBelowWifi) &&
-            !isValidMacHex12(directBelowWifi) &&
-            directBelowWifi !== extractedData.ipPass &&
-            directBelowWifi.length >= 6 &&
-            directBelowWifi.length <= 48
+            belowWifi &&
+            !isLikelyLabelOrBarcodeNoise(belowWifi) &&
+            !isClaroOrNetToken(belowWifi) &&
+            !isValidMacHex12(belowWifi) &&
+            belowWifi !== extractedData.ipPass &&
+            belowWifi.length >= 5 &&
+            belowWifi.length <= 48
           ) {
-            extractedData.wifiPass = directBelowWifi;
+            extractedData.wifiPass = belowWifi;
+          }
+        }
+
+        // Rótulo "Senha:" isolado na linha e valor na linha seguinte
+        if (/^(?:senha|password|pass|pwd|key)\s*[:=\-]?$/i.test(line) && nextLine) {
+          const nextVal = cleanCredentialToken(nextLine.split(/\s+/)[0]).toUpperCase();
+          if (nextVal && !isLikelyLabelOrBarcodeNoise(nextVal) && !isClaroOrNetToken(nextVal)) {
+            if (contextoAtual === "wifi" || linhasAposWifiSsid <= 2) {
+              if (!extractedData.wifiPass) extractedData.wifiPass = nextVal;
+            } else if (!extractedData.ipPass) {
+              extractedData.ipPass = nextVal;
+            } else if (!extractedData.wifiPass && nextVal !== extractedData.ipPass) {
+              extractedData.wifiPass = nextVal;
+            }
           }
         }
       }
 
-      // Distribuição dos tokens CLARO_ / NET_
+      // Distribui tokens CLARO_ / NET_ entre Usuário 192.168.0.1, SSID 2.4GHz e SSID 5GHz
       for (const token of allClaroNetTokens) {
         const is5g = /(?:[_-]5g|_5|5ghz)/i.test(token);
         const is24g = /(?:[_-]2\.?4g?|[_-]2g|24g)/i.test(token);
-
-        const temOutrosComBanda = allClaroNetTokens.some((t) => /(?:[_-]5g|_5|5ghz|[_-]2\.?4g?|[_-]2g|24g)/i.test(t));
-        if (!extractedData.ipUser && !is5g && !is24g && temOutrosComBanda) {
-          extractedData.ipUser = token;
-          continue;
-        }
-
-        if (token === extractedData.ipUser && allClaroNetTokens.length > 1) {
-          continue;
-        }
 
         if (is5g && (!extractedData.ssid5 || !mergeMode)) {
           extractedData.ssid5 = token;
         } else if (is24g && (!extractedData.ssid24 || !mergeMode)) {
           extractedData.ssid24 = token;
+        } else if (!extractedData.ipUser) {
+          extractedData.ipUser = token;
         } else if (!extractedData.ssid24) {
           extractedData.ssid24 = token;
         } else if (!extractedData.ssid5 && token !== extractedData.ssid24) {
@@ -1751,51 +1740,25 @@
         }
       }
 
-      if (!extractedData.ipUser && allClaroNetTokens.length === 1) {
-        const idxIp = joined.search(/192\.168\.0\.1/);
-        const tokenBase = allClaroNetTokens[0].replace(/^CLARO_|^NET_/i, "");
-        const idxTok = joined.indexOf(tokenBase);
-        if (idxIp !== -1 && idxTok !== -1 && idxTok > idxIp && (idxTok - idxIp) < 120) {
-          extractedData.ipUser = allClaroNetTokens[0];
+      if (!extractedData.ipUser && extractedData.ssid24) {
+        extractedData.ipUser = extractedData.ssid24;
+      }
+
+      // Fallback final: se encontrou duas senhas distintas, distribui entre ipPass e wifiPass
+      if (!extractedData.ipPass || !extractedData.wifiPass) {
+        const todasSenhas = [...joined.matchAll(/(?:senha|password|pass|pwd|key)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})/gi)]
+          .map((m) => cleanCredentialToken(m[1]).toUpperCase())
+          .filter((v) => v && !isLikelyLabelOrBarcodeNoise(v) && !isClaroOrNetToken(v));
+
+        const unicas = [...new Set(todasSenhas)];
+        if (!extractedData.ipPass && unicas.length >= 1) {
+          extractedData.ipPass = unicas[0];
         }
-      }
-
-      if (!extractedData.ipUser && /\badmin\b/i.test(joined)) {
-        extractedData.ipUser = "admin";
-      }
-
-      // Fallbacks globais para senhas caso tenham ficado em blocos separados
-      if (!extractedData.ipPass) {
-        const globalIpPass = joined.match(/(?:192\.168\.0\.1[\s\S]{0,180}?)(?:pass(?:word)?|senha|pwd)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{4,36})/i);
-        if (globalIpPass && !isLikelyLabelOrBarcodeNoise(globalIpPass[1]) && !isClaroOrNetToken(globalIpPass[1])) {
-          extractedData.ipPass = cleanCredentialToken(globalIpPass[1]);
+        if (!extractedData.wifiPass && unicas.length >= 2) {
+          extractedData.wifiPass = unicas.find((u) => u !== extractedData.ipPass) || unicas[1];
+        } else if (!extractedData.wifiPass && unicas.length === 1 && !/ssid/i.test(joined)) {
+          extractedData.wifiPass = unicas[0];
         }
-      }
-
-      if (!extractedData.wifiPass) {
-        const globalWifiPass = joined.match(/(?:(?:CLARO|NET)_[A-Za-z0-9_\-]+[\s\S]{0,180}?)(?:pass(?:word)?|senha|key|wpa(?:2|3)?|psk)\s*[:=\-]?\s*[\r\n]*\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
-        if (globalWifiPass && !isLikelyLabelOrBarcodeNoise(globalWifiPass[1]) && !isClaroOrNetToken(globalWifiPass[1])) {
-          extractedData.wifiPass = cleanCredentialToken(globalWifiPass[1]);
-        }
-      }
-
-      if (extractedData.ipPass && !extractedData.wifiPass) {
-        const allPassMatches = [...joined.matchAll(/(?:pass(?:word)?|senha|key|wpa2?|psk)\s*[:=\-]?\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/gi)];
-        for (const pm of allPassMatches) {
-          const cand = cleanCredentialToken(pm[1]);
-          if (cand && cand !== extractedData.ipPass && !isLikelyLabelOrBarcodeNoise(cand) && !isClaroOrNetToken(cand)) {
-            extractedData.wifiPass = cand;
-            break;
-          }
-        }
-      }
-
-      const qrWifiMatch = joined.match(/WIFI:[^;\n]*S:((?:CLARO|NET)[^;\n]+)[^;\n]*;[^;\n]*P:([^;\n]+)/i);
-      if (qrWifiMatch) {
-        const qrSsid = normalizeClaroNetIdentifier(qrWifiMatch[1]);
-        const qrPass = cleanCredentialToken(qrWifiMatch[2]);
-        if (!extractedData.ssid24) extractedData.ssid24 = qrSsid;
-        if (!extractedData.wifiPass) extractedData.wifiPass = qrPass;
       }
     }
 
