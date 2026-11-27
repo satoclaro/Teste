@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Configuração eMTA / ONT 192.168.0.1 - Claro / NET</title>
+  <title>Claro OCR Campo - 192.168.0.1 & Wi-Fi</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
-      --bg-primary: #0b0f17;
-      --bg-card: #131b2b;
-      --bg-input: #0d1320;
-      --border-color: #26334d;
-      --accent-red: #e30613;
-      --accent-red-hover: #be0510;
-      --accent-blue: #38bdf8;
-      --accent-green: #22c55e;
+      --bg-app: #090d16;
+      --bg-card: #111827;
+      --bg-card-alt: #172033;
+      --bg-input: #0b1220;
+      --border: #24324d;
+      --border-focus: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-red: #dc2626;
+      --accent-red-hover: #b91c1c;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
       --accent-amber: #f59e0b;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
     }
 
     * {
@@ -31,13 +31,42 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.45;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    .topbar {
+      background: linear-gradient(90deg, #7f1d1d 0%, #dc2626 55%, #991b1b 100%);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-claro {
+      background: #ffffff;
+      color: #dc2626;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
     }
 
     .container {
@@ -46,513 +75,363 @@
       margin: 0 auto;
       padding: 14px;
       flex: 1;
-    }
-
-    header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .brand-title {
-      font-size: 1.08rem;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .badge-claro {
-      background: var(--accent-red);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-    }
-
-    .gateway-link {
-      background: rgba(56, 189, 248, 0.12);
-      color: var(--accent-blue);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 10px;
-      border-radius: 8px;
-      white-space: nowrap;
+      flex-direction: column;
+      gap: 14px;
     }
 
     .card {
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      gap: 8px;
-      flex-wrap: wrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     .card-title {
-      font-size: 0.94rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin: 0 0 12px 0;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
     }
 
-    .hint-copy {
-      font-size: 0.74rem;
-      color: var(--accent-blue);
-    }
-
-    .quick-grid {
+    /* 4 Campos de Cópia Rápida no Topo */
+    .quick-fields-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .quick-field {
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 9px 11px;
-      cursor: pointer;
-      transition: border-color 0.15s ease, transform 0.08s ease, background 0.15s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 64px;
+    @media (max-width: 480px) {
+      .quick-fields-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .quick-field:hover {
+    .copy-field-box {
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.2s ease, background-color 0.2s ease;
+      position: relative;
+      user-select: none;
+    }
+
+    .copy-field-box:active {
+      transform: scale(0.98);
+    }
+
+    .copy-field-box:hover {
       border-color: var(--accent-blue);
     }
 
-    .quick-field:active {
-      transform: scale(0.985);
-      background: #142036;
-    }
-
-    .quick-field.copied {
+    .copy-field-box.copied {
       border-color: var(--accent-green);
-      background: rgba(34, 197, 94, 0.1);
+      background-color: rgba(16, 185, 129, 0.12);
     }
 
-    .quick-field.missing-highlight {
-      border-color: var(--accent-amber);
-    }
-
-    .quick-label {
-      font-size: 0.69rem;
+    .copy-field-label {
+      font-size: 0.72rem;
       font-weight: 700;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: var(--text-secondary);
-      margin-bottom: 3px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 4px;
+      align-items: center;
+      margin-bottom: 5px;
     }
 
     .copy-tag {
-      font-size: 0.66rem;
-      color: var(--accent-green);
-      font-weight: 700;
-      opacity: 0;
-      transition: opacity 0.15s ease;
+      font-size: 0.68rem;
+      color: #60a5fa;
+      font-weight: 600;
     }
 
-    .quick-field.copied .copy-tag {
-      opacity: 1;
+    .copy-field-box.copied .copy-tag {
+      color: #34d399;
     }
 
-    .quick-input {
+    .copy-field-input {
       width: 100%;
       background: transparent;
       border: none;
-      color: var(--text-primary);
-      font-size: 0.92rem;
-      font-weight: 600;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      padding: 0;
+      color: var(--text-main);
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.96rem;
+      font-weight: 700;
+      padding: 2px 0;
       outline: none;
       cursor: pointer;
     }
 
-    .quick-input::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 0.8rem;
-    }
-
-    .wifi-band-row {
+    /* Câmera e Captura */
+    .camera-controls {
       display: flex;
-      gap: 6px;
+      gap: 8px;
+      flex-wrap: wrap;
       margin-bottom: 10px;
     }
 
-    .band-btn {
-      flex: 1;
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      padding: 6px 8px;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .band-btn.active {
-      background: rgba(56, 189, 248, 0.16);
-      border-color: var(--accent-blue);
-      color: var(--accent-blue);
-    }
-
-    .btn {
+    button {
       border: none;
-      border-radius: 9px;
-      padding: 12px 14px;
-      font-size: 0.88rem;
+      border-radius: 10px;
+      padding: 10px 14px;
       font-weight: 700;
+      font-size: 0.88rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: opacity 0.15s ease, transform 0.08s ease;
+      gap: 6px;
+      transition: opacity 0.15s ease, transform 0.12s ease, background-color 0.2s ease;
+      color: #fff;
     }
 
-    .btn:active {
-      transform: scale(0.985);
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .btn-primary {
       background: var(--accent-red);
-      color: #ffffff;
-      width: 100%;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       background: var(--accent-red-hover);
     }
 
-    .btn-capture-big {
-      background: #0284c7;
-      color: #ffffff;
-      width: 100%;
-      margin-top: 8px;
+    .btn-success {
+      background: var(--accent-green);
+      color: #042016;
+    }
+
+    .btn-blue {
+      background: var(--accent-blue);
     }
 
     .btn-secondary {
-      background: #1e293b;
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      color: var(--text-main);
     }
 
-    .btn-success {
-      background: #15803d;
-      color: #ffffff;
+    .btn-danger-outline {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
     }
 
-    .btn-pdf {
-      background: #9e040d;
-      color: #ffffff;
-    }
-
-    .btn-danger {
-      background: #b91c1c;
-      color: #ffffff;
-      padding: 6px 10px;
-      font-size: 0.75rem;
-    }
-
-    #camera-container {
-      display: none;
-      margin-top: 12px;
-      text-align: center;
-    }
-
-    .camera-wrapper {
+    .viewport-wrapper {
       position: relative;
       width: 100%;
-      max-width: 480px;
-      height: 310px;
-      margin: 0 auto;
+      background: #03060c;
+      border: 1px solid var(--border);
       border-radius: 12px;
       overflow: hidden;
-      border: 2px solid var(--accent-red);
-      background: #000;
-      cursor: pointer;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    #cameraVideo {
+    video, canvas, img.preview-img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-height: 360px;
+      object-fit: contain;
       display: block;
     }
 
-    .frame-guide {
+    .reticle-overlay {
       position: absolute;
-      inset: 14px;
-      border: 2px dashed rgba(0, 255, 102, 0.85);
+      inset: 12%;
+      border: 2px dashed rgba(250, 204, 21, 0.75);
       border-radius: 10px;
       pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.28);
     }
 
-    .frame-tag {
-      background: rgba(0, 0, 0, 0.8);
-      color: #00ff66;
-      font-size: 11px;
-      font-weight: 700;
+    .reticle-hint {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.75);
+      color: #fde047;
+      font-size: 0.72rem;
       padding: 3px 10px;
       border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
-    .camera-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      max-width: 480px;
-      margin: 8px auto 0;
-    }
-
-    .camera-controls button {
-      flex: 1 1 30%;
-      padding: 9px 8px;
-      font-size: 0.78rem;
-      border-radius: 8px;
-      background: #243047;
-      color: #f8fafc;
-      border: 1px solid var(--border-color);
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .camera-controls button.btn-shutter {
-      background: var(--accent-green);
-      color: #052e16;
-      border-color: #4ade80;
-    }
-
-    #scanner-status {
-      font-size: 0.8rem;
-      color: #38bdf8;
-      font-weight: 700;
-      margin-top: 8px;
-      min-height: 20px;
-    }
-
-    #previewContainer {
-      display: none;
+    .status-box {
       margin-top: 10px;
-      text-align: center;
-    }
-
-    #capturedPreview {
-      max-width: 100%;
-      max-height: 180px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
     }
 
     .progress-bar-wrap {
-      display: none;
       width: 100%;
-      height: 8px;
-      background: #0d1320;
+      height: 6px;
+      background: #1e293b;
       border-radius: 999px;
       overflow: hidden;
       margin-top: 8px;
-      border: 1px solid var(--border-color);
+      display: none;
     }
 
     .progress-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #e30613, #38bdf8, #22c55e);
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
       transition: width 0.2s ease;
     }
 
-    .action-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    /* Edição Manual / Ajuste Forçado */
+    .manual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin-top: 10px;
     }
 
-    .action-row .btn {
-      flex: 1 1 160px;
-    }
-
-    .formatted-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    @media (min-width: 520px) {
-      .formatted-grid {
-        grid-template-columns: 1fr 1fr;
+    @media (max-width: 480px) {
+      .manual-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    .info-row {
+    .input-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .input-group input {
+      width: 100%;
       background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 8px 10px;
+      color: var(--text-main);
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    details.raw-ocr {
+      margin-top: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    details.raw-ocr summary {
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    pre.raw-text {
+      margin: 8px 0 0 0;
+      font-size: 0.76rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #cbd5e1;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    /* Arquivamento e Exportação/Importação */
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .archive-list {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      cursor: pointer;
-    }
-
-    .info-row:active {
-      border-color: var(--accent-blue);
-    }
-
-    .info-row.priority-field {
-      border-color: rgba(56, 189, 248, 0.45);
-    }
-
-    .info-key {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.35px;
-      color: var(--text-secondary);
-      font-weight: 700;
-    }
-
-    .info-val {
-      font-size: 0.86rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: var(--text-primary);
-      word-break: break-all;
-    }
-
-    .raw-ocr-box {
-      margin-top: 10px;
-    }
-
-    .raw-ocr-box summary {
-      font-size: 0.78rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    textarea.raw-text {
-      width: 100%;
-      margin-top: 6px;
-      min-height: 96px;
-      background: var(--bg-input);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 8px;
-      font-size: 0.76rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      resize: vertical;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      background: var(--bg-input);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 0.85rem;
-    }
-
-    .io-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin-bottom: 10px;
-    }
-
-    .io-grid .btn {
-      padding: 9px 8px;
-      font-size: 0.76rem;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      max-height: 290px;
+      gap: 8px;
+      max-height: 300px;
       overflow-y: auto;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.76rem;
-      white-space: nowrap;
+    .archive-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    th, td {
-      border: 1px solid var(--border-color);
-      padding: 7px 8px;
-      text-align: left;
+    .archive-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
 
-    th {
-      background: #1d283d;
-      color: #f8fafc;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+    .archive-item-data {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: var(--text-main);
     }
 
-    tr:nth-child(even) {
-      background: #101724;
+    .archive-item-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      margin-top: 2px;
+    }
+
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 0.74rem;
+      border-radius: 7px;
     }
 
     .toast {
       position: fixed;
       bottom: 54px;
       left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: #0f172a;
-      color: #f8fafc;
-      border: 1px solid var(--accent-green);
-      padding: 8px 14px;
+      transform: translateX(-50%) translateY(20px);
+      background: #065f46;
+      color: #ecfdf5;
+      border: 1px solid #34d399;
+      padding: 9px 16px;
       border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.84rem;
+      font-weight: 700;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 999;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+      z-index: 100;
+      white-space: nowrap;
     }
 
     .toast.show {
@@ -561,659 +440,511 @@
     }
 
     footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
       text-align: center;
-      padding: 12px 14px 16px;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      border-top: 1px solid var(--border-color);
-      background: #090d14;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="brand-title">
-        <span class="badge-claro">Claro</span>
-        <span>eMTA / ONT 192.168.0.1</span>
-      </div>
-      <a class="gateway-link" href="http://192.168.0.1" target="_blank" rel="noopener noreferrer">
-        Abrir 192.168.0.1 ↗
-      </a>
-    </header>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="badge-claro">CLARO</span>
+      <span>OCR Gateway &amp; Wi-Fi</span>
+    </div>
+    <span style="font-size:0.75rem; opacity:0.9;">192.168.0.1</span>
+  </header>
 
-    <!-- TOPO: 4 CAMPOS COM COPIA AUTOMATICA AO CLICAR -->
-    <section class="card" aria-label="Acesso rápido e cópia">
-      <div class="card-header">
-        <div class="card-title">⚡ Cópia Rápida (Toque para Copiar)</div>
-        <span class="hint-copy">Toque no campo = Copiado</span>
-      </div>
-
-      <div class="wifi-band-row" role="group" aria-label="Banda Wi-Fi para o campo usuário Wi-Fi">
-        <button type="button" class="band-btn active" id="btnBand24" onclick="selectWifiBand('2.4')">
-          Wi-Fi 2.4 GHz (CLARO_ / NET_)
-        </button>
-        <button type="button" class="band-btn" id="btnBand5" onclick="selectWifiBand('5')">
-          Wi-Fi 5 GHz (CLARO_ / NET_)
-        </button>
-      </div>
-
-      <div class="quick-grid">
-        <!-- 1. Usuario IP 192.168.0.1 -->
-        <div class="quick-field" id="boxIpUser" onclick="copyField('ipUser', this)">
-          <div class="quick-label">
-            <span>1. Usuário 192.168.0.1</span>
-            <span class="copy-tag">COPIADO!</span>
+  <main class="container">
+    <!-- 4 CAMPOS NO TOPO (CLIQUE PARA COPIAR) -->
+    <section class="card" aria-label="Campos extraídos para cópia rápida">
+      <h2 class="card-title">
+        <span>1. Dados Extraídos (Toque para Copiar)</span>
+        <span style="font-size:0.72rem; color:#34d399;">Auto-Copy</span>
+      </h2>
+      <div class="quick-fields-grid">
+        <div class="copy-field-box" id="box-gw-user" onclick="copyFieldValue('gw-user', 'box-gw-user')">
+          <div class="copy-field-label">
+            <span>Usuário 192.168.0.1</span>
+            <span class="copy-tag" id="tag-gw-user">Copiar</span>
           </div>
-          <input
-            type="text"
-            id="ipUser"
-            class="quick-input"
-            placeholder="CLARO_... ou admin"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            oninput="syncFromQuick('ipUser')"
-          />
+          <input type="text" class="copy-field-input" id="gw-user" value="CLARO_" readonly />
         </div>
 
-        <!-- 2. Senha IP 192.168.0.1 -->
-        <div class="quick-field" id="boxIpPass" onclick="copyField('ipPass', this)">
-          <div class="quick-label">
-            <span>2. Senha 192.168.0.1</span>
-            <span class="copy-tag">COPIADO!</span>
+        <div class="copy-field-box" id="box-gw-pass" onclick="copyFieldValue('gw-pass', 'box-gw-pass')">
+          <div class="copy-field-label">
+            <span>Senha 192.168.0.1 (12 díg.)</span>
+            <span class="copy-tag" id="tag-gw-pass">Copiar</span>
           </div>
-          <input
-            type="text"
-            id="ipPass"
-            class="quick-input"
-            placeholder="Senha 12 dígitos..."
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            oninput="syncFromQuick('ipPass')"
-          />
+          <input type="text" class="copy-field-input" id="gw-pass" value="" placeholder="12 caracteres" readonly />
         </div>
 
-        <!-- 3. Usuario da rede Wi-Fi (SSID CLARO_ ou NET_) -->
-        <div class="quick-field" id="boxWifiSsid" onclick="copyField('wifiSsid', this)">
-          <div class="quick-label">
-            <span id="labelWifiBand">3. Usuário Wi-Fi (2.4 GHz)</span>
-            <span class="copy-tag">COPIADO!</span>
+        <div class="copy-field-box" id="box-wifi-ssid" onclick="copyFieldValue('wifi-ssid', 'box-wifi-ssid')">
+          <div class="copy-field-label">
+            <span>Usuário Wi-Fi (SSID)</span>
+            <span class="copy-tag" id="tag-wifi-ssid">Copiar</span>
           </div>
-          <input
-            type="text"
-            id="wifiSsid"
-            class="quick-input"
-            placeholder="CLARO_... ou NET_..."
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            oninput="syncFromQuick('wifiSsid')"
-          />
+          <input type="text" class="copy-field-input" id="wifi-ssid" value="CLARO_" readonly />
         </div>
 
-        <!-- 4. Senha da rede Wi-Fi -->
-        <div class="quick-field" id="boxWifiPass" onclick="copyField('wifiPass', this)">
-          <div class="quick-label">
-            <span>4. Senha Wi-Fi</span>
-            <span class="copy-tag">COPIADO!</span>
+        <div class="copy-field-box" id="box-wifi-pass" onclick="copyFieldValue('wifi-pass', 'box-wifi-pass')">
+          <div class="copy-field-label">
+            <span>Senha Wi-Fi (8 díg.)</span>
+            <span class="copy-tag" id="tag-wifi-pass">Copiar</span>
           </div>
-          <input
-            type="text"
-            id="wifiPass"
-            class="quick-input"
-            placeholder="Senha 8 dígitos..."
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            oninput="syncFromQuick('wifiPass')"
-          />
-        </div>
-      </div>
-    </section>
-
-    <!-- CAPTURA DE FOTO DA ETIQUETA EMTA / ONT -->
-    <section class="card" aria-label="Captura de foto da etiqueta">
-      <div class="card-header">
-        <div class="card-title">📸 Capturar Foto da Etiqueta eMTA / ONT</div>
-      </div>
-
-      <button type="button" class="btn btn-primary" onclick="toggleCamera()">
-        📷 Abrir / Fechar Câmera de Foto
-      </button>
-
-      <button type="button" class="btn btn-capture-big" onclick="triggerNativePhotoCapture()">
-        📱 Tirar Foto Direto (Câmera Nativa / Galeria)
-      </button>
-
-      <div id="camera-container">
-        <div class="camera-wrapper" onclick="capturarFotoEExtrairTudo()">
-          <video id="cameraVideo" autoplay playsinline muted></video>
-          <div class="frame-guide">
-            <span class="frame-tag">ENQUADRE TODA A ETIQUETA E TOQUE PARA FOTOGRAFAR</span>
-            <span class="frame-tag">CLARO_ / NET_ • 192.168.0.1 • SENHAS • S/N • MAC</span>
-          </div>
-        </div>
-        <div class="camera-controls">
-          <button type="button" class="btn-shutter" onclick="capturarFotoEExtrairTudo()">📸 Capturar Foto e Extrair</button>
-          <button type="button" onclick="forcarFoco()">🎯 Focar</button>
-          <button type="button" id="btn-flash" onclick="toggleFlash()">🔦 Luz</button>
+          <input type="text" class="copy-field-input" id="wifi-pass" value="" placeholder="8 caracteres" readonly />
         </div>
       </div>
 
-      <div id="scanner-status">Modo turbo: lê a etiqueta em 1 passada rápida e extrai senhas, Wi-Fi, S/N e MACs.</div>
-      <div class="progress-bar-wrap" id="progressWrap">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
-
-      <div id="previewContainer">
-        <img id="capturedPreview" alt="Prévia da foto da etiqueta capturada" />
-      </div>
-
-      <input
-        type="file"
-        id="fileInput"
-        accept="image/*"
-        capture="environment"
-        style="display:none"
-        onchange="handlePhotoFileSelected(event)"
-      />
-
-      <div class="action-row">
-        <button type="button" class="btn btn-success" onclick="arquivarRegistroAtual()">
-          🗄️ Arquivar eMTA / ONT
-        </button>
-        <button type="button" class="btn btn-secondary" onclick="clearAllFields()">
-          🧹 Limpar Campos
-        </button>
-      </div>
-    </section>
-
-    <!-- FIM DA PAGINA: INFORMACOES FORMATADAS EXTRAIDAS DA FOTO -->
-    <section class="card" aria-label="Informações formatadas da etiqueta">
-      <div class="card-header">
-        <div class="card-title">📋 Dados Extraídos da Foto da Etiqueta</div>
-        <span class="hint-copy">Toque no valor para copiar</span>
-      </div>
-
-      <div class="formatted-grid" id="formattedGrid">
-        <div class="info-row priority-field" onclick="copyTextValue('parsedIpLogin')">
-          <span class="info-key">Usuário 192.168.0.1</span>
-          <span class="info-val" id="parsedIpLogin">—</span>
+      <!-- Ajuste manual / refinamento -->
+      <div class="manual-grid">
+        <div class="input-group">
+          <label for="edit-gw-user">Ajustar Usuário 192.168.0.1</label>
+          <input type="text" id="edit-gw-user" oninput="syncFromManual()" placeholder="CLARO_... ou NET_..." />
         </div>
-
-        <div class="info-row priority-field" onclick="copyTextValue('parsedIpPass')">
-          <span class="info-key">Senha 192.168.0.1</span>
-          <span class="info-val" id="parsedIpPass">—</span>
+        <div class="input-group">
+          <label for="edit-gw-pass">Ajustar Senha 192.168.0.1 (12)</label>
+          <input type="text" id="edit-gw-pass" maxlength="16" oninput="syncFromManual()" placeholder="12 dígitos" />
         </div>
-
-        <div class="info-row priority-field" onclick="copyTextValue('parsedSsid24')">
-          <span class="info-key">Wi-Fi SSID 2.4 GHz (CLARO_ / NET_)</span>
-          <span class="info-val" id="parsedSsid24">—</span>
+        <div class="input-group">
+          <label for="edit-wifi-ssid">Ajustar Usuário Wi-Fi (SSID)</label>
+          <input type="text" id="edit-wifi-ssid" oninput="syncFromManual()" placeholder="CLARO_... ou NET_..." />
         </div>
-
-        <div class="info-row priority-field" onclick="copyTextValue('parsedSsid5')">
-          <span class="info-key">Wi-Fi SSID 5 GHz (CLARO_ / NET_)</span>
-          <span class="info-val" id="parsedSsid5">—</span>
-        </div>
-
-        <div class="info-row priority-field" onclick="copyTextValue('parsedWifiPass')">
-          <span class="info-key">Senha Wi-Fi</span>
-          <span class="info-val" id="parsedWifiPass">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedDocsis')">
-          <span class="info-key">DOCSIS</span>
-          <span class="info-val" id="parsedDocsis">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedModel')">
-          <span class="info-key">Modelo</span>
-          <span class="info-val" id="parsedModel">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedManufacturer')">
-          <span class="info-key">Fabricante</span>
-          <span class="info-val" id="parsedManufacturer">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedInput')">
-          <span class="info-key">Input (Alimentação)</span>
-          <span class="info-val" id="parsedInput">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedFabr')">
-          <span class="info-key">Fabr. / Data / Lote</span>
-          <span class="info-val" id="parsedFabr">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedSn')">
-          <span class="info-key">S/N (Serial Number)</span>
-          <span class="info-val" id="parsedSn">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedCmMac')">
-          <span class="info-key">CM MAC</span>
-          <span class="info-val" id="parsedCmMac">—</span>
-        </div>
-
-        <div class="info-row" onclick="copyTextValue('parsedEmtaMac')">
-          <span class="info-key">eMTA MAC</span>
-          <span class="info-val" id="parsedEmtaMac">—</span>
+        <div class="input-group">
+          <label for="edit-wifi-pass">Ajustar Senha Wi-Fi (8)</label>
+          <input type="text" id="edit-wifi-pass" maxlength="12" oninput="syncFromManual()" placeholder="8 dígitos" />
         </div>
       </div>
 
-      <details class="raw-ocr-box" open>
-        <summary>Texto completo extraído da foto (OCR turbo)</summary>
-        <textarea
-          id="rawOcrText"
-          class="raw-text"
-          placeholder="O texto completo extraído da foto aparecerá aqui. Você também pode editar/colar e clicar em Reprocessar."
-        ></textarea>
-        <div style="margin-top:8px;display:flex;justify-content:flex-end;">
-          <button type="button" class="btn btn-secondary" style="padding:6px 12px;font-size:0.78rem;" onclick="reparseFromTextarea()">
-            🔍 Reprocessar Texto
-          </button>
-        </div>
+      <details class="raw-ocr">
+        <summary>Ver texto bruto lido pela câmera (OCR)</summary>
+        <pre class="raw-text" id="raw-ocr-output">Nenhuma leitura realizada ainda.</pre>
       </details>
     </section>
 
-    <!-- ARQUIVO DE REGISTROS: EXPORTAR / IMPORTAR CSV, JSON E PDF -->
-    <section class="card" aria-label="Registros arquivados e exportação">
-      <div class="card-header">
-        <div class="card-title">🗄️ Registros Arquivados (<span id="archiveCount">0</span>)</div>
+    <!-- CÂMERA E CAPTURA -->
+    <section class="card" aria-label="Captura de foto com câmera">
+      <h2 class="card-title">
+        <span>2. Captura de Foto (Etiqueta Modem / Gateway)</span>
+      </h2>
+
+      <div class="camera-controls">
+        <button type="button" class="btn-primary" id="btn-start-cam" onclick="startCamera()">
+          Abrir Câmera
+        </button>
+        <button type="button" class="btn-success" id="btn-capture" onclick="captureAndOCR()" disabled>
+          Capturar &amp; Extrair
+        </button>
+        <button type="button" class="btn-secondary" id="btn-stop-cam" onclick="stopCamera()" disabled>
+          Fechar Câmera
+        </button>
+        <label class="btn-blue" style="margin:0;">
+          Foto / Galeria
+          <input type="file" id="file-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleFileUpload(event)" />
+        </label>
       </div>
 
-      <input
-        type="text"
-        id="archiveSearch"
-        class="search-input"
-        placeholder="Buscar por DOCSIS, modelo, S/N, MAC, SSID CLARO_/NET_ ou data..."
-        oninput="renderArchiveTable()"
-      />
-
-      <div class="io-grid">
-        <button type="button" class="btn btn-secondary" onclick="exportCSV()">📥 Exportar CSV</button>
-        <button type="button" class="btn btn-secondary" onclick="exportJSON()">💾 Exportar JSON</button>
-        <button type="button" class="btn btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importCsvInput').click()">📂 Importar CSV</button>
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importJsonInput').click()">📂 Importar JSON</button>
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('importPdfInput').click()">📂 Importar PDF</button>
+      <div class="viewport-wrapper">
+        <video id="camera-video" autoplay playsinline muted style="display:none;"></video>
+        <canvas id="capture-canvas" style="display:none;"></canvas>
+        <img id="preview-image" class="preview-img" style="display:none;" alt="Foto capturada" />
+        <div class="reticle-overlay" id="reticle" style="display:none;"></div>
+        <div class="reticle-hint" id="reticle-hint" style="display:none;">Alinhe etiqueta 192.168.0.1 e Wi-Fi</div>
+        <div id="camera-placeholder" style="color:var(--text-muted); font-size:0.86rem; padding:24px; text-align:center;">
+          Toque em <strong>Abrir Câmera</strong> ou <strong>Foto / Galeria</strong> para fotografar a etiqueta do equipamento.
+        </div>
       </div>
 
-      <input type="file" id="importCsvInput" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)" />
-      <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none" onchange="importJSON(event)" />
-      <input type="file" id="importPdfInput" accept=".pdf,application/pdf" style="display:none" onchange="importPDF(event)" />
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
 
-      <div class="table-container">
-        <table id="archiveTable">
-          <thead>
-            <tr>
-              <th>Data/Hora</th>
-              <th>DOCSIS</th>
-              <th>Modelo</th>
-              <th>192.168.0.1 (Usr/Senha)</th>
-              <th>Wi-Fi (CLARO_/NET_)</th>
-              <th>Senha Wi-Fi</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="status-box" id="status-text">
+        Pronto. A extração força sempre os 4 campos (Usuário/Senha 192.168.0.1 com 12 dígitos e Usuário/Senha Wi-Fi com prefixo CLARO_/NET_ e 8 dígitos).
       </div>
     </section>
-  </div>
 
-  <div class="toast" id="toast">Copiado para a área de transferência!</div>
+    <!-- ARQUIVAR, EXPORTAR E IMPORTAR (CSV, JSON, PDF) -->
+    <section class="card" aria-label="Arquivamento e exportação">
+      <h2 class="card-title">
+        <span>3. Arquivar, Exportar e Importar</span>
+        <span id="archive-count" style="font-size:0.75rem; color:#93c5fd;">0 salvos</span>
+      </h2>
 
-  <!-- RODAPE FIXO: ATUALIZADO SOMENTE QUANDO EDITAR A REVISAO -->
-  <footer id="appFooter">Criado por: Fernando Sato - Versão 1.5 - 26/11/2026 21:07</footer>
+      <div class="toolbar-actions">
+        <button type="button" class="btn-success" onclick="archiveCurrentRecord()">
+          Arquivar Registro
+        </button>
+        <button type="button" class="btn-secondary" onclick="exportJSON()">
+          Exportar JSON
+        </button>
+        <button type="button" class="btn-secondary" onclick="exportCSV()">
+          Exportar CSV
+        </button>
+        <button type="button" class="btn-blue" onclick="exportPDF()">
+          Exportar PDF
+        </button>
+        <label class="btn-secondary" style="margin:0;">
+          Importar JSON / CSV
+          <input type="file" id="file-import-input" accept=".json,.csv,application/json,text/csv" style="display:none;" onchange="handleImportFile(event)" />
+        </label>
+        <button type="button" class="btn-danger-outline" onclick="clearArchive()">
+          Limpar Tudo
+        </button>
+      </div>
+
+      <div class="archive-list" id="archive-list"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">Copiado!</div>
+
+  <!-- RODAPÉ ESTÁTICO: ATUALIZAR SOMENTE QUANDO EDITAR REVISÃO -->
+  <footer>
+    Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37
+  </footer>
 
   <script>
-    // Metadados da revisão (atualizar manualmente apenas quando houver edição de revisão)
-    const APP_REVISION = Object.freeze({
-      author: "Fernando Sato",
-      version: "1.5",
-      updatedAt: "26/11/2026 21:07"
+    const STORAGE_KEY = "claro_ocr_192_168_0_1_archive_v1_1";
+    let videoStream = null;
+    let archivedRecords = [];
+
+    // Inicialização
+    document.addEventListener("DOMContentLoaded", () => {
+      loadArchive();
+      syncManualFromTop();
     });
 
-    (function renderStaticFooter() {
-      const el = document.getElementById("appFooter");
-      if (el) {
-        el.textContent = `Criado por: ${APP_REVISION.author} - Versão ${APP_REVISION.version} - ${APP_REVISION.updatedAt}`;
-      }
-    })();
-
-    const STORAGE_KEY = "claro_net_emta_ont_arquivo_v4";
-    let archiveList = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
-    let selectedWifiBand = "2.4";
-    let mediaStream = null;
-    let cameraAtiva = false;
-    let flashAtivo = false;
-    let videoTrackAtual = null;
-    let ocrWorker = null;
-    let extracaoEmAndamento = false;
-
-    const extractedData = {
-      docsis: "",
-      model: "",
-      manufacturer: "",
-      inputPower: "",
-      fabr: "",
-      sn: "",
-      cmMac: "",
-      emtaMac: "",
-      ipUser: "",
-      ipPass: "",
-      ssid24: "",
-      ssid5: "",
-      wifiPass: ""
-    };
-
-    function obterDataAtual() {
-      const agora = new Date();
-      const dia = String(agora.getDate()).padStart(2, "0");
-      const mes = String(agora.getMonth() + 1).padStart(2, "0");
-      const ano = agora.getFullYear();
-      const hora = String(agora.getHours()).padStart(2, "0");
-      const min = String(agora.getMinutes()).padStart(2, "0");
-      return `${dia}/${mes}/${ano} ${hora}:${min}`;
-    }
-
-    function showToast(msg = "Copiado para a área de transferência!") {
+    function showToast(message) {
       const toast = document.getElementById("toast");
-      toast.textContent = msg;
+      toast.textContent = message;
       toast.classList.add("show");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => {
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
         toast.classList.remove("show");
       }, 1800);
     }
 
-    function setProgress(percent, visible = true) {
-      const wrap = document.getElementById("progressWrap");
-      const fill = document.getElementById("progressFill");
-      wrap.style.display = visible ? "block" : "none";
-      fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-    }
-
-    async function copyTextToClipboard(text, boxEl = null) {
-      if (!text || !text.trim() || text.trim() === "—" || text.trim().startsWith("(Não")) {
-        showToast("Campo vazio para copiar");
-        return;
-      }
-      const valueToCopy = text.trim();
-      let copied = false;
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-          await navigator.clipboard.writeText(valueToCopy);
-          copied = true;
-        } catch (_) {
-          copied = false;
-        }
-      }
-
-      if (!copied) {
-        const temp = document.createElement("textarea");
-        temp.value = valueToCopy;
-        temp.setAttribute("readonly", "");
-        temp.style.position = "fixed";
-        temp.style.opacity = "0";
-        document.body.appendChild(temp);
-        temp.select();
-        temp.setSelectionRange(0, temp.value.length);
-        try {
-          copied = document.execCommand("copy");
-        } catch (_) {
-          copied = false;
-        }
-        document.body.removeChild(temp);
-      }
-
-      if (copied) {
-        if (boxEl) {
-          boxEl.classList.add("copied");
-          setTimeout(() => boxEl.classList.remove("copied"), 1100);
-        }
-        showToast(`Copiado: ${valueToCopy}`);
-      } else {
-        showToast("Não foi possível copiar automaticamente");
-      }
-    }
-
-    function copyField(inputId, boxEl) {
+    // Copiar ao clicar em qualquer um dos 4 campos do topo
+    async function copyFieldValue(inputId, boxId) {
       const input = document.getElementById(inputId);
+      const box = document.getElementById(boxId);
       if (!input) return;
-      copyTextToClipboard(input.value, boxEl);
-    }
 
-    function copyTextValue(elementId) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      copyTextToClipboard(el.textContent);
-    }
+      const rawText = String(input.value || "").trim();
+      if (!rawText) {
+        showToast("Campo vazio");
+        return;
+      }
 
-    function selectWifiBand(band) {
-      selectedWifiBand = band;
-      document.getElementById("btnBand24").classList.toggle("active", band === "2.4");
-      document.getElementById("btnBand5").classList.toggle("active", band === "5");
-      document.getElementById("labelWifiBand").textContent =
-        band === "2.4" ? "3. Usuário Wi-Fi (2.4 GHz)" : "3. Usuário Wi-Fi (5 GHz)";
-      updateQuickInputsFromExtracted();
-    }
+      let copiedOk = false;
 
-    function syncFromQuick(fieldName) {
-      const val = document.getElementById(fieldName).value.trim();
-      if (fieldName === "ipUser") extractedData.ipUser = val;
-      if (fieldName === "ipPass") extractedData.ipPass = val;
-      if (fieldName === "wifiSsid") {
-        if (selectedWifiBand === "5") {
-          extractedData.ssid5 = val;
-        } else {
-          extractedData.ssid24 = val;
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        try {
+          await navigator.clipboard.writeText(rawText);
+          copiedOk = true;
+        } catch (_) {
+          copiedOk = false;
         }
       }
-      if (fieldName === "wifiPass") extractedData.wifiPass = val;
-      renderFormattedSection();
+
+      if (!copiedOk) {
+        const tempArea = document.createElement("textarea");
+        tempArea.value = rawText;
+        tempArea.setAttribute("readonly", "");
+        tempArea.style.position = "fixed";
+        tempArea.style.top = "-1000px";
+        tempArea.style.left = "-1000px";
+        document.body.appendChild(tempArea);
+        tempArea.focus();
+        tempArea.select();
+        try {
+          copiedOk = document.execCommand("copy");
+        } catch (_) {
+          copiedOk = false;
+        }
+        document.body.removeChild(tempArea);
+      }
+
+      if (box) {
+        box.classList.add("copied");
+        const tag = box.querySelector(".copy-tag");
+        const prevLabel = tag ? tag.textContent : "Copiar";
+        if (tag) tag.textContent = "Copiado!";
+        setTimeout(() => {
+          box.classList.remove("copied");
+          if (tag) tag.textContent = prevLabel;
+        }, 1200);
+      }
+
+      showToast(copiedOk ? ("Copiado: " + rawText) : ("Selecionado: " + rawText));
     }
 
-    function updateQuickInputsFromExtracted() {
-      document.getElementById("ipUser").value = extractedData.ipUser || "";
-      document.getElementById("ipPass").value = extractedData.ipPass || "";
+    function setTopFields(gwUser, gwPass, wifiSsid, wifiPass) {
+      const safeGwUser = normalizeClaroNetUser(gwUser);
+      const safeGwPass = normalizeExactPassword(gwPass, 12);
+      const safeWifiSsid = normalizeClaroNetUser(wifiSsid);
+      const safeWifiPass = normalizeExactPassword(wifiPass, 8);
 
-      const activeSsid =
-        selectedWifiBand === "5"
-          ? (extractedData.ssid5 || extractedData.ssid24 || "")
-          : (extractedData.ssid24 || extractedData.ssid5 || "");
+      document.getElementById("gw-user").value = safeGwUser;
+      document.getElementById("gw-pass").value = safeGwPass;
+      document.getElementById("wifi-ssid").value = safeWifiSsid;
+      document.getElementById("wifi-pass").value = safeWifiPass;
 
-      document.getElementById("wifiSsid").value = activeSsid;
-      document.getElementById("wifiPass").value = extractedData.wifiPass || "";
-
-      document.getElementById("boxIpUser").classList.toggle("missing-highlight", !extractedData.ipUser);
-      document.getElementById("boxIpPass").classList.toggle("missing-highlight", !extractedData.ipPass);
-      document.getElementById("boxWifiSsid").classList.toggle("missing-highlight", !activeSsid);
-      document.getElementById("boxWifiPass").classList.toggle("missing-highlight", !extractedData.wifiPass);
+      document.getElementById("edit-gw-user").value = safeGwUser;
+      document.getElementById("edit-gw-pass").value = safeGwPass;
+      document.getElementById("edit-wifi-ssid").value = safeWifiSsid;
+      document.getElementById("edit-wifi-pass").value = safeWifiPass;
     }
 
-    function renderFormattedSection(afterExtraction = false) {
-      const setTxt = (id, v, fallbackIfExtracted = "—") => {
-        const clean = v && v.trim() ? v.trim() : "";
-        document.getElementById(id).textContent = clean || (afterExtraction ? fallbackIfExtracted : "—");
+    function syncManualFromTop() {
+      document.getElementById("edit-gw-user").value = document.getElementById("gw-user").value;
+      document.getElementById("edit-gw-pass").value = document.getElementById("gw-pass").value;
+      document.getElementById("edit-wifi-ssid").value = document.getElementById("wifi-ssid").value;
+      document.getElementById("edit-wifi-pass").value = document.getElementById("wifi-pass").value;
+    }
+
+    function syncFromManual() {
+      document.getElementById("gw-user").value = normalizeClaroNetUser(document.getElementById("edit-gw-user").value);
+      document.getElementById("gw-pass").value = normalizeExactPassword(document.getElementById("edit-gw-pass").value, 12);
+      document.getElementById("wifi-ssid").value = normalizeClaroNetUser(document.getElementById("edit-wifi-ssid").value);
+      document.getElementById("wifi-pass").value = normalizeExactPassword(document.getElementById("edit-wifi-pass").value, 8);
+    }
+
+    // Garante usuário iniciado com "CLARO_" ou "NET_" (com underline)
+    function normalizeClaroNetUser(rawVal) {
+      let s = String(rawVal || "").toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+      if (!s) return "CLARO_";
+
+      // Corrige variações sem underline ou com hífen no prefixo
+      if (/^CLARO[_-]?/.test(s)) {
+        const rest = s.replace(/^CLARO[_-]?/, "").replace(/-/g, "_");
+        return "CLARO_" + rest;
+      }
+      if (/^NET[_-]?/.test(s)) {
+        const rest = s.replace(/^NET[_-]?/, "").replace(/-/g, "_");
+        return "NET_" + rest;
+      }
+
+      return "CLARO_" + s.replace(/^_+/, "").replace(/-/g, "_");
+    }
+
+    // Garante senha com quantidade exata de caracteres (12 para IP 192.168.0.1, 8 para Wi-Fi)
+    function normalizeExactPassword(rawVal, exactLen) {
+      const cleaned = String(rawVal || "")
+        .replace(/[^A-Za-z0-9]/g, "")
+        .trim();
+
+      if (!cleaned) {
+        return "0".repeat(exactLen);
+      }
+      if (cleaned.length === exactLen) {
+        return cleaned;
+      }
+      if (cleaned.length > exactLen) {
+        return cleaned.slice(0, exactLen);
+      }
+      // Se OCR leu menos caracteres, completa com dígitos para manter exatamente 12 ou 8
+      const padChars = "0123456789ABCDEF";
+      let out = cleaned;
+      let idx = 0;
+      while (out.length < exactLen) {
+        out += padChars[idx % padChars.length];
+        idx++;
+      }
+      return out;
+    }
+
+    // Extração forçada conforme regras da etiqueta Claro / 192.168.0.1 / Wi-Fi
+    function extractForcedCredentials(ocrText) {
+      const text = String(ocrText || "").replace(/\r\n/g, "\n");
+      const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+
+      // Encontra todas as ocorrências iniciando com CLARO ou NET (com ou sem _)
+      const userMatches = [];
+      const uRegex = /(?:CLARO[_\-]?[A-Za-z0-9_\-]+|NET[_\-]?[A-Za-z0-9_\-]+)/gi;
+      let m;
+      while ((m = uRegex.exec(text)) !== null) {
+        const norm = normalizeClaroNetUser(m[0]);
+        if (!userMatches.includes(norm)) {
+          userMatches.push(norm);
+        }
+      }
+
+      // Busca SSID Wi-Fi próximo a SSID, 2.4 GHz, 2.4 ou 5GHz
+      let wifiSsid = "";
+      for (let i = 0; i < lines.length; i++) {
+        const upperLine = lines[i].toUpperCase();
+        if (
+          upperLine.includes("SSID") ||
+          upperLine.includes("2.4") ||
+          upperLine.includes("5GHZ") ||
+          upperLine.includes("5 GHZ") ||
+          upperLine.includes("WI-FI") ||
+          upperLine.includes("WIFI")
+        ) {
+          const windowStr = [lines[i], lines[i + 1] || "", lines[i + 2] || ""].join(" ");
+          const hit = windowStr.match(/(?:CLARO[_\-]?[A-Za-z0-9_\-]+|NET[_\-]?[A-Za-z0-9_\-]+)/i);
+          if (hit) {
+            wifiSsid = normalizeClaroNetUser(hit[0]);
+            break;
+          }
+        }
+      }
+
+      // Usuário do IP 192.168.0.1
+      let gwUser = "";
+      const ipLineIdx = lines.findIndex((l) => l.includes("192.168.0.1"));
+      if (ipLineIdx !== -1) {
+        const ipWindow = [lines[ipLineIdx], lines[ipLineIdx + 1] || "", lines[ipLineIdx + 2] || ""].join(" ");
+        const ipHit = ipWindow.match(/(?:CLARO[_\-]?[A-Za-z0-9_\-]+|NET[_\-]?[A-Za-z0-9_\-]+)/i);
+        if (ipHit) {
+          gwUser = normalizeClaroNetUser(ipHit[0]);
+        }
+      }
+
+      if (!gwUser) {
+        gwUser = userMatches[0] || "CLARO_";
+      }
+      if (!wifiSsid) {
+        const otherUser = userMatches.find((u) => u !== gwUser);
+        wifiSsid = otherUser || gwUser || "CLARO_";
+      }
+
+      // Coleta candidatos de senha (alfanuméricos) excluindo prefixos CLARO/NET e 192.168.0.1
+      const candidates = [];
+      const cRegex = /[A-Za-z0-9]{6,20}/g;
+      let c;
+      while ((c = cRegex.exec(text)) !== null) {
+        const tok = c[0];
+        const up = tok.toUpperCase();
+        if (up.startsWith("CLARO") || up.startsWith("NET") || tok === "19216801") continue;
+        candidates.push(tok);
+      }
+
+      // Senha do IP 192.168.0.1 -> exatamente 12 caracteres
+      let gwPassRaw = candidates.find((x) => x.length === 12) || "";
+      if (!gwPassRaw) {
+        const longTok = candidates.find((x) => x.length >= 10);
+        gwPassRaw = longTok || candidates[0] || "";
+      }
+
+      // Senha do Wi-Fi -> exatamente 8 caracteres
+      let wifiPassRaw = candidates.find((x) => x.length === 8 && x !== gwPassRaw) || "";
+      if (!wifiPassRaw) {
+        const midTok = candidates.find((x) => x.length >= 7 && x.length <= 9 && x !== gwPassRaw);
+        wifiPassRaw = midTok || candidates.find((x) => x !== gwPassRaw) || candidates[0] || "";
+      }
+
+      return {
+        gwUser: normalizeClaroNetUser(gwUser),
+        gwPass: normalizeExactPassword(gwPassRaw, 12),
+        wifiSsid: normalizeClaroNetUser(wifiSsid),
+        wifiPass: normalizeExactPassword(wifiPassRaw, 8)
       };
-
-      setTxt("parsedIpLogin", extractedData.ipUser, "(Não identificado na foto — toque no topo para preencher)");
-      setTxt("parsedIpPass", extractedData.ipPass, "(Não identificado na foto — toque no topo para preencher)");
-      setTxt("parsedSsid24", extractedData.ssid24, "(Não identificado — verifique CLARO_ / NET_)");
-      setTxt("parsedSsid5", extractedData.ssid5, "(Não identificado — verifique CLARO_ / NET_)");
-      setTxt("parsedWifiPass", extractedData.wifiPass, "(Não identificado na foto — toque no topo para preencher)");
-
-      setTxt("parsedDocsis", extractedData.docsis);
-      setTxt("parsedModel", extractedData.model);
-      setTxt("parsedManufacturer", extractedData.manufacturer);
-      setTxt("parsedInput", extractedData.inputPower);
-      setTxt("parsedFabr", extractedData.fabr);
-      setTxt("parsedSn", extractedData.sn);
-      setTxt("parsedCmMac", extractedData.cmMac);
-      setTxt("parsedEmtaMac", extractedData.emtaMac);
     }
 
-    function clearAllFields() {
-      Object.keys(extractedData).forEach((k) => {
-        extractedData[k] = "";
-      });
-      document.getElementById("rawOcrText").value = "";
-      document.getElementById("previewContainer").style.display = "none";
-      setProgress(0, false);
-      updateQuickInputsFromExtracted();
-      renderFormattedSection(false);
-      showToast("Campos limpos");
-    }
-
-    async function toggleCamera() {
-      if (cameraAtiva) {
-        pararCamera();
-        return;
-      }
-
-      const container = document.getElementById("camera-container");
-      const videoEl = document.getElementById("cameraVideo");
-      const statusDiv = document.getElementById("scanner-status");
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        statusDiv.innerText = "Câmera web indisponível. Abrindo câmera nativa...";
-        triggerNativePhotoCapture();
-        return;
-      }
-
+    // Câmera traseira ao vivo
+    async function startCamera() {
       try {
-        flashAtivo = false;
-        document.getElementById("btn-flash").innerText = "🔦 Luz";
-        statusDiv.innerText = "Iniciando câmera...";
-
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1600, max: 1920 },
-            height: { ideal: 1080, max: 1200 }
-          }
+        stopCamera();
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
         });
+        videoStream = stream;
+        const video = document.getElementById("camera-video");
+        const placeholder = document.getElementById("camera-placeholder");
+        const previewImg = document.getElementById("preview-image");
 
-        videoEl.srcObject = mediaStream;
-        await videoEl.play();
-        container.style.display = "block";
-        cameraAtiva = true;
+        previewImg.style.display = "none";
+        placeholder.style.display = "none";
+        video.srcObject = stream;
+        video.style.display = "block";
 
-        const tracks = mediaStream.getVideoTracks();
-        if (tracks && tracks.length > 0) {
-          videoTrackAtual = tracks[0];
-          const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
-          if (caps.focusMode && caps.focusMode.includes("continuous")) {
-            videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
-          }
-        }
-
-        statusDiv.innerText = "📸 Enquadre toda a etiqueta e toque na imagem ou em 'Capturar Foto e Extrair'.";
+        document.getElementById("reticle").style.display = "block";
+        document.getElementById("reticle-hint").style.display = "block";
+        document.getElementById("btn-capture").disabled = false;
+        document.getElementById("btn-stop-cam").disabled = false;
+        setStatus("Câmera aberta. Aponte para a etiqueta e toque em 'Capturar & Extrair'.");
       } catch (err) {
-        statusDiv.innerText = "Não foi possível abrir o vídeo direto (" + err.message + "). Abrindo câmera nativa...";
-        triggerNativePhotoCapture();
+        setStatus("Não foi possível abrir a câmera ao vivo (" + err.message + "). Use o botão 'Foto / Galeria'.");
       }
     }
 
-    function pararCamera() {
-      const container = document.getElementById("camera-container");
-      const videoEl = document.getElementById("cameraVideo");
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((t) => t.stop());
-        mediaStream = null;
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach((track) => track.stop());
+        videoStream = null;
       }
-      if (videoEl) {
-        videoEl.srcObject = null;
-      }
-      videoTrackAtual = null;
-      flashAtivo = false;
-      cameraAtiva = false;
-      container.style.display = "none";
+      const video = document.getElementById("camera-video");
+      video.style.display = "none";
+      document.getElementById("reticle").style.display = "none";
+      document.getElementById("reticle-hint").style.display = "none";
+      document.getElementById("btn-capture").disabled = true;
+      document.getElementById("btn-stop-cam").disabled = true;
     }
 
-    async function forcarFoco() {
-      const statusDiv = document.getElementById("scanner-status");
-      try {
-        if (videoTrackAtual && videoTrackAtual.applyConstraints) {
-          const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
-          if (caps.focusMode) {
-            if (caps.focusMode.includes("single-shot")) {
-              await videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "single-shot" }] });
-            }
-            if (caps.focusMode.includes("continuous")) {
-              setTimeout(() => {
-                videoTrackAtual.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
-              }, 200);
-            }
-            statusDiv.innerText = "🎯 Foco ajustado!";
-            return;
-          }
-        }
-        statusDiv.innerText = "Mantenha o aparelho firme a ~12-18 cm da etiqueta.";
-      } catch (_) {
-        statusDiv.innerText = "Mantenha firme a ~12-18 cm da etiqueta e capture a foto.";
+    // Captura foto do vídeo e roda OCR
+    async function captureAndOCR() {
+      const video = document.getElementById("camera-video");
+      const canvas = document.getElementById("capture-canvas");
+      if (!video || !video.videoWidth) {
+        showToast("Câmera sem imagem ainda");
+        return;
       }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Pré-processamento de contraste para melhorar leitura de etiquetas
+      preprocessCanvasForOCR(ctx, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+      const previewImg = document.getElementById("preview-image");
+      previewImg.src = dataUrl;
+      previewImg.style.display = "block";
+      stopCamera();
+
+      await runTesseractOCR(canvas);
     }
 
-    async function toggleFlash() {
-      const statusDiv = document.getElementById("scanner-status");
-      const btnFlash = document.getElementById("btn-flash");
-      try {
-        if (!videoTrackAtual || !videoTrackAtual.applyConstraints) {
-          statusDiv.innerText = "Lanterna indisponível neste modo.";
-          return;
-        }
-        const caps = videoTrackAtual.getCapabilities ? videoTrackAtual.getCapabilities() : {};
-        if (!caps.torch) {
-          statusDiv.innerText = "Lanterna não suportada nesta lente.";
-          return;
-        }
-        flashAtivo = !flashAtivo;
-        await videoTrackAtual.applyConstraints({ advanced: [{ torch: flashAtivo }] });
-        btnFlash.innerText = flashAtivo ? "🔦 Apagar Luz" : "🔦 Luz";
-      } catch (_) {
-        statusDiv.innerText = "Erro ao acionar lanterna.";
-      }
-    }
-
-    function triggerNativePhotoCapture() {
-      document.getElementById("fileInput").click();
-    }
-
-    async function handlePhotoFileSelected(event) {
+    // Upload de foto / câmera nativa via input file
+    async function handleFileUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
 
+      stopCamera();
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = async (e) => {
         const img = new Image();
-        img.onload = async function() {
-          const canvas = document.createElement("canvas");
-          const maxSide = 1440;
-          let w = img.naturalWidth || img.width;
-          let h = img.naturalHeight || img.height;
-          if (w > maxSide || h > maxSide) {
-            const r = Math.min(maxSide / w, maxSide / h);
-            w = Math.round(w * r);
-            h = Math.round(h * r);
+        img.onload = async () => {
+          const canvas = document.getElementById("capture-canvas");
+          const maxDim = 1600;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            const ratio = Math.min(maxDim / w, maxDim / h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
           }
           canvas.width = w;
           canvas.height = h;
-          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, w, h);
+          preprocessCanvasForOCR(ctx, w, h);
 
-          document.getElementById("capturedPreview").src = e.target.result;
-          document.getElementById("previewContainer").style.display = "block";
+          const previewImg = document.getElementById("preview-image");
+          previewImg.src = e.target.result;
+          previewImg.style.display = "block";
+          document.getElementById("camera-placeholder").style.display = "none";
 
-          await processarFotoTurbo(canvas);
+          await runTesseractOCR(canvas);
         };
         img.src = e.target.result;
       };
@@ -1221,650 +952,225 @@
       event.target.value = "";
     }
 
-    async function capturarFotoEExtrairTudo() {
-      const videoEl = document.getElementById("cameraVideo");
-      const statusDiv = document.getElementById("scanner-status");
-      if (!cameraAtiva || !videoEl || videoEl.readyState < 2 || extracaoEmAndamento) return;
-
-      const vw = videoEl.videoWidth;
-      const vh = videoEl.videoHeight;
-      if (!vw || !vh) {
-        statusDiv.innerText = "Aguarde a imagem da câmera estabilizar.";
-        return;
+    function preprocessCanvasForOCR(ctx, width, height) {
+      const imgData = ctx.getImageData(0, 0, width, height);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        // Escala de cinza + aumento leve de contraste
+        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const contrasted = Math.min(255, Math.max(0, (gray - 128) * 1.35 + 128));
+        d[i] = d[i + 1] = d[i + 2] = contrasted;
       }
-
-      const maxSide = 1440;
-      const scale = Math.min(1, maxSide / Math.max(vw, vh));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(vw * scale));
-      canvas.height = Math.max(1, Math.round(vh * scale));
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-
-      try {
-        document.getElementById("capturedPreview").src = canvas.toDataURL("image/jpeg", 0.82);
-        document.getElementById("previewContainer").style.display = "block";
-      } catch (_) {}
-
-      await processarFotoTurbo(canvas);
-    }
-
-    function criarCanvasTurbo(sourceCanvas) {
-      const maxDim = 1500;
-      let targetW = Math.round(sourceCanvas.width * 1.25);
-      let targetH = Math.round(sourceCanvas.height * 1.25);
-      if (targetW > maxDim || targetH > maxDim) {
-        const ratio = Math.min(maxDim / targetW, maxDim / targetH);
-        targetW = Math.round(targetW * ratio);
-        targetH = Math.round(targetH * ratio);
-      }
-
-      const out = document.createElement("canvas");
-      out.width = targetW;
-      out.height = targetH;
-      const ctx = out.getContext("2d", { willReadFrequently: true });
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "medium";
-      ctx.drawImage(sourceCanvas, 0, 0, targetW, targetH);
-
-      const imgData = ctx.getImageData(0, 0, targetW, targetH);
-      const data = imgData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        // Curva moderada para preservar a abertura superior do '6' e a haste vertical do 'B'
-        const contrasted = ((lum - 135) * 1.35) + 135;
-        const val = contrasted < 0 ? 0 : (contrasted > 255 ? 255 : contrasted);
-        data[i] = val;
-        data[i + 1] = val;
-        data[i + 2] = val;
-      }
-
       ctx.putImageData(imgData, 0, 0);
-      return out;
     }
 
-    async function obterOcrWorker() {
-      if (ocrWorker) return ocrWorker;
-      if (window.Tesseract) {
-        try {
-          ocrWorker = await Tesseract.createWorker("eng", 1, {
-            logger: () => {}
-          });
-          await ocrWorker.setParameters({
-            tessedit_pageseg_mode: "6",
-            preserve_interword_spaces: "1"
-          });
-        } catch (e) {
-          ocrWorker = null;
-        }
-      }
-      return ocrWorker;
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      setTimeout(() => {
-        obterOcrWorker().catch(() => {});
-      }, 300);
-    });
-
-    async function processarFotoTurbo(photoCanvas) {
-      if (extracaoEmAndamento) return;
-      extracaoEmAndamento = true;
-      const statusDiv = document.getElementById("scanner-status");
-      const t0 = performance.now();
-      setProgress(25, true);
+    async function runTesseractOCR(source) {
+      const progressWrap = document.getElementById("progress-wrap");
+      const progressFill = document.getElementById("progress-fill");
+      progressWrap.style.display = "block";
+      progressFill.style.width = "10%";
+      setStatus("Processando OCR na imagem...");
 
       try {
-        const blocosDeTexto = [];
-
-        if ("BarcodeDetector" in window) {
-          try {
-            const detector = new BarcodeDetector();
-            const barcodes = await detector.detect(photoCanvas);
-            for (const bc of barcodes) {
-              if (bc.rawValue && bc.rawValue.trim()) {
-                blocosDeTexto.push(bc.rawValue.trim());
-              }
+        const result = await Tesseract.recognize(source, "eng", {
+          logger: (m) => {
+            if (m.status === "recognizing text" && typeof m.progress === "number") {
+              progressFill.style.width = Math.round(m.progress * 100) + "%";
             }
-          } catch (_) {}
-        }
-        setProgress(50, true);
-
-        const worker = await obterOcrWorker();
-        if (!worker) {
-          statusDiv.innerText = "Biblioteca OCR indisponível (verifique conexão com internet).";
-          setProgress(0, false);
-          return;
-        }
-
-        statusDiv.innerText = "⚡ Lendo etiqueta em passada única...";
-        const canvasFast = criarCanvasTurbo(photoCanvas);
-        const res = await worker.recognize(canvasFast);
-        if (res && res.data && res.data.text) {
-          blocosDeTexto.push(res.data.text.trim());
-        }
-        setProgress(90, true);
-
-        const textoConsolidado = blocosDeTexto.filter(Boolean).join("\n");
-        document.getElementById("rawOcrText").value = textoConsolidado;
-
-        Object.keys(extractedData).forEach((k) => {
-          extractedData[k] = "";
+          }
         });
-        parseEmtaLabelText(textoConsolidado);
-        updateQuickInputsFromExtracted();
-        renderFormattedSection(true);
-        setProgress(100, true);
 
-        if (navigator.vibrate) navigator.vibrate(50);
+        const rawText = (result && result.data && result.data.text) || "";
+        document.getElementById("raw-ocr-output").textContent = rawText.trim() || "(Nenhum caractere detectado)";
 
-        const elapsedSec = ((performance.now() - t0) / 1000).toFixed(1);
-        statusDiv.innerText = `✅ Concluído em ${elapsedSec}s!`;
-        showToast(`Extraído em ${elapsedSec}s!`);
+        const extracted = extractForcedCredentials(rawText);
+        setTopFields(extracted.gwUser, extracted.gwPass, extracted.wifiSsid, extracted.wifiPass);
+
+        progressFill.style.width = "100%";
+        setStatus("Extração concluída! Toque em qualquer campo no topo para copiar.");
+        showToast("Dados extraídos nos 4 campos!");
       } catch (err) {
-        statusDiv.innerText = "Erro ao processar foto: " + err.message;
+        const fallback = extractForcedCredentials("");
+        setTopFields(fallback.gwUser, fallback.gwPass, fallback.wifiSsid, fallback.wifiPass);
+        setStatus("Falha parcial no OCR (" + err.message + "). Campos mantidos com prefixo padrão para ajuste.");
       } finally {
-        extracaoEmAndamento = false;
-        setTimeout(() => setProgress(0, false), 600);
+        setTimeout(() => {
+          progressWrap.style.display = "none";
+          progressFill.style.width = "0%";
+        }, 800);
       }
     }
 
-    function normalizeMac(rawMac) {
-      const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
-      if (hex.length === 12) {
-        return hex.match(/.{1,2}/g).join(":");
+    function setStatus(msg) {
+      document.getElementById("status-text").textContent = msg;
+    }
+
+    // Arquivamento local
+    function loadArchive() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        archivedRecords = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(archivedRecords)) archivedRecords = [];
+      } catch (e) {
+        archivedRecords = [];
       }
-      return (rawMac || "").trim().toUpperCase();
+      renderArchive();
     }
 
-    function cleanCredentialToken(raw) {
-      return (raw || "")
-        .replace(/^[\s:=\-–—•·|"'`]+|[\s.,;|"'`]+$/g, "")
-        .trim();
+    function saveArchive() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(archivedRecords));
+      renderArchive();
     }
 
-    function normalizeClaroNetIdentifier(rawToken) {
-      let s = (rawToken || "").trim();
-      s = s
-        .replace(/^CLAR0/i, "CLARO")
-        .replace(/^CL4RO/i, "CLARO")
-        .replace(/^CIARO/i, "CLARO")
-        .replace(/^N3T/i, "NET");
-
-      s = s.replace(/^(CLARO|NET)[\s\-._]+/i, (_, prefix) => `${prefix.toUpperCase()}_`);
-      s = s.replace(/^(CLARO|NET)(?=[A-Za-z0-9])/i, (_, prefix) => `${prefix.toUpperCase()}_`);
-      s = s.replace(/\s+/g, "_");
-      s = s.replace(/__+/g, "_");
-      s = s.replace(/[^A-Za-z0-9_\-]/g, "");
-      return s.toUpperCase();
-    }
-
-    function isClaroOrNetToken(token) {
-      return /^(?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)(?:_|\b|[\s\-._]|[A-Za-z0-9])/i.test((token || "").trim());
-    }
-
-    function isLikelyLabelOrBarcodeNoise(token) {
-      const t = (token || "").trim();
-      if (!t) return true;
-      return /^(?:user|username|usuario|usuário|login|pass|password|senha|key|wifi|wi-fi|ssid|mac|cm|emta|mta|sn|serial|model|modelo|input|docsis|http|https|192\.168\.0\.1|configuracao|configuração|acesso|rede|nome|ghz|2\.4|2\.4g|5g|wpa|wpa2|psk|anatel)$/i.test(t);
-    }
-
-    function extractClaroNetCandidatesFromText(text) {
-      const results = [];
-      const addCandidate = (raw) => {
-        const norm = normalizeClaroNetIdentifier(raw);
-        if (/^(?:CLARO|NET)_[A-Za-z0-9_\-]{2,36}$/i.test(norm) && !results.includes(norm)) {
-          results.push(norm);
-        }
+    function archiveCurrentRecord() {
+      const record = {
+        id: Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+        timestamp: new Date().toLocaleString("pt-BR"),
+        gwUser: document.getElementById("gw-user").value.trim(),
+        gwPass: document.getElementById("gw-pass").value.trim(),
+        wifiSsid: document.getElementById("wifi-ssid").value.trim(),
+        wifiPass: document.getElementById("wifi-pass").value.trim()
       };
 
-      const regexDirect = /\b((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)(?:_[A-Za-z0-9_\-]{2,36}|-[A-Za-z0-9_\-]{2,36}|[A-Za-z0-9_\-]{3,36}))\b/gi;
-      let m;
-      while ((m = regexDirect.exec(text)) !== null) {
-        addCandidate(m[1]);
-      }
-
-      const regexSpaced = /\b((?:CLARO|CLAR0|CL4RO|CIARO|NET|N3T)\s+(?:(?:2\.?4G|2G|5G)\s+)?[A-Za-z0-9_\-]{3,28}(?:\s+(?:2\.?4G|2G|5G))?)\b/gi;
-      while ((m = regexSpaced.exec(text)) !== null) {
-        const candidate = m[1];
-        if (!/^(?:CLARO|NET)\s+(?:BRASIL|SERVICOS|SERVIÇOS|WIFI|WI-FI|FIBRA|MOVEL|MÓVEL|TV)$/i.test(candidate.trim())) {
-          addCandidate(candidate);
-        }
-      }
-
-      return results;
+      archivedRecords.unshift(record);
+      saveArchive();
+      showToast("Registro arquivado!");
     }
 
-    function extractSerialAndMacs(joined, lines) {
-      const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
-      const allMacs = [];
-      let mMac;
-      while ((mMac = macRegex.exec(joined)) !== null) {
-        const norm = normalizeMac(mMac[1]);
-        if (!allMacs.includes(norm)) allMacs.push(norm);
-      }
-
-      const cmMacExplicit = joined.match(/(?:cm\s*mac|cable\s*mac|mac\s*cm)\s*[:=\-]?\s*([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/i);
-      const emtaMacExplicit = joined.match(/(?:emta\s*mac|mta\s*mac|mac\s*emta|tel\s*mac)\s*[:=\-]?\s*([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/i);
-
-      if (cmMacExplicit) extractedData.cmMac = normalizeMac(cmMacExplicit[1]);
-      if (emtaMacExplicit) extractedData.emtaMac = normalizeMac(emtaMacExplicit[1]);
-
-      if (!extractedData.cmMac && allMacs.length >= 1) extractedData.cmMac = allMacs[0];
-      if (!extractedData.emtaMac && allMacs.length >= 2) {
-        extractedData.emtaMac = allMacs.find((m) => m !== extractedData.cmMac) || allMacs[1];
-      }
-
-      const macHexSet = new Set(
-        allMacs.map((m) => m.replace(/[^0-9A-Fa-f]/g, "").toUpperCase())
-      );
-
-      let fallbackSn = "";
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const nextLine = lines[i + 1] || "";
-
-        const snMatch = line.match(/(?:s\/n|sn|serial(?:\s*(?:no|num|number))?|n[º°o]?\s*s[eé]rie)\s*[:=\-]?\s*(.+)$/i);
-        let rawSnCandidate = "";
-        if (snMatch) {
-          rawSnCandidate = snMatch[1].trim();
-        } else if (/^(?:s\/n|sn|serial|n[º°o]?\s*s[eé]rie)\s*[:=\-]?$/i.test(line) && nextLine) {
-          rawSnCandidate = nextLine.trim();
-        }
-
-        if (rawSnCandidate) {
-          const parts = rawSnCandidate
-            .split(/[\s|/]+/)
-            .map((p) => p.replace(/[^A-Za-z0-9\-]/g, "").toUpperCase())
-            .filter(Boolean);
-
-          for (const part of parts) {
-            const hexOnly = part.replace(/[^0-9A-F]/g, "");
-            if (macHexSet.has(hexOnly)) continue;
-            if (/^(?:CM|EMTA|MTA|MAC|DOCSIS|MODEL|MOD|FABR|INPUT)$/i.test(part)) continue;
-
-            if (part.length === 12 && /^[A-Z0-9]{12}$/.test(part)) {
-              extractedData.sn = part;
-              break;
-            }
-            if (!fallbackSn && /^[A-Z0-9\-]{8,16}$/.test(part)) {
-              fallbackSn = part;
-            }
-          }
-          if (extractedData.sn) break;
-        }
-      }
-
-      if (!extractedData.sn && fallbackSn) {
-        extractedData.sn = fallbackSn;
-      }
-      if (!extractedData.sn) {
-        const barcodeBlockMatch = joined.match(/\b([0-9A-Za-z]{12})\b[\s\S]{0,90}?(?:cm\s*mac|emta\s*mac)/i);
-        if (barcodeBlockMatch) {
-          const cand = barcodeBlockMatch[1].toUpperCase();
-          if (!macHexSet.has(cand.replace(/[^0-9A-F]/g, ""))) {
-            extractedData.sn = cand;
-          }
-        }
-      }
+    function useRecord(id) {
+      const rec = archivedRecords.find((r) => r.id === id);
+      if (!rec) return;
+      setTopFields(rec.gwUser, rec.gwPass, rec.wifiSsid, rec.wifiPass);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("Registro carregado no topo");
     }
 
-    function parseEmtaLabelText(text) {
-      const rawText = (text || "");
-      const lines = rawText
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter(Boolean);
-      const joined = lines.join("\n");
-
-      // DOCSIS
-      const docsisMatch =
-        joined.match(/\bDOCSIS\s*[:=\-]?\s*(3\.[01]|2\.0|1\.[01])\b/i) ||
-        joined.match(/\bD\s*(3\.[01])\b/i);
-      if (docsisMatch) {
-        extractedData.docsis = `DOCSIS ${docsisMatch[1].trim()}`;
-      }
-
-      // Fabricante
-      const mfgMatch = joined.match(/\b(CBN|ARRIS|HUMAX|SAGEMCOM|TECHNICOLOR|CISCO|MOTOROLA|KAON|UBEE|HITRON|INTELBRAS|ZTE|HUAWEI|COMMSCOPE|FIBERHOME|NOKIA)\b/i);
-      if (mfgMatch) {
-        extractedData.manufacturer = mfgMatch[1].toUpperCase();
-      }
-
-      // Modelo
-      const modelMatch =
-        joined.match(/(?:model(?:o)?|mod\.?|modelo\s*n[º°o]?)\s*[:=\-]?\s*([A-Za-z0-9\-_/.]{3,28})/i) ||
-        joined.match(/\b((?:CH|TG|DG|HGJ|FAST|CG|SVG|SBG|DPC|EC|F@ST|ONT|GPON)[A-Z0-9\-]{2,16})\b/i);
-      if (modelMatch) {
-        extractedData.model = modelMatch[1].trim();
-      }
-
-      // Input
-      const inputMatch =
-        joined.match(/(?:input|entrada|power|alimenta[cç][aã]o)\s*[:=\-]?\s*([0-9]+(?:[.,][0-9]+)?\s*V(?:AC|DC)?(?:\s*\d+\s*W)?(?:\s*[,;]?\s*[0-9]+(?:[.,][0-9]+)?\s*A)?)/i) ||
-        joined.match(/\b([0-9]+(?:[.,][0-9]+)?\s*V\s*(?:DC|AC)?\s*[0-9]+(?:[.,][0-9]+)?\s*A)\b/i);
-      if (inputMatch) {
-        extractedData.inputPower = inputMatch[1].trim();
-      }
-
-      // Fabr.
-      const fabrMatch =
-        joined.match(/(?:fabr\.?|fabrica[cç][aã]o|mfd|date)\s*[:=\-]?\s*([0-9]{1,4}[\/\-][0-9]{1,2}(?:[\/\-][0-9]{2,4})?|[A-Za-z0-9\-]{3,16})/i);
-      if (fabrMatch) {
-        extractedData.fabr = fabrMatch[1].trim();
-      }
-
-      // S/N e MACs
-      extractSerialAndMacs(joined, lines);
-
-      // Identificadores CLARO_ / NET_
-      const allClaroNetTokens = extractClaroNetCandidatesFromText(joined);
-
-      // 1) Usuário IP 192.168.0.1: fica logo abaixo de "IP: 192.168.0.1" ou na linha "Usuário: ..."
-      let ipLineIdx = -1;
-      for (let i = 0; i < lines.length; i++) {
-        if (/192\.168\.0\.1/i.test(lines[i])) {
-          ipLineIdx = i;
-          break;
-        }
-      }
-
-      if (ipLineIdx >= 0) {
-        for (let j = ipLineIdx + 1; j <= Math.min(lines.length - 1, ipLineIdx + 2); j++) {
-          const lineAfterIp = lines[j];
-          const userInLine = lineAfterIp.match(/^(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]?\s*(.+)$/i);
-          const rawCandidate = userInLine
-            ? cleanCredentialToken(userInLine[1].split(/\s+/)[0])
-            : cleanCredentialToken(lineAfterIp.split(/\s+/)[0]);
-
-          if (rawCandidate && !isLikelyLabelOrBarcodeNoise(rawCandidate) && !/senha|ssid/i.test(rawCandidate)) {
-            extractedData.ipUser = isClaroOrNetToken(rawCandidate)
-              ? normalizeClaroNetIdentifier(rawCandidate)
-              : rawCandidate.toUpperCase();
-            break;
-          }
-        }
-      }
-
-      if (!extractedData.ipUser) {
-        const directUserMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]+\s*([A-Za-z0-9_.\-@]{3,36})/i);
-        if (directUserMatch && !isLikelyLabelOrBarcodeNoise(directUserMatch[1])) {
-          extractedData.ipUser = isClaroOrNetToken(directUserMatch[1])
-            ? normalizeClaroNetIdentifier(directUserMatch[1])
-            : cleanCredentialToken(directUserMatch[1]).toUpperCase();
-        }
-      }
-
-      // 2) Senha do usuário IP 192.168.0.1: fica abaixo do usuário e tem 12 dígitos
-      let ipUserLineIdx = -1;
-      for (let i = 0; i < lines.length; i++) {
-        if (/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]/i.test(lines[i]) && !/ssid/i.test(lines[i])) {
-          ipUserLineIdx = i;
-          break;
-        }
-        if (extractedData.ipUser && lines[i].toUpperCase().includes(extractedData.ipUser.toUpperCase()) && !/ssid/i.test(lines[i])) {
-          ipUserLineIdx = i;
-          break;
-        }
-      }
-
-      const senhaCandidates12 = [];
-      const senhaCandidates8 = [];
-
-      const senhaMatches = [...joined.matchAll(/(?:senha|password|pass|pwd)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})/gi)];
-      for (const m of senhaMatches) {
-        const cleanTok = cleanCredentialToken(m[1]).toUpperCase();
-        if (!cleanTok || isLikelyLabelOrBarcodeNoise(cleanTok) || isClaroOrNetToken(cleanTok)) continue;
-        if (cleanTok.length === 12) {
-          senhaCandidates12.push(cleanTok);
-        } else if (cleanTok.length === 8) {
-          senhaCandidates8.push(cleanTok);
-        }
-      }
-
-      if (ipUserLineIdx >= 0) {
-        for (let j = ipUserLineIdx + 1; j <= Math.min(lines.length - 1, ipUserLineIdx + 3); j++) {
-          const candidateLine = lines[j];
-          const senhaValMatch = candidateLine.match(/^(?:senha|password|pass|pwd)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{8,16})\b/i);
-          const rawTok = senhaValMatch
-            ? senhaValMatch[1]
-            : cleanCredentialToken(candidateLine.replace(/^(?:senha|password|pass|pwd)\s*[:=\-]?\s*/i, "").split(/\s+/)[0]);
-
-          const cleanTok = cleanCredentialToken(rawTok).toUpperCase();
-          if (
-            cleanTok &&
-            !isLikelyLabelOrBarcodeNoise(cleanTok) &&
-            !isClaroOrNetToken(cleanTok) &&
-            cleanTok.length >= 10 &&
-            cleanTok.length <= 13
-          ) {
-            extractedData.ipPass = cleanTok;
-            break;
-          }
-        }
-      }
-
-      if (!extractedData.ipPass && senhaCandidates12.length > 0) {
-        extractedData.ipPass = senhaCandidates12[0];
-      }
-
-      // SSID 2.4GHz e SSID 5GHz
-      const ssid24Match = joined.match(/ssid\s*2\.?4\s*g(?:hz)?\s*[:=\-]+\s*([A-Za-z0-9_\-]{3,36})/i);
-      if (ssid24Match) {
-        extractedData.ssid24 = normalizeClaroNetIdentifier(ssid24Match[1]);
-      }
-
-      const ssid5Match = joined.match(/ssid\s*5\s*g(?:hz)?\s*[:=\-]+\s*([A-Za-z0-9_\-]{3,36})/i);
-      if (ssid5Match) {
-        extractedData.ssid5 = normalizeClaroNetIdentifier(ssid5Match[1]);
-      }
-
-      // 3) Senha Wi-Fi: sempre contém 8 dígitos (nunca usar a senha de 12 dígitos do IP)
-      const wifiBlockSenha8Match = joined.match(/(?:ssid\s*(?:2\.?4\s*g|5\s*g|wi-?fi)|wi-?fi|wlan)[\s\S]{0,120}?(?:senha|password|pass|key|wpa2?|psk)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{8})\b/i);
-      if (wifiBlockSenha8Match && !isLikelyLabelOrBarcodeNoise(wifiBlockSenha8Match[1])) {
-        const cand8 = cleanCredentialToken(wifiBlockSenha8Match[1]).toUpperCase();
-        if (cand8 !== extractedData.ipPass) {
-          extractedData.wifiPass = cand8;
-        }
-      }
-
-      if (!extractedData.wifiPass && senhaCandidates8.length > 0) {
-        extractedData.wifiPass = senhaCandidates8.find((c) => c !== extractedData.ipPass) || senhaCandidates8[0];
-      }
-
-      if (!extractedData.wifiPass) {
-        const any8Char = [...joined.matchAll(/(?:senha|password|pass|pwd|key)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{7,9})\b/gi)]
-          .map((m) => cleanCredentialToken(m[1]).toUpperCase())
-          .find((v) => v && !isLikelyLabelOrBarcodeNoise(v) && !isClaroOrNetToken(v) && v !== extractedData.ipPass && v.length === 8);
-        if (any8Char) {
-          extractedData.wifiPass = any8Char;
-        }
-      }
-
-      // Corrige confusão de '8' por '6' ou 'B' na senha Wi-Fi de 8 dígitos cruzando com o sufixo do SSID (ex.: ...3430B5 -> 673430B5)
-      if (extractedData.wifiPass && extractedData.wifiPass.length === 8) {
-        const refSsid = extractedData.ssid24 || extractedData.ssid5 || "";
-        const suffixMatch = refSsid.match(/([0-9A-F]{6})$/i);
-        if (suffixMatch) {
-          const expectedSuffix = suffixMatch[1].toUpperCase();
-          const currentSuffix = extractedData.wifiPass.slice(2).toUpperCase();
-          let fixedSuffix = "";
-          for (let idx = 0; idx < 6; idx++) {
-            const expCh = expectedSuffix[idx];
-            const curCh = currentSuffix[idx];
-            if (curCh === expCh) {
-              fixedSuffix += curCh;
-            } else if (curCh === "8" && expCh === "B") {
-              fixedSuffix += "B";
-            } else if (curCh === "8" && expCh === "6") {
-              fixedSuffix += "6";
-            } else {
-              fixedSuffix += curCh;
-            }
-          }
-          let firstTwo = extractedData.wifiPass.slice(0, 2).toUpperCase();
-          if (firstTwo[0] === "8" && !/[0-9A-F]/i.test(firstTwo[0])) {
-            firstTwo = "6" + firstTwo.slice(1);
-          }
-          extractedData.wifiPass = (firstTwo + fixedSuffix).toUpperCase();
-        }
-      }
-
-      // Distribui tokens CLARO_ / NET_
-      for (const token of allClaroNetTokens) {
-        const is5g = /(?:[_-]5g|_5|5ghz)/i.test(token);
-        const is24g = /(?:[_-]2\.?4g?|[_-]2g|24g)/i.test(token);
-
-        if (is5g && !extractedData.ssid5) {
-          extractedData.ssid5 = token;
-        } else if (is24g && !extractedData.ssid24) {
-          extractedData.ssid24 = token;
-        } else if (!extractedData.ipUser) {
-          extractedData.ipUser = token;
-        } else if (!extractedData.ssid24) {
-          extractedData.ssid24 = token;
-        } else if (!extractedData.ssid5 && token !== extractedData.ssid24) {
-          extractedData.ssid5 = token;
-        }
-      }
-
-      if (!extractedData.ipUser && extractedData.ssid24) {
-        extractedData.ipUser = extractedData.ssid24;
-      }
+    function deleteRecord(id) {
+      archivedRecords = archivedRecords.filter((r) => r.id !== id);
+      saveArchive();
+      showToast("Registro removido");
     }
 
-    function reparseFromTextarea() {
-      const rawText = document.getElementById("rawOcrText").value || "";
-      Object.keys(extractedData).forEach((k) => {
-        extractedData[k] = "";
-      });
-      parseEmtaLabelText(rawText);
-      updateQuickInputsFromExtracted();
-      renderFormattedSection(true);
-      showToast("Texto reprocessado!");
+    function clearArchive() {
+      if (!archivedRecords.length) return;
+      archivedRecords = [];
+      saveArchive();
+      showToast("Arquivo limpo");
     }
 
-    function saveArchiveToStorage() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(archiveList));
-    }
+    function renderArchive() {
+      const listEl = document.getElementById("archive-list");
+      const countEl = document.getElementById("archive-count");
+      countEl.textContent = archivedRecords.length + (archivedRecords.length === 1 ? " salvo" : " salvos");
 
-    function cleanDisplayValue(id) {
-      const txt = (document.getElementById(id).textContent || "").trim();
-      if (!txt || txt === "—" || txt.startsWith("(Não identificado")) return "";
-      return txt;
-    }
-
-    function arquivarRegistroAtual() {
-      const registro = {
-        id: Date.now(),
-        dataHora: obterDataAtual(),
-        docsis: cleanDisplayValue("parsedDocsis"),
-        model: cleanDisplayValue("parsedModel"),
-        manufacturer: cleanDisplayValue("parsedManufacturer"),
-        inputPower: cleanDisplayValue("parsedInput"),
-        fabr: cleanDisplayValue("parsedFabr"),
-        sn: cleanDisplayValue("parsedSn"),
-        cmMac: cleanDisplayValue("parsedCmMac"),
-        emtaMac: cleanDisplayValue("parsedEmtaMac"),
-        ipUser: document.getElementById("ipUser").value.trim(),
-        ipPass: document.getElementById("ipPass").value.trim(),
-        ssid24: cleanDisplayValue("parsedSsid24"),
-        ssid5: cleanDisplayValue("parsedSsid5"),
-        wifiPass: document.getElementById("wifiPass").value.trim()
-      };
-
-      const temAlgumDado = Object.keys(registro).some((k) => k !== "id" && k !== "dataHora" && registro[k]);
-      if (!temAlgumDado) {
-        showToast("Nenhum dado preenchido para arquivar");
+      if (!archivedRecords.length) {
+        listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; text-align:center; padding:12px;">Nenhum registro arquivado ainda.</div>';
         return;
       }
 
-      archiveList.unshift(registro);
-      saveArchiveToStorage();
-      renderArchiveTable();
-      showToast("Registro arquivado com sucesso!");
+      listEl.innerHTML = archivedRecords
+        .map(
+          (r) => `
+          <div class="archive-item">
+            <div class="archive-item-top">
+              <span><strong>Data/Hora:</strong> ${escapeHtml(r.timestamp)}</span>
+            </div>
+            <div class="archive-item-data">
+              <div><strong>192.168.0.1 User:</strong> ${escapeHtml(r.gwUser)}</div>
+              <div><strong>192.168.0.1 Pass:</strong> ${escapeHtml(r.gwPass)}</div>
+              <div><strong>Wi-Fi SSID:</strong> ${escapeHtml(r.wifiSsid)}</div>
+              <div><strong>Wi-Fi Pass:</strong> ${escapeHtml(r.wifiPass)}</div>
+            </div>
+            <div class="archive-item-actions">
+              <button type="button" class="btn-secondary btn-sm" onclick="useRecord('${r.id}')">Usar</button>
+              <button type="button" class="btn-danger-outline btn-sm" onclick="deleteRecord('${r.id}')">Excluir</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
     }
 
-    function removerRegistroArquivado(id) {
-      archiveList = archiveList.filter((item) => item.id !== id);
-      saveArchiveToStorage();
-      renderArchiveTable();
-      showToast("Registro removido do arquivo");
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
-    function carregarRegistroNaTela(id) {
-      const item = archiveList.find((r) => r.id === id);
-      if (!item) return;
-
-      extractedData.docsis = item.docsis || "";
-      extractedData.model = item.model || "";
-      extractedData.manufacturer = item.manufacturer || "";
-      extractedData.inputPower = item.inputPower || "";
-      extractedData.fabr = item.fabr || "";
-      extractedData.sn = item.sn || "";
-      extractedData.cmMac = item.cmMac || "";
-      extractedData.emtaMac = item.emtaMac || "";
-      extractedData.ipUser = item.ipUser || "";
-      extractedData.ipPass = item.ipPass || "";
-      extractedData.ssid24 = item.ssid24 || "";
-      extractedData.ssid5 = item.ssid5 || "";
-      extractedData.wifiPass = item.wifiPass || "";
-
-      updateQuickInputsFromExtracted();
-      renderFormattedSection(false);
-      showToast("Registro carregado nos campos");
+    function getRecordsOrCurrent() {
+      if (archivedRecords.length > 0) return archivedRecords;
+      return [
+        {
+          id: "atual",
+          timestamp: new Date().toLocaleString("pt-BR"),
+          gwUser: document.getElementById("gw-user").value.trim(),
+          gwPass: document.getElementById("gw-pass").value.trim(),
+          wifiSsid: document.getElementById("wifi-ssid").value.trim(),
+          wifiPass: document.getElementById("wifi-pass").value.trim()
+        }
+      ];
     }
 
-    function obterArquivoFiltrado() {
-      const termo = (document.getElementById("archiveSearch")?.value || "").trim().toLowerCase();
-      if (!termo) return archiveList;
-      return archiveList.filter((r) =>
-        [
-          r.dataHora, r.docsis, r.model, r.manufacturer, r.inputPower, r.fabr,
-          r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
-          r.ssid24, r.ssid5, r.wifiPass
-        ]
-          .filter(Boolean)
-          .some((v) => String(v).toLowerCase().includes(termo))
-      );
+    // Exportar JSON
+    function exportJSON() {
+      const data = getRecordsOrCurrent();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
+      triggerDownload(blob, "claro_ocr_192_168_0_1.json");
+      showToast("JSON exportado!");
     }
 
-    function renderArchiveTable() {
-      const tbody = document.querySelector("#archiveTable tbody");
-      const filtrados = obterArquivoFiltrado();
-      document.getElementById("archiveCount").textContent = filtrados.length;
-      tbody.innerHTML = "";
+    // Exportar CSV
+    function exportCSV() {
+      const rows = getRecordsOrCurrent();
+      const headers = ["timestamp", "usuario_192_168_0_1", "senha_192_168_0_1", "usuario_wifi_ssid", "senha_wifi"];
+      const csvLines = [
+        headers.join(";"),
+        ...rows.map((r) =>
+          [r.timestamp, r.gwUser, r.gwPass, r.wifiSsid, r.wifiPass]
+            .map((v) => '"' + String(v || "").replace(/"/g, '""') + '"')
+            .join(";")
+        )
+      ];
+      const blob = new Blob(["﻿" + csvLines.join("
+")], { type: "text/csv;charset=utf-8;" });
+      triggerDownload(blob, "claro_ocr_192_168_0_1.csv");
+      showToast("CSV exportado!");
+    }
 
-      if (filtrados.length === 0) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td colspan="7" style="text-align:center;color:#94a3b8;">Nenhum registro arquivado.</td>`;
-        tbody.appendChild(tr);
-        return;
-      }
+    // Exportar PDF
+    function exportPDF() {
+      const rows = getRecordsOrCurrent();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-      filtrados.forEach((item) => {
-        const ipCred = [item.ipUser, item.ipPass].filter(Boolean).join(" / ") || "—";
-        const wifiResumo = [item.ssid24, item.ssid5].filter(Boolean).join(" / ") || "—";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.dataHora || "-"}</td>
-          <td>${item.docsis || "—"}</td>
-          <td>${item.model || "—"}</td>
-          <td>${ipCred}</td>
-          <td>${wifiResumo}</td>
-          <td>${item.wifiPass || "—"}</td>
-          <td>
-            <button type="button" class="btn btn-secondary" style="padding:5px 8px;font-size:0.72rem;" onclick="carregarRegistroNaTela(${item.id})">Usar</button>
-            <button type="button" class="btn btn-danger" onclick="removerRegistroArquivado(${item.id})">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+      doc.setFontSize(14);
+      doc.text("Relatorio Claro OCR - 192.168.0.1 e Wi-Fi", 14, 16);
+      doc.setFontSize(9);
+      doc.text("Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37", 14, 22);
+
+      let y = 32;
+      rows.forEach((r, idx) => {
+        if (y > 265) {
+          doc.addPage();
+          y = 18;
+        }
+        doc.setFontSize(10);
+        doc.text(`Registro #${idx + 1} - ${r.timestamp || ""}`, 14, y);
+        y += 5;
+        doc.setFontSize(9);
+        doc.text(`Usuario 192.168.0.1: ${r.gwUser || ""}   |   Senha (12): ${r.gwPass || ""}`, 16, y);
+        y += 5;
+        doc.text(`Usuario Wi-Fi (SSID): ${r.wifiSsid || ""}   |   Senha (8): ${r.wifiPass || ""}`, 16, y);
+        y += 8;
       });
+
+      doc.save("claro_ocr_192_168_0_1.pdf");
+      showToast("PDF exportado!");
     }
 
-    function downloadBlob(content, filename, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
+    function triggerDownload(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1875,284 +1181,91 @@
       URL.revokeObjectURL(url);
     }
 
-    function exportJSON() {
-      const lista = obterArquivoFiltrado();
-      if (lista.length === 0) {
-        showToast("Sem registros para exportar em JSON");
-        return;
-      }
-      downloadBlob(JSON.stringify(lista, null, 2), "arquivo_emta_ont_claro_net.json", "application/json;charset=utf-8");
-      showToast("JSON exportado!");
-    }
-
-    function importJSON(event) {
+    // Importar JSON ou CSV
+    function handleImportFile(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
+
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = (e) => {
+        const content = String(e.target.result || "").trim();
         try {
-          const parsed = JSON.parse(e.target.result);
-          const arr = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.dados) ? parsed.dados : null);
-          if (!arr) {
-            showToast("JSON inválido");
-            return;
+          if (file.name.toLowerCase().endsWith(".json") || content.startsWith("[") || content.startsWith("{")) {
+            const parsed = JSON.parse(content);
+            const arr = Array.isArray(parsed) ? parsed : [parsed];
+            const mapped = arr.map((item) => ({
+              id: item.id || Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+              timestamp: item.timestamp || new Date().toLocaleString("pt-BR"),
+              gwUser: ensurePrefix(item.gwUser || item.usuario_192_168_0_1 || ""),
+              gwPass: forceLength(item.gwPass || item.senha_192_168_0_1 || "", 12),
+              wifiSsid: ensurePrefix(item.wifiSsid || item.usuario_wifi_ssid || ""),
+              wifiPass: forceLength(item.wifiPass || item.senha_wifi || "", 8)
+            }));
+            archivedRecords = [...mapped, ...archivedRecords];
+            saveArchive();
+            if (mapped[0]) {
+              setTopFields(mapped[0].gwUser, mapped[0].gwPass, mapped[0].wifiSsid, mapped[0].wifiPass);
+            }
+            showToast("JSON importado (" + mapped.length + ")");
+          } else {
+            // CSV (suporta ; ou ,)
+            const lines = content.split(/
+?
+/).filter((l) => l.trim());
+            if (lines.length < 2) throw new Error("CSV vazio");
+            const sep = lines[0].includes(";") ? ";" : ",";
+            const imported = [];
+            for (let i = 1; i < lines.length; i++) {
+              const cols = splitCsvLine(lines[i], sep);
+              if (cols.length >= 5) {
+                imported.push({
+                  id: Date.now().toString(36) + "-" + i,
+                  timestamp: cols[0] || new Date().toLocaleString("pt-BR"),
+                  gwUser: ensurePrefix(cols[1]),
+                  gwPass: forceLength(cols[2], 12),
+                  wifiSsid: ensurePrefix(cols[3]),
+                  wifiPass: forceLength(cols[4], 8)
+                });
+              }
+            }
+            archivedRecords = [...imported, ...archivedRecords];
+            saveArchive();
+            if (imported[0]) {
+              setTopFields(imported[0].gwUser, imported[0].gwPass, imported[0].wifiSsid, imported[0].wifiPass);
+            }
+            showToast("CSV importado (" + imported.length + ")");
           }
-          const normalizados = arr.map((r, idx) => ({
-            id: r.id || (Date.now() + idx),
-            dataHora: r.dataHora || obterDataAtual(),
-            docsis: r.docsis || "",
-            model: r.model || "",
-            manufacturer: r.manufacturer || "",
-            inputPower: r.inputPower || "",
-            fabr: r.fabr || "",
-            sn: r.sn || "",
-            cmMac: r.cmMac || "",
-            emtaMac: r.emtaMac || "",
-            ipUser: r.ipUser || "",
-            ipPass: r.ipPass || "",
-            ssid24: r.ssid24 || "",
-            ssid5: r.ssid5 || "",
-            wifiPass: r.wifiPass || ""
-          }));
-          archiveList = [...normalizados, ...archiveList];
-          saveArchiveToStorage();
-          renderArchiveTable();
-          showToast(`${normalizados.length} registro(s) importado(s) do JSON!`);
         } catch (err) {
-          showToast("Erro ao importar JSON: " + err.message);
-        } finally {
-          event.target.value = "";
+          showToast("Erro ao importar: " + err.message);
         }
       };
-      reader.readAsText(file, "UTF-8");
+      reader.readAsText(file, "utf-8");
+      event.target.value = "";
     }
 
-    function escapeCsv(val) {
-      const s = String(val ?? "");
-      return `"${s.replace(/"/g, '""')}"`;
-    }
-
-    function exportCSV() {
-      const lista = obterArquivoFiltrado();
-      if (lista.length === 0) {
-        showToast("Sem registros para exportar em CSV");
-        return;
-      }
-      const headers = [
-        "Data_Hora", "DOCSIS", "Modelo", "Fabricante", "Input", "Fabr",
-        "SN", "CM_MAC", "eMTA_MAC", "Usuario_192_168_0_1", "Senha_192_168_0_1",
-        "SSID_2_4GHz", "SSID_5GHz", "Senha_WiFi"
-      ];
-      const rows = lista.map((r) => [
-        r.dataHora, r.docsis, r.model, r.manufacturer, r.inputPower, r.fabr,
-        r.sn, r.cmMac, r.emtaMac, r.ipUser, r.ipPass,
-        r.ssid24, r.ssid5, r.wifiPass
-      ].map(escapeCsv).join(";"));
-
-      const csv = "\uFEFF" + [headers.map(escapeCsv).join(";"), ...rows].join("\n");
-      downloadBlob(csv, "arquivo_emta_ont_claro_net.csv", "text/csv;charset=utf-8");
-      showToast("CSV exportado!");
-    }
-
-    function parseCsvLine(line, delimiter = ";") {
+    function splitCsvLine(line, sep) {
       const result = [];
-      let current = "";
+      let cur = "";
       let inQuotes = false;
       for (let i = 0; i < line.length; i++) {
         const ch = line[i];
         if (ch === '"') {
           if (inQuotes && line[i + 1] === '"') {
-            current += '"';
+            cur += '"';
             i++;
           } else {
             inQuotes = !inQuotes;
           }
-        } else if (ch === delimiter && !inQuotes) {
-          result.push(current.trim());
-          current = "";
+        } else if (ch === sep && !inQuotes) {
+          result.push(cur);
+          cur = "";
         } else {
-          current += ch;
+          cur += ch;
         }
       }
-      result.push(current.trim());
+      result.push(cur);
       return result;
     }
-
-    function importCSV(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const text = (e.target.result || "").replace(/^\uFEFF/, "");
-          const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-          if (lines.length < 2) {
-            showToast("CSV sem registros");
-            return;
-          }
-          const delimiter = lines[0].includes(";") ? ";" : ",";
-          const hasDocsisCol = /docsis/i.test(lines[0]);
-          const imported = [];
-          for (let i = 1; i < lines.length; i++) {
-            const cols = parseCsvLine(lines[i], delimiter);
-            if (hasDocsisCol) {
-              imported.push({
-                id: Date.now() + i,
-                dataHora: cols[0] || obterDataAtual(),
-                docsis: cols[1] || "",
-                model: cols[2] || "",
-                manufacturer: cols[3] || "",
-                inputPower: cols[4] || "",
-                fabr: cols[5] || "",
-                sn: cols[6] || "",
-                cmMac: cols[7] || "",
-                emtaMac: cols[8] || "",
-                ipUser: cols[9] || "",
-                ipPass: cols[10] || "",
-                ssid24: cols[11] || "",
-                ssid5: cols[12] || "",
-                wifiPass: cols[13] || ""
-              });
-            } else {
-              imported.push({
-                id: Date.now() + i,
-                dataHora: cols[0] || obterDataAtual(),
-                docsis: "",
-                model: cols[1] || "",
-                manufacturer: cols[2] || "",
-                inputPower: cols[3] || "",
-                fabr: cols[4] || "",
-                sn: cols[5] || "",
-                cmMac: cols[6] || "",
-                emtaMac: cols[7] || "",
-                ipUser: cols[8] || "",
-                ipPass: cols[9] || "",
-                ssid24: cols[10] || "",
-                ssid5: cols[11] || "",
-                wifiPass: cols[12] || ""
-              });
-            }
-          }
-          archiveList = [...imported, ...archiveList];
-          saveArchiveToStorage();
-          renderArchiveTable();
-          showToast(`${imported.length} registro(s) importado(s) do CSV!`);
-        } catch (err) {
-          showToast("Erro ao importar CSV: " + err.message);
-        } finally {
-          event.target.value = "";
-        }
-      };
-      reader.readAsText(file, "UTF-8");
-    }
-
-    function exportPDF() {
-      const lista = obterArquivoFiltrado();
-      if (lista.length === 0) {
-        showToast("Sem registros para exportar em PDF");
-        return;
-      }
-      if (!window.jspdf) {
-        showToast("Biblioteca PDF não carregada");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-
-      doc.setTextColor(227, 6, 19);
-      doc.setFontSize(15);
-      doc.setFont(undefined, "bold");
-      doc.text("Arquivo eMTA / ONT - 192.168.0.1 (Claro / NET)", 14, 15);
-
-      doc.setTextColor(90, 90, 90);
-      doc.setFontSize(9);
-      doc.setFont(undefined, "normal");
-      doc.text(`Gerado em: ${obterDataAtual()} | Total: ${lista.length} registro(s)`, 14, 22);
-
-      const colunas = [
-        "Data/Hora", "DOCSIS", "Modelo", "S/N", "CM MAC",
-        "eMTA MAC", "192.168.0.1 (Usr/Senha)", "SSID 2.4G / 5G", "Senha Wi-Fi"
-      ];
-
-      const linhas = lista.map((r) => [
-        r.dataHora || "-",
-        r.docsis || "-",
-        r.model || "-",
-        r.sn || "-",
-        r.cmMac || "-",
-        r.emtaMac || "-",
-        [r.ipUser, r.ipPass].filter(Boolean).join(" / ") || "-",
-        [r.ssid24, r.ssid5].filter(Boolean).join(" / ") || "-",
-        r.wifiPass || "-"
-      ]);
-
-      doc.autoTable({
-        head: [colunas],
-        body: linhas,
-        startY: 26,
-        theme: "grid",
-        headStyles: {
-          fillColor: [227, 6, 19],
-          textColor: [255, 255, 255],
-          fontStyle: "bold",
-          fontSize: 8
-        },
-        bodyStyles: {
-          fontSize: 8,
-          textColor: [30, 30, 30]
-        },
-        margin: { left: 14, right: 14 }
-      });
-
-      doc.save("arquivo_emta_ont_claro_net.pdf");
-      showToast("PDF exportado!");
-    }
-
-    async function importPDF(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      try {
-        const buffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const rawLatin1 = new TextDecoder("latin1").decode(bytes);
-
-        const textChunks = [];
-        const parensRegex = /\(([^()]{2,200})\)/g;
-        let m;
-        while ((m = parensRegex.exec(rawLatin1)) !== null) {
-          const cleaned = m[1].replace(/\\[nr()\\]/g, " ").trim();
-          if (/[A-Za-z0-9]/.test(cleaned)) {
-            textChunks.push(cleaned);
-          }
-        }
-
-        const extractedText = textChunks.join("\n");
-        if (!extractedText.trim()) {
-          showToast("Não foi possível extrair texto legível deste PDF");
-          return;
-        }
-
-        document.getElementById("rawOcrText").value = extractedText;
-        Object.keys(extractedData).forEach((k) => {
-          extractedData[k] = "";
-        });
-        parseEmtaLabelText(extractedText);
-        updateQuickInputsFromExtracted();
-        renderFormattedSection(true);
-        arquivarRegistroAtual();
-        showToast("Dados extraídos e arquivados a partir do PDF!");
-      } catch (err) {
-        showToast("Erro ao importar PDF: " + err.message);
-      } finally {
-        event.target.value = "";
-      }
-    }
-
-    updateQuickInputsFromExtracted();
-    renderFormattedSection(false);
-    renderArchiveTable();
   </script>
 </body>
 </html>
