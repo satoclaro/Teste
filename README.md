@@ -1,29 +1,58 @@
-# Leitor de Etiquetas Telecom — v1.1
+# Leitor de Etiqueta de Modem
 
-Página HTML local para fotografar/selecionar uma etiqueta de modem, executar OCR e organizar os quatro campos:
+Página HTML única (funciona no celular e no computador) que abre a câmera, fotografa a etiqueta do modem e extrai:
 
-1. Usuário do IP `192.168.0.1`
-2. Senha do IP `192.168.0.1`
-3. Usuário da rede Wi-Fi
-4. Senha da rede Wi-Fi
+1. **Login do IP 192.168.0.1** (começa com `CLARO_` ou `NET_`)
+2. **Senha do IP 192.168.0.1** (normalmente 12 caracteres)
+3. **Usuário da rede Wi-Fi** (SSID 2.4 GHz)
+4. **Senha da rede Wi-Fi** (normalmente 8 caracteres)
+
+Os 4 campos ficam no topo. **Tocar/clicar em qualquer campo copia o valor para a área de transferência.**
+
+Criado por: Fernando Sato
 
 ## Como usar
-1. Extraia o ZIP e abra `index.html` no navegador (Chrome/Edge recomendados).
-2. Clique **Abrir câmera** para fotografar ou **Selecionar foto** para carregar uma imagem.
-3. Clique **Extrair informações**. A leitura OCR usa Tesseract.js via CDN, portanto precisa de internet na primeira execução/para carregar a biblioteca.
-4. Confira e corrija os campos. OCR pode trocar letras/números e o layout das etiquetas varia.
-5. Clique/toque em qualquer campo para copiar o conteúdo automaticamente.
-6. **Arquivar registro** guarda o conteúdo localmente no navegador.
-7. CSV/JSON exportam os campos preenchidos no formulário. Importação CSV/JSON permite restaurar registros. PDF/Imprimir abre a impressão do navegador (selecione “Salvar como PDF”).
 
-## Privacidade e segurança
-- Os registros ficam no `localStorage` do navegador neste aparelho/perfil, não em um servidor.
-- Credenciais são informações sensíveis: não exporte, compartilhe nem deixe arquivos de backup acessíveis a terceiros.
-- O botão PDF/Imprimir gera uma página de impressão; escolha “Salvar como PDF” no diálogo.
-- Se o OCR falhar, digite/corrija os campos manualmente. O app não valida credenciais no modem.
+1. Abra `index.html` no navegador (Chrome recomendado). **É necessária internet**, pois o OCR (Tesseract.js), o gerador de PDF (jsPDF) e o leitor de PDF (pdf.js) são carregados por CDN.
+2. Toque em **📷 Abrir câmera** (no celular abre a câmera nativa; no PC abre a webcam) ou em **🖼️ Galeria / arquivo**.
+3. Aguarde a leitura. Os campos são preenchidos automaticamente.
+4. Toque no campo desejado para copiar.
+5. Se algum caractere vier errado, edite direto no campo. Se a foto estiver inclinada, use o controle **Girar** e clique em **Reler**.
 
-## Limitações do OCR
-As regras de extração tentam reconhecer usuários que começam com `CLARO_` ou `NET_`, senhas de 12 dígitos do acesso ao modem e senhas Wi-Fi de 8 dígitos. A leitura pode confundir caracteres semelhantes; revise antes de copiar ou arquivar.
+Dica de foto: só a etiqueta no enquadramento, boa luz, sem reflexo, texto na horizontal e de perto.
 
-## Versão
-Rodapé fixo no HTML: **Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37**. O texto não é atualizado automaticamente em cada visualização.
+## Como a leitura funciona
+
+- A imagem é lida 5 vezes (2 tratamentos de imagem × modos de leitura diferentes) e o resultado mais repetido vence.
+- Se o login não for encontrado, a foto é girada automaticamente (90°, 270°, 180°) e relida.
+- O login é o texto `CLARO_xxxxxx` / `NET_xxxxxx` logo após "Usuário"/"Login"; o SSID é o que vem após "SSID", "2.4GHz" etc. (`CLARO_2G…`, `NET_2G…`).
+- Senhas: aceita as que vêm após "Senha". Prefere 12 caracteres (IP) e 8 caracteres (Wi-Fi), mas também reconhece etiquetas novas com senhas aleatórias de outro tamanho (ex.: 15/16 e 10 caracteres).
+- Correções automáticas: confusões `O/0`, `I/1`, `S/5` em trechos hexadecimais e conferência com o final do usuário (ex.: `CLARO_3430B5` → senhas terminam em `3430B5`).
+- Se a senha Wi-Fi não for lida mas a senha do IP tiver 12 caracteres, a senha Wi-Fi é deduzida dos **últimos 8 dígitos** da senha do IP (padrão desses modems). A página avisa quando isso acontece.
+- Em "Texto bruto lido" você vê o que o OCR enxergou, útil para diagnóstico.
+
+## Arquivo, exportar e importar
+
+- **💾 Arquivar**: salva os 4 campos no arquivo local (armazenado no navegador do aparelho, via `localStorage`).
+- **Exportar**: CSV, JSON ou PDF.
+- **Importar**: CSV, JSON ou PDF. O PDF precisa ter sido gerado por esta página (formato próprio). Registros repetidos são ignorados.
+- Busca, carregar registro nos campos, excluir um registro e apagar tudo.
+
+## Atualizar a versão do rodapé
+
+O rodapé é um **texto fixo** no HTML e não muda sozinho ao abrir a página. Quando editar o arquivo, atualize manualmente a linha:
+
+```html
+<footer id="credit">Criado por: Fernando Sato - Versão 1.1 - 24/11/2026 20:37</footer>
+```
+
+## Privacidade e cuidados
+
+- A leitura da foto é feita **no próprio aparelho**; a imagem não é enviada para servidor (só as bibliotecas são baixadas dos CDNs).
+- Os registros arquivados contêm senhas em texto puro no armazenamento do navegador e nos arquivos exportados. Use apenas em equipamento autorizado, guarde/compartilhe os arquivos com cuidado e apague registros que não precisar mais.
+- Use somente em equipamentos sob sua responsabilidade de atendimento.
+
+## Limitações
+
+- Fotos desfocadas, com reflexo ou muito inclinadas podem gerar leitura errada: confira os campos antes de usar.
+- O OCR precisa de internet na primeira leitura para baixar o motor e o idioma.
