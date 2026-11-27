@@ -1272,7 +1272,8 @@
 
       for (let i = 0; i < data.length; i += 4) {
         const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-        const contrasted = ((lum - 128) * 1.5) + 128;
+        // Curva moderada para preservar a abertura superior do '6' e a haste vertical do 'B'
+        const contrasted = ((lum - 135) * 1.35) + 135;
         const val = contrasted < 0 ? 0 : (contrasted > 255 ? 255 : contrasted);
         data[i] = val;
         data[i + 1] = val;
@@ -1678,6 +1679,35 @@
           .find((v) => v && !isLikelyLabelOrBarcodeNoise(v) && !isClaroOrNetToken(v) && v !== extractedData.ipPass && v.length === 8);
         if (any8Char) {
           extractedData.wifiPass = any8Char;
+        }
+      }
+
+      // Corrige confusão de '8' por '6' ou 'B' na senha Wi-Fi de 8 dígitos cruzando com o sufixo do SSID (ex.: ...3430B5 -> 673430B5)
+      if (extractedData.wifiPass && extractedData.wifiPass.length === 8) {
+        const refSsid = extractedData.ssid24 || extractedData.ssid5 || "";
+        const suffixMatch = refSsid.match(/([0-9A-F]{6})$/i);
+        if (suffixMatch) {
+          const expectedSuffix = suffixMatch[1].toUpperCase();
+          const currentSuffix = extractedData.wifiPass.slice(2).toUpperCase();
+          let fixedSuffix = "";
+          for (let idx = 0; idx < 6; idx++) {
+            const expCh = expectedSuffix[idx];
+            const curCh = currentSuffix[idx];
+            if (curCh === expCh) {
+              fixedSuffix += curCh;
+            } else if (curCh === "8" && expCh === "B") {
+              fixedSuffix += "B";
+            } else if (curCh === "8" && expCh === "6") {
+              fixedSuffix += "6";
+            } else {
+              fixedSuffix += curCh;
+            }
+          }
+          let firstTwo = extractedData.wifiPass.slice(0, 2).toUpperCase();
+          if (firstTwo[0] === "8" && !/[0-9A-F]/i.test(firstTwo[0])) {
+            firstTwo = "6" + firstTwo.slice(1);
+          }
+          extractedData.wifiPass = (firstTwo + fixedSuffix).toUpperCase();
         }
       }
 
