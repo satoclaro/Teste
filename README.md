@@ -1,7 +1,7 @@
 # Configuração eMTA / ONT 192.168.0.1 — Claro / NET
 
-Ferramenta web em arquivo único (`index.html`) otimizada para extração rápida e precisa por captura de foto:
-- **Recorte ampliado nas credenciais**: além da etiqueta inteira, faz leitura ampliada (`2.1x`) na área inferior onde ficam `IP: 192.168.0.1`, `Usuário: CLARO_...`, `Senha: ...` e `SSID 2.4GHz / 5GHz / SENHA`.
-- **Diferenciação entre senha de acesso (`192.168.0.1`) e senha Wi-Fi**: associa corretamente cada `Senha:` ao seu respectivo bloco (usuário/IP vs. SSID/Wi-Fi).
-- **S/N separado de código de barras e MACs**: filtra MACs (`CM MAC` / `eMTA MAC`) e códigos de barras colados.
-- **Rodapé estático**: `Criado por: Fernando Sato - Versão 1.4 - 26/11/2026 20:53`.
+Ferramenta web em arquivo único (`index.html`) otimizada para extração rápida em passada única:
+- **Modo turbo (1 passada OCR)**: pré-aquece o worker ao carregar a página e reduz a resolução máxima para `1440px–1500px`, tornando a leitura da foto bem mais rápida.
+- **Senha do usuário `192.168.0.1`**: busca logo abaixo da linha do usuário e prioriza valores de `8` a `13` caracteres (como o padrão de `12` dígitos `B4F2673430B5`).
+- **S/N de 12 dígitos junto aos códigos de barras**: prioriza o código alfanumérico de `12` caracteres próximo a `S/N` e aos códigos de barras de `CM MAC` / `eMTA MAC`, sem confundir com MACs.
+- **Rodapé estático**: `Criado por: Fernando Sato - Versão 1.5 - 26/11/2026 21:07`.
