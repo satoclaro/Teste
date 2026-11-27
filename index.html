@@ -627,7 +627,7 @@
             type="text"
             id="ipPass"
             class="quick-input"
-            placeholder="Senha 192.168.0.1..."
+            placeholder="Senha 12 dígitos..."
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -663,7 +663,7 @@
             type="text"
             id="wifiPass"
             class="quick-input"
-            placeholder="Senha Wi-Fi..."
+            placeholder="Senha 8 dígitos..."
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
@@ -1072,7 +1072,6 @@
       showToast("Campos limpos");
     }
 
-    // --- CONTROLE DA CAMERA DE FOTO ---
     async function toggleCamera() {
       if (cameraAtiva) {
         pararCamera();
@@ -1250,7 +1249,6 @@
       await processarFotoTurbo(canvas);
     }
 
-    // --- PRE-PROCESSAMENTO TURBO (1 UNICA PASSADA OCR OTIMIZADA PARA VELOCIDADE) ---
     function criarCanvasTurbo(sourceCanvas) {
       const maxDim = 1500;
       let targetW = Math.round(sourceCanvas.width * 1.25);
@@ -1303,7 +1301,6 @@
       return ocrWorker;
     }
 
-    // Pré-aquece o worker em segundo plano ao carregar a página para acelerar a 1ª foto
     window.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         obterOcrWorker().catch(() => {});
@@ -1372,18 +1369,12 @@
       }
     }
 
-    // --- PARSER FOCADO NA SENHA ABAIXO DO USUARIO (9 A 12 DIGITOS) E S/N DE 12 DIGITOS ---
     function normalizeMac(rawMac) {
       const hex = (rawMac || "").replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
       if (hex.length === 12) {
         return hex.match(/.{1,2}/g).join(":");
       }
       return (rawMac || "").trim().toUpperCase();
-    }
-
-    function isValidMacHex12(token) {
-      const hex = (token || "").replace(/[^0-9A-Fa-f]/g, "");
-      return hex.length === 12;
     }
 
     function cleanCredentialToken(raw) {
@@ -1444,7 +1435,6 @@
       return results;
     }
 
-    // Extrai S/N (priorizando código de 12 dígitos junto ao bloco de códigos de barras de CM MAC / eMTA MAC) e MACs
     function extractSerialAndMacs(joined, lines) {
       const macRegex = /([0-9A-Fa-f]{2}(?:[:\-]?[0-9A-Fa-f]{2}){5})/g;
       const allMacs = [];
@@ -1469,7 +1459,6 @@
         allMacs.map((m) => m.replace(/[^0-9A-Fa-f]/g, "").toUpperCase())
       );
 
-      // Procura S/N de 12 dígitos (ou 9-14 dígitos) próximo a S/N ou aos códigos de barras de CM MAC / eMTA MAC
       let fallbackSn = "";
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -1506,7 +1495,6 @@
         }
       }
 
-      // Caso não tenha lido o rótulo "S/N" mas haja token de 12 dígitos antes/perto de CM MAC / eMTA MAC
       if (!extractedData.sn && fallbackSn) {
         extractedData.sn = fallbackSn;
       }
@@ -1572,20 +1560,65 @@
       // Identificadores CLARO_ / NET_
       const allClaroNetTokens = extractClaroNetCandidatesFromText(joined);
 
-      // Usuário 192.168.0.1
-      const directUserMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]+\s*([A-Za-z0-9_.\-@]{3,36})/i);
-      if (directUserMatch && !isLikelyLabelOrBarcodeNoise(directUserMatch[1])) {
-        extractedData.ipUser = isClaroOrNetToken(directUserMatch[1])
-          ? normalizeClaroNetIdentifier(directUserMatch[1])
-          : cleanCredentialToken(directUserMatch[1]);
+      // 1) Usuário IP 192.168.0.1: fica logo abaixo de "IP: 192.168.0.1" ou na linha "Usuário: ..."
+      let ipLineIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        if (/192\.168\.0\.1/i.test(lines[i])) {
+          ipLineIdx = i;
+          break;
+        }
       }
 
-      // Senha do usuário IP 192.168.0.1: fica abaixo do usuário e tem geralmente entre 9 e 12 caracteres (frequentemente 12)
+      if (ipLineIdx >= 0) {
+        for (let j = ipLineIdx + 1; j <= Math.min(lines.length - 1, ipLineIdx + 2); j++) {
+          const lineAfterIp = lines[j];
+          const userInLine = lineAfterIp.match(/^(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]?\s*(.+)$/i);
+          const rawCandidate = userInLine
+            ? cleanCredentialToken(userInLine[1].split(/\s+/)[0])
+            : cleanCredentialToken(lineAfterIp.split(/\s+/)[0]);
+
+          if (rawCandidate && !isLikelyLabelOrBarcodeNoise(rawCandidate) && !/senha|ssid/i.test(rawCandidate)) {
+            extractedData.ipUser = isClaroOrNetToken(rawCandidate)
+              ? normalizeClaroNetIdentifier(rawCandidate)
+              : rawCandidate.toUpperCase();
+            break;
+          }
+        }
+      }
+
+      if (!extractedData.ipUser) {
+        const directUserMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]+\s*([A-Za-z0-9_.\-@]{3,36})/i);
+        if (directUserMatch && !isLikelyLabelOrBarcodeNoise(directUserMatch[1])) {
+          extractedData.ipUser = isClaroOrNetToken(directUserMatch[1])
+            ? normalizeClaroNetIdentifier(directUserMatch[1])
+            : cleanCredentialToken(directUserMatch[1]).toUpperCase();
+        }
+      }
+
+      // 2) Senha do usuário IP 192.168.0.1: fica abaixo do usuário e tem 12 dígitos
       let ipUserLineIdx = -1;
       for (let i = 0; i < lines.length; i++) {
         if (/(?:usu[aá]rio|user(?:name)?|login)\s*[:=\-]/i.test(lines[i]) && !/ssid/i.test(lines[i])) {
           ipUserLineIdx = i;
           break;
+        }
+        if (extractedData.ipUser && lines[i].toUpperCase().includes(extractedData.ipUser.toUpperCase()) && !/ssid/i.test(lines[i])) {
+          ipUserLineIdx = i;
+          break;
+        }
+      }
+
+      const senhaCandidates12 = [];
+      const senhaCandidates8 = [];
+
+      const senhaMatches = [...joined.matchAll(/(?:senha|password|pass|pwd)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})/gi)];
+      for (const m of senhaMatches) {
+        const cleanTok = cleanCredentialToken(m[1]).toUpperCase();
+        if (!cleanTok || isLikelyLabelOrBarcodeNoise(cleanTok) || isClaroOrNetToken(cleanTok)) continue;
+        if (cleanTok.length === 12) {
+          senhaCandidates12.push(cleanTok);
+        } else if (cleanTok.length === 8) {
+          senhaCandidates8.push(cleanTok);
         }
       }
 
@@ -1602,7 +1635,7 @@
             cleanTok &&
             !isLikelyLabelOrBarcodeNoise(cleanTok) &&
             !isClaroOrNetToken(cleanTok) &&
-            cleanTok.length >= 8 &&
+            cleanTok.length >= 10 &&
             cleanTok.length <= 13
           ) {
             extractedData.ipPass = cleanTok;
@@ -1611,12 +1644,8 @@
         }
       }
 
-      // Fallback para senha 192.168.0.1 após "Usuário:" / "192.168.0.1" com 8 a 13 caracteres
-      if (!extractedData.ipPass) {
-        const afterUserPassMatch = joined.match(/(?:usu[aá]rio|user(?:name)?|192\.168\.0\.1)[\s\S]{0,110}?(?:senha|password|pass|pwd)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{8,13})\b/i);
-        if (afterUserPassMatch && !isLikelyLabelOrBarcodeNoise(afterUserPassMatch[1])) {
-          extractedData.ipPass = cleanCredentialToken(afterUserPassMatch[1]).toUpperCase();
-        }
+      if (!extractedData.ipPass && senhaCandidates12.length > 0) {
+        extractedData.ipPass = senhaCandidates12[0];
       }
 
       // SSID 2.4GHz e SSID 5GHz
@@ -1630,28 +1659,25 @@
         extractedData.ssid5 = normalizeClaroNetIdentifier(ssid5Match[1]);
       }
 
-      // Senha Wi-Fi
-      const wifiBlockSenhaMatch = joined.match(/(?:ssid\s*(?:2\.?4\s*g|5\s*g|wi-?fi)|wi-?fi|wlan)[\s\S]{0,120}?(?:senha|password|pass|key|wpa2?|psk)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{5,48})/i);
-      if (wifiBlockSenhaMatch && !isLikelyLabelOrBarcodeNoise(wifiBlockSenhaMatch[1])) {
-        const candWifi = cleanCredentialToken(wifiBlockSenhaMatch[1]).toUpperCase();
-        if (candWifi !== extractedData.ipPass || !/ssid/i.test(joined)) {
-          extractedData.wifiPass = candWifi;
+      // 3) Senha Wi-Fi: sempre contém 8 dígitos (nunca usar a senha de 12 dígitos do IP)
+      const wifiBlockSenha8Match = joined.match(/(?:ssid\s*(?:2\.?4\s*g|5\s*g|wi-?fi)|wi-?fi|wlan)[\s\S]{0,120}?(?:senha|password|pass|key|wpa2?|psk)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{8})\b/i);
+      if (wifiBlockSenha8Match && !isLikelyLabelOrBarcodeNoise(wifiBlockSenha8Match[1])) {
+        const cand8 = cleanCredentialToken(wifiBlockSenha8Match[1]).toUpperCase();
+        if (cand8 !== extractedData.ipPass) {
+          extractedData.wifiPass = cand8;
         }
       }
 
-      if (!extractedData.wifiPass) {
-        const todasSenhas = [...joined.matchAll(/(?:senha|password|pass|pwd|key)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{4,48})/gi)]
-          .map((m) => cleanCredentialToken(m[1]).toUpperCase())
-          .filter((v) => v && !isLikelyLabelOrBarcodeNoise(v) && !isClaroOrNetToken(v));
+      if (!extractedData.wifiPass && senhaCandidates8.length > 0) {
+        extractedData.wifiPass = senhaCandidates8.find((c) => c !== extractedData.ipPass) || senhaCandidates8[0];
+      }
 
-        const unicas = [...new Set(todasSenhas)];
-        if (!extractedData.ipPass && unicas.length >= 1) {
-          extractedData.ipPass = unicas[0];
-        }
-        if (unicas.length >= 2) {
-          extractedData.wifiPass = unicas.find((u) => u !== extractedData.ipPass) || unicas[1];
-        } else if (unicas.length === 1 && !/ssid/i.test(joined) && !extractedData.ipPass) {
-          extractedData.ipPass = unicas[0];
+      if (!extractedData.wifiPass) {
+        const any8Char = [...joined.matchAll(/(?:senha|password|pass|pwd|key)\s*[:=\-]+\s*([A-Za-z0-9@#$%&*!._\-+]{7,9})\b/gi)]
+          .map((m) => cleanCredentialToken(m[1]).toUpperCase())
+          .find((v) => v && !isLikelyLabelOrBarcodeNoise(v) && !isClaroOrNetToken(v) && v !== extractedData.ipPass && v.length === 8);
+        if (any8Char) {
+          extractedData.wifiPass = any8Char;
         }
       }
 
@@ -1689,7 +1715,6 @@
       showToast("Texto reprocessado!");
     }
 
-    // --- ARQUIVAMENTO E EXPORTACAO / IMPORTACAO (CSV, JSON, PDF) ---
     function saveArchiveToStorage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(archiveList));
     }
